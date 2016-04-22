@@ -29,7 +29,7 @@ def drive_21cmSense(calib_file,ps_filename,\
 	PS = model[:,1]
 
 	# Load 21cmSense errors
-	sense = np.load(calib_file+'drif_mod_%0.3f.npz'%freq)
+	sense = np.load(calib_file+'.drift_mod_%0.3f.npz'%freq)
 	err_kbins = sense['ks']
 	err_mag = sense['errs']
 
