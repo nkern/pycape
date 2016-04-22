@@ -28,7 +28,7 @@ Optional:
 
 
 ##### License:
-See the GPL License for details on usage
+See the General Public License for details on usage
 
 ##### Authors:
 Nicholas Kern<br>
