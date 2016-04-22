@@ -33,7 +33,7 @@ def drive_21cmSense(calib_file,ps_filename,\
 	err_kbins = sense['ks']
 	err_mag = sense['errs']
 
-	valid = np.where((errs!=np.inf)&(np.isnan(errs)!=True))[0]
+	valid = np.where((err_mag!=np.inf)&(np.isnan(err_mag)!=True))[0]
 	err_kbins = err_kbins[valid]
 	err_mag = err_mag[valid]
 
