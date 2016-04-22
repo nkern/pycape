@@ -1,5 +1,5 @@
 """
-## codape : PYthon toolbox for Cosmic dAwn Parameter Estimation
+## pycape : PYthon toolbox for Cosmic dAwn Parameter Estimation
 
 ##### Version: 0.1
 Code Repo : https://github.com/nkern/pycape
