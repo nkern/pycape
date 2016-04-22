@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 def drive_21cmSense(calib_file,ps_filename,\
-		foreground_model='mod',buff=0.1,freq=0.150,ndays=180,n_per_day=6,bdwidth=0.008,nchan=82,\
+		foreground_model='mod',buff=0.1,freq=0.150,ndays=180,n_per_day=6,bwidth=0.008,nchan=82,\
 		dir_21cmSense='/Users/nkern/Desktop/Research/Software/21cmSense'):
 	"""
 	Calculate telescope sensitivity to a 21cm power spectrum
@@ -20,8 +20,8 @@ def drive_21cmSense(calib_file,ps_filename,\
 	os.system('%s/mk_array_file.py -C %s' % (dir_21cmSense,calib_file))
 
 	# Use *.npz file to get sensitivity measurements
-	os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bdwidth %s \
-		--nchan %s %s*.npz' % (dir_21cmSense,foreground_model,buff,freq,ps_filename,ndays,n_per_day,bdwidth,nchan,calib_file))
+	os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
+		--nchan %s %s*.npz' % (dir_21cmSense,foreground_model,buff,freq,ps_filename,ndays,n_per_day,bwidth,nchan,calib_file))
 
 	# Load 21cm PS
 	model = np.loadtxt(ps_filename)
