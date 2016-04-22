@@ -37,6 +37,6 @@ Nicholas Kern
 
 __version__     = '0.1'
 
-from .emulate_funcs import *
-
+from .emulate import *
+from .drive_21cmSense import *
 
