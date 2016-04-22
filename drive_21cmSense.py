@@ -20,7 +20,7 @@ def drive_21cmSense(calib_file,ps_filename,\
 	os.system('%s/mk_array_file.py -C %s' % (dir_21cmSense,calib_file))
 
 	# Use *.npz file to get sensitivity measurements
-	os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bdwith %s \
+	os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bdwidth %s \
 		--nchan %s %s*.npz' % (dir_21cmSense,foreground_model,buff,freq,ps_filename,ndays,n_per_day,bdwidth,nchan,calib_file))
 
 	# Load 21cm PS
