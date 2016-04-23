@@ -34,6 +34,13 @@ See the GPL License for details on usage
 ##### Authors:
 Nicholas Kern
 """
+
 from .drive_21cmSense import drive_21cmSense
+from .likelihood import like
+
+L = like({})
+
+
+
 
 
