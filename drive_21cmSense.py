@@ -39,6 +39,6 @@ def drive_21cmSense(calib_file,ps_filename,\
 	# Interpolate between ps_file to get ps at sense_kbins
 	sense_PS = np.interp(sense_kbins,kbin,PSdat)
 
-	return kbin, PSdat, sense_kbins, sense_PSerr, sense_PS
+	return kbin, PSdat, sense_kbins, sense_PS, sense_PSerr
 
 
