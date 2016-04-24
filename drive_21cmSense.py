@@ -25,17 +25,20 @@ def drive_21cmSense(calib_file,ps_filename,\
 	# Load 21cm PS
 	model = np.loadtxt(ps_filename)
 	kbin = model[:,0]
-	PS = model[:,1]
+	PSdat = model[:,1]
 
 	# Load 21cmSense errors
 	sense = np.load(calib_file+'.drift_mod_%0.3f.npz'%freq)
-	err_kbins = sense['ks']
-	err_mag = sense['errs']
+	sense_kbins = sense['ks']
+	sense_PSerr = sense['errs']
 
-	valid = np.where((err_mag!=np.inf)&(np.isnan(err_mag)!=True))[0]
-	err_kbins = err_kbins[valid]
-	err_mag = err_mag[valid]
+	valid = np.where((sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True))[0]
+	sense_kbins = sense_kbins[valid]
+	sense_PSerr = sense_PSerr[valid]
 
-	return kbin, PS, err_kbins, err_mag
+	# Interpolate between ps_file to get ps at sense_kbins
+	sense_PS = np.interp(sense_kbins,kbin,PSdat)
+
+	return kbin, PSdat, sense_kbins, sense_PSerr, sense_PS
 
 
