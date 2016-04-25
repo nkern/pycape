@@ -16,13 +16,12 @@ pycape is dependent on a number of public codes, including
 - matplotlib >= 1.5.1
 - sklearn >= 0.17
 - klip : https://github.com/nkern/klip
-- pystan : https://pystan.readthedocs.org/en/latest/
+- emcee : http://dan.iel.fm/emcee/current
 
 Optional:
-- emcee : http://pymc-devs.github.io/pymc/
-- PyMC : http://dan.iel.fm/emcee/current/
-- 21cmFAST : 
-- 21cmSense : 
+- PyMC : http://pymc-devs.github.io/pymc
+- 21cmFAST : http://homepage.sns.it/mesinger/Download.html
+- 21cmSense : https://github.com/jpober/21cmSense
 
 ##### Installation and Running:
 
