@@ -35,7 +35,7 @@ See the GPL License for details on usage
 Nicholas Kern
 """
 
-from .emulate import *
+from .toolbox import workspace
 
 
 
