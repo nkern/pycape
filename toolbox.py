@@ -1,0 +1,166 @@
+"""
+toolbox.py : functions for emulating the 21cm PS and producing parameter constraints
+
+"""
+import os
+import numpy as np
+import cPickle as pkl
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as mp
+from mpl_toolkits.mplot3d import Axes3D
+from fits_table import fits_table, fits_data, fits_append
+import scipy.stats as stats
+from .DictEZ import create as ezcreate
+import numpy.linalg as la
+import astropy.io.fits as fits
+import fnmatch
+from plot_ellipse import plot_ellipse
+import operator
+from .klip import klfuncs
+import time
+import emcee
+import AttrDict
+from .drive_21cmSense import drive_21cmSense
+import scipy.optimize as opt
+import corner
+
+class workspace():
+
+	##################################
+	############ Emulator ############
+	##################################
+
+	def save_emu(self,filename=None,clobber=False):
+
+		if filename==None:
+			filename = 'emulator_%s.pkl' % '_'.join(time.asctime().split(' '))
+
+		if os.path.isfile(filename):
+			print "file exists, quitting..."
+			return
+		file = open(filename,'wb')
+		output = pkl.Pickler(file)
+		output.dump({'E':self.E})
+		file.close()
+
+	def emu_init(self,variables):
+		self.E = self.klfuncs(variables)
+
+	def emu_train(self,ydata_tr,param_tr,fid_ydata=None,fid_params=None,kwargs_tr={}):
+		self.E.klinterp(ydata_tr,param_tr,fid_data=fid_ydata,fid_params=fid_params,**kwargs_tr)
+
+	def emu_cross_valid(selfc,ydata_cv,param_cv,fid_ydata=None,fid_params=None):
+		self.E.cross_validate(ydata_cv,param_cv,fid_data=fid_ydata,fid_params=fid_params)
+
+	def emu_predict(self,param_pr,use_Nmodes=None):
+		self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
+		return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
+
+	######################################
+	############ Observations ############
+	######################################
+
+	def obs_init(self,dic,obs='mock'):
+		self.Obs = drive_21cmSense(dic)
+
+		self.Obs.y		= data
+		self.Obs.cov		= data_cov
+		self.Obs.invcov		= la.inv(self.Obs.cov)
+
+
+
+        #################################
+        ############ Sampler ############
+        #################################
+
+	def sampler_init(self,dic,lnlike=None,lnprior=None):
+		"""
+		Initialize workspace self.S for sampler
+		"""
+		# Initialize workspace
+		self.S = AttrDict(dic)
+
+		# Check to see if an observation exists
+		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
+
+		# Create a model that constructs data given parameters and calculates error
+		def construct_model(self,theta):
+			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
+			self.S.model		= recon
+			self.S.model_err	= np.mean(np.abs([recon_pos_err,recon_neg_err]))
+
+		self.S.construct_model = construct_model
+
+		# Specify Likelihoods, Priors and Bayes theorem numerator
+		def gaussian_lnlike(self,theta):
+			self.S.construct_model(theta)
+			resid = self.Obs.y - self.S.model
+			invcov = self.Obs.invcov
+			return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
+
+		def flat_lnpior(self,theta):
+			within = True
+			for i in range(self.S.N_params):
+				if theta[i] < self.param_bounds[i][0] or theta[i] > self.param_bounds[i][1]:
+					within = False
+
+			if within == True:
+				return np.log(1/self.param_hypervol)
+
+			elif within == False:
+				return -np.inf	
+
+		# Specify loglike and logprior
+		if lnlike == None:
+			self.S.lnlike = gaussian_lnlike
+		else:
+			self.S.lnlike = lnlike	
+
+		if lnprior == None:
+			self.S.lnprior = flat_lnprior
+		else:
+			self.S.lnprior = lnprior
+
+		# Specify log-probability (Bayes Theorem Numerator)
+		def lnprob(self,theta):
+			lnprior = self.S.lnprior(theta)
+			lnlike = self.S.lnlike(theta)
+			if not np.isfinite(lnprior):
+				return -np.inf
+			return lnlike + lnprior
+
+		self.S.lnprob = lnprob
+
+		# Initialize emcee Ensemble Sampler
+		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob)
+
+	def find_mle(self):
+		"""
+		use scipy.optimize to get maximum likelihood estimate
+		"""
+		pass
+
+	def drive_sampler(self,burn_num=100):
+		"""
+		drive sampler
+		"""
+		# Run burn-in iterations
+
+
+
+	############################################
+	############ Build Training Set ############
+	############################################
+
+
+	def builder_init(self,dic):
+		self.B = drive_21cmFAST(dic)
+
+
+
+
+
+
+
+
