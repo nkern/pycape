@@ -35,10 +35,24 @@ See the GPL License for details on usage
 Nicholas Kern
 """
 
-from .drive_21cmSense import drive_21cmSense
-from .likelihood import like
+from .emulate import *
 
-L = like({})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
