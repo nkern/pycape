@@ -84,7 +84,7 @@ class workspace():
 		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
 
 		# Create a model that constructs data given parameters and calculates error
-		def construct_model(self,theta):
+		def construct_model(theta):
 			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
 			self.S.model		= recon
 			self.S.model_err	= np.mean(np.abs([recon_pos_err,recon_neg_err]))
@@ -92,13 +92,13 @@ class workspace():
 		self.S.construct_model = construct_model
 
 		# Specify Likelihoods, Priors and Bayes theorem numerator
-		def gaussian_lnlike(self,theta):
+		def gaussian_lnlike(theta):
 			self.S.construct_model(theta)
 			resid = self.Obs.y - self.S.model
 			invcov = self.Obs.invcov
 			return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
 
-		def flat_lnprior(self,theta):
+		def flat_lnprior(theta):
 			within = True
 			for i in range(self.S.N_params):
 				if theta[i] < self.param_bounds[i][0] or theta[i] > self.param_bounds[i][1]:
