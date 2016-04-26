@@ -7,6 +7,7 @@ import os
 import numpy as np
 from .DictEZ import create as ezcreate
 from fits_table import fits_table
+import cPickle as pkl
 
 class drive_21cmSense():
 
@@ -100,7 +101,10 @@ class drive_21cmSense():
 
 		# Write to file
 		if write_data == True:
-			fits_table(data_dic,names,write_direc+'/'+data_filename,clobber=True)
+			file = open(write_direc+'/'+data_filename,'wb')
+			output = pkl.Pickler(file)
+			output.dump(data_dic)
+			file.close()
 
 
 
