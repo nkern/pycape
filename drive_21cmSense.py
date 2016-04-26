@@ -34,7 +34,7 @@ class drive_21cmSense():
 			write_direc = '.'
 
 		if data_filename == None:
-			data_filename = 'mock_21cmObs.fits'
+			data_filename = 'mock_21cmObs.pkl'
 
 		# Use calibration file to create *.npz file
 		os.system('%s/mk_array_file.py -C %s' % (dir_21cmSense,calib_file))
