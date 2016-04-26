@@ -62,7 +62,7 @@ class drive_21cmSense():
 			sense_PSerr = sense['errs']
 
 			local_valid = (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True)
-			if i == 0 and len(len_files) != len(local_valid):
+			if i == 0 and len_files != len(local_valid):
 				len_files = np.array([True]*len(local_valid),bool)
 			valid *= local_valid
 
