@@ -122,7 +122,7 @@ class workspace():
 			self.S.lnprior = lnprior
 
 		# Specify log-probability (Bayes Theorem Numerator)
-		def lnprob(self,theta):
+		def lnprob(theta):
 			lnprior = self.S.lnprior(theta)
 			lnlike = self.S.lnlike(theta)
 			if not np.isfinite(lnprior):
