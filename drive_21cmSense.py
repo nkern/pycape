@@ -12,6 +12,9 @@ class drive_21cmSense():
 	def __init__(self,dic):
 		self.__dict__.update(dic)
 
+	def update(self,dic):
+		self.__dict__.update(dic)
+
 	def calc_sense(self,calib_file,ps_filenames,data_filename=None,obs_direc=None,write_direc=None,write_data=True,
 			foreground_model='mod',buff=0.1,freq=0.150,ndays=180,n_per_day=6,bwidth=0.008,nchan=82,
 			dir_21cmSense='/Users/nkern/Desktop/Research/Software/21cmSense'):
