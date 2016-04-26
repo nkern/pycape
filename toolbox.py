@@ -154,8 +154,10 @@ class workspace():
 		self.S.sampler.reset()	
 
 		# Run MCMC steps
-		end_pos, end_prob, end_state = self.S.sampler.run_mcmc(end_pos,step_num)
-
+		if burn_num > 0:
+			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(end_pos,step_num)
+		else:
+			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
 	############################################
