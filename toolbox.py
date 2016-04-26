@@ -141,15 +141,16 @@ class workspace():
 		"""
 		pass
 
-	def drive_sampler(self,burn_num=100):
+	def drive_sampler(self,pos,step_num=500,burn_num=100):
 		"""
 		drive sampler
 		"""
 		# Run burn-in iterations
+		end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,burn_num)
+		self.S.sampler.reset()	
 
-
-
-
+		# Run MCMC steps
+		end_pos, end_prob, end_state = self.S.sampler.run_mcmc(end_pos,step_num)
 
 
 
