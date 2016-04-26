@@ -61,13 +61,13 @@ class workspace():
 	############ Observations ############
 	######################################
 
-	def obs_init(self,dic,obs='mock'):
+	def obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
-		self.Obs.y		= data
-		self.Obs.cov		= data_cov
+	def feed_obs(self,PSdata,PSerrs):
+		self.Obs.y		= PSdata
+		self.Obs.cov		= np.eye(self.Obs.N_data)*PSerrs
 		self.Obs.invcov		= la.inv(self.Obs.cov)
-
 
 
         #################################
@@ -149,12 +149,15 @@ class workspace():
 
 
 
+
+
+
+
 	############################################
 	############ Build Training Set ############
 	############################################
 
-
-	def builder_init(self,dic):
+	def TSbuild_init(self,dic):
 		self.B = drive_21cmFAST(dic)
 
 
