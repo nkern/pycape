@@ -19,7 +19,7 @@ import operator
 from klip import klfuncs
 import time
 import emcee
-import AttrDict
+from AttrDict import AttrDict
 from .drive_21cmSense import drive_21cmSense
 import scipy.optimize as opt
 import corner
