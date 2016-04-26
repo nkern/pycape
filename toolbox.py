@@ -64,9 +64,9 @@ class workspace():
 		self.Obs = drive_21cmSense(dic)
 
 	def feed_obs(self,model_kbins,obs_kbins,obs_PSdata,obs_PSerrs):
-		self.Obs.x		= kbins
-		self.Obs.y		= PSdata
-		self.Obs.cov		= np.eye(self.Obs.N_data)*PSerrs
+		self.Obs.x		= obs_kbins
+		self.Obs.y		= obs_PSdata
+		self.Obs.cov		= np.eye(self.Obs.N_data)*obs_PSerrs
 		self.Obs.invcov		= la.inv(self.Obs.cov)
 		self.Obs.model_kbins	= model_kbins
 
