@@ -63,11 +63,12 @@ class workspace():
 	def obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
-	def feed_obs(self,PSdata,PSerrs):
+	def feed_obs(self,model_kbins,obs_kbins,obs_PSdata,obs_PSerrs):
+		self.Obs.x		= kbins
 		self.Obs.y		= PSdata
 		self.Obs.cov		= np.eye(self.Obs.N_data)*PSerrs
 		self.Obs.invcov		= la.inv(self.Obs.cov)
-
+		self.Obs.model_kbins	= model_kbins
 
         #################################
         ############ Sampler ############
@@ -85,10 +86,12 @@ class workspace():
 
 		# Create a model that constructs data given parameters and calculates error
 		def construct_model(theta):
+			# Emulate
 			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
-			self.S.model		= recon
-			self.S.model_err	= np.mean(np.abs([recon_pos_err,recon_neg_err]))
-
+			model		= recon
+			model_err	= np.mean(np.abs([recon_pos_err,recon_neg_err]))
+			# Interpolate onto observation data arrays
+			self.S.model = np.interpolate(self.Obs.model_kbins,self.Obs.x,self.Obs.y)
 		self.S.construct_model = construct_model
 
 		# Specify Likelihoods, Priors and Bayes theorem numerator
