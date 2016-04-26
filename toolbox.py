@@ -98,7 +98,7 @@ class workspace():
 			invcov = self.Obs.invcov
 			return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
 
-		def flat_lnpior(self,theta):
+		def flat_lnprior(self,theta):
 			within = True
 			for i in range(self.S.N_params):
 				if theta[i] < self.param_bounds[i][0] or theta[i] > self.param_bounds[i][1]:
