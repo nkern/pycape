@@ -45,6 +45,7 @@ class drive_21cmSense():
 		sense_PSerrs = []	
 
 		valid = np.array([True]*52,bool)
+		self.valid = valid
 		# Use *.npz file to get sensitivity measurements
 		len_files = len(ps_filenames)
 		for i in range(len_files):
@@ -62,6 +63,7 @@ class drive_21cmSense():
 			sense_PSerr = sense['errs']
 
 			local_valid = (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True)
+			self.local_valid = local_valid
 			if i == 0 and len_files != len(local_valid):
 				len_files = np.array([True]*len(local_valid),bool)
 			valid *= local_valid
