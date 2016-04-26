@@ -31,7 +31,7 @@ class workspace():
 	############ Emulator ############
 	##################################
 
-	def save_emu(self,filename=None,clobber=False):
+	def emu_save(self,filename=None,clobber=False):
 
 		if filename==None:
 			filename = 'emulator_%s.pkl' % '_'.join(time.asctime().split(' '))
@@ -45,7 +45,7 @@ class workspace():
 		file.close()
 
 	def emu_init(self,variables):
-		self.E = self.klfuncs(variables)
+		self.E = klfuncs(variables)
 
 	def emu_train(self,ydata_tr,param_tr,fid_ydata=None,fid_params=None,kwargs_tr={}):
 		self.E.klinterp(ydata_tr,param_tr,fid_data=fid_ydata,fid_params=fid_params,**kwargs_tr)
