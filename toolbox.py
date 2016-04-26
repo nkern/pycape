@@ -101,11 +101,11 @@ class workspace():
 		def flat_lnprior(theta):
 			within = True
 			for i in range(self.S.N_params):
-				if theta[i] < self.param_bounds[i][0] or theta[i] > self.param_bounds[i][1]:
+				if theta[i] < self.S.param_bounds[i][0] or theta[i] > self.S.param_bounds[i][1]:
 					within = False
 
 			if within == True:
-				return np.log(1/self.param_hypervol)
+				return np.log(1/self.S.param_hypervol)
 
 			elif within == False:
 				return -np.inf	
