@@ -66,7 +66,8 @@ class workspace():
 	def feed_obs(self,model_kbins,obs_kbins,obs_PSdata,obs_PSerrs):
 		self.Obs.x		= obs_kbins
 		self.Obs.y		= obs_PSdata
-		self.Obs.cov		= np.eye(self.Obs.N_data)*obs_PSerrs
+		self.Obs.y_err		= obs_PSerrs
+		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_err
 		self.Obs.invcov		= la.inv(self.Obs.cov)
 		self.Obs.model_kbins	= model_kbins
 
@@ -88,10 +89,11 @@ class workspace():
 		def construct_model(theta):
 			# Emulate
 			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
-			model		= recon
-			model_err	= np.mean(np.abs([recon_pos_err,recon_neg_err]))
-			# Interpolate onto observation data arrays
-			self.S.model = np.interp(self.Obs.model_kbins,self.Obs.x,self.Obs.y)
+			model			= recon[0][self.E.model_lim]
+			model_err		= np.mean(np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]))
+			# Interpolate model onto observation data arrays
+			self.S.model		= np.interp(self.Obs.x,self.Obs.model_kbins,model)
+			self.S.model_err	= np.interp(self.Obs.x,self.Obs.x,self.Obs.yerr)
 		self.S.construct_model = construct_model
 
 		# Specify Likelihoods, Priors and Bayes theorem numerator
