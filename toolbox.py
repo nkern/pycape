@@ -91,7 +91,7 @@ class workspace():
 			model		= recon
 			model_err	= np.mean(np.abs([recon_pos_err,recon_neg_err]))
 			# Interpolate onto observation data arrays
-			self.S.model = np.interpolate(self.Obs.model_kbins,self.Obs.x,self.Obs.y)
+			self.S.model = np.interp(self.Obs.model_kbins,self.Obs.x,self.Obs.y)
 		self.S.construct_model = construct_model
 
 		# Specify Likelihoods, Priors and Bayes theorem numerator
