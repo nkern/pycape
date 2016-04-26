@@ -16,7 +16,7 @@ import astropy.io.fits as fits
 import fnmatch
 from plot_ellipse import plot_ellipse
 import operator
-from .klip import klfuncs
+from klip import klfuncs
 import time
 import emcee
 import AttrDict
