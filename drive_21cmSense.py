@@ -90,7 +90,7 @@ class drive_21cmSense():
 		PSdata		= np.array(PSdata)
 		sense_kbins	= np.array(sense_kbins)
 		sense_PSdata	= np.array(sense_PSdata)
-		sense_PSerr	= np.array(sense_PSerr)
+		sense_PSerrs	= np.array(sense_PSerrs)
 		valid		= np.array(valid)
 
 		# Append to namespace
