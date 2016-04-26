@@ -91,6 +91,7 @@ class drive_21cmSense():
 		sense_kbins	= np.array(sense_kbins)
 		sense_PSdata	= np.array(sense_PSdata)
 		sense_PSerr	= np.array(sense_PSerr)
+		valid		= np.array(valid)
 
 		# Append to namespace
 		names = ['kbins','PSdata','sense_kbins','sense_PSdata','sense_PSerrs','valid']
