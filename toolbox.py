@@ -87,7 +87,7 @@ class workspace():
 		self.Obs.invcov		= la.inv(self.Obs.cov)
 		self.Obs.model_kbins	= model_kbins
 
-	def obs_save(self,filename,clobber=False)
+	def obs_save(self,filename,clobber=False):
                 if filename == None:
                         filename = 'observation_%s.pkl' % '_'.join(time.asctime().split(' '))
 
@@ -189,7 +189,7 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
-        def sampler_save(self,filename,clobber=False)
+        def sampler_save(self,filename,clobber=False):
                 if filename == None:
                         filename = 'sampler_%s.pkl' % '_'.join(time.asctime().split(' '))
         
