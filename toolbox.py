@@ -213,7 +213,7 @@ class workspace():
 
 
 
-        def TSbuilder_save(self,filename,clobber=False)
+        def TSbuilder_save(self,filename,clobber=False):
                 if filename == None:
                         filename = 'TSbuilder_%s.pkl' % '_'.join(time.asctime().split(' '))
         
