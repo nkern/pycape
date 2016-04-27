@@ -42,6 +42,12 @@ class workspace():
 		output.dump({'W':self.__dict__})
 		file.close()
 
+	def print_message(self,string,type=1):
+		if type == 1:
+			print ''
+			print string
+			print '-'*40
+
 	##################################
 	############ Emulator ############
 	##################################
