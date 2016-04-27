@@ -90,7 +90,7 @@ class workspace():
 			# Emulate
 			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
 			model			= recon[0][self.E.model_lim]
-			model_err		= np.mean(np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]))
+			model_err		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
 			# Interpolate model onto observation data arrays
 			self.S.model		= np.interp(self.Obs.x,self.Obs.model_kbins,model)
 			self.S.model_err	= np.interp(self.Obs.x,self.Obs.model_kbins,model_err)
