@@ -27,6 +27,22 @@ import corner
 class workspace():
 
 	##################################
+	############# General ############
+	##################################
+
+	def workspace_save(self,filename=None,clobber=False):
+		if filename == None:
+			filename = 'workspace_%s.pkl' % '_'.join(time.asctime().split(' '))
+
+		if clobber == False and os.path.isfile(filename) == True:
+			print 'file exists, quitting...'
+
+		file = open(filename,'wb')
+		output = pkl.Pickler(file)
+		output.dump({'W':self.__dict__})
+		file.close()
+
+	##################################
 	############ Emulator ############
 	##################################
 
@@ -35,7 +51,7 @@ class workspace():
 		if filename==None:
 			filename = 'emulator_%s.pkl' % '_'.join(time.asctime().split(' '))
 
-		if os.path.isfile(filename):
+		if os.path.isfile(filename) == True and clobber == False:
 			print "file exists, quitting..."
 			return
 		file = open(filename,'wb')
@@ -70,6 +86,19 @@ class workspace():
 		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_err
 		self.Obs.invcov		= la.inv(self.Obs.cov)
 		self.Obs.model_kbins	= model_kbins
+
+	def obs_save(self,filename,clobber=False)
+                if filename == None:
+                        filename = 'observation_%s.pkl' % '_'.join(time.asctime().split(' '))
+
+                if clobber == False and os.path.isfile(filename) == True:
+                        print 'file exists, quitting...'
+
+                file = open(filename,'wb')
+                output = pkl.Pickler(file)
+                output.dump({'Obs':self.Obs})
+                file.close()
+	
 
         #################################
         ############ Sampler ############
@@ -160,6 +189,19 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
+        def sampler_save(self,filename,clobber=False)
+                if filename == None:
+                        filename = 'sampler_%s.pkl' % '_'.join(time.asctime().split(' '))
+        
+                if clobber == False and os.path.isfile(filename) == True:
+                        print 'file exists, quitting...'
+
+                file = open(filename,'wb')
+                output = pkl.Pickler(file)
+                output.dump({'S':self.S})
+                file.close()
+
+
 	############################################
 	############ Build Training Set ############
 	############################################
@@ -171,6 +213,17 @@ class workspace():
 
 
 
+        def TSbuilder_save(self,filename,clobber=False)
+                if filename == None:
+                        filename = 'TSbuilder_%s.pkl' % '_'.join(time.asctime().split(' '))
+        
+                if clobber == False and os.path.isfile(filename) == True:
+                        print 'file exists, quitting...'
+
+                file = open(filename,'wb')
+                output = pkl.Pickler(file)
+                output.dump({'B':self.B})
+                file.close()
 
 
 
