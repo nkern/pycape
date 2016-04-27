@@ -19,7 +19,8 @@ class drive_21cmSense():
 
 	def calc_sense(self,calib_file,ps_filenames,data_filename=None,obs_direc=None,write_direc=None,write_data=True,
 			foreground_model='mod',buff=0.1,freq=0.150,ndays=180,n_per_day=6,bwidth=0.008,nchan=82,
-			dir_pycape='/Users/nkern/Desktop/Research/Software/pycape'):
+			dir_pycape='/Users/nkern/Desktop/Research/Software/pycape',
+			dir_21cmSense='/Users/nkern/Desktop/Research/Software/21cmSense'):
 		"""
 		(calib_file,ps_filenames,obs_direc=None,write_direc=None)
 		Calculate telescope sensitivity to a 21cm power spectrum
@@ -55,7 +56,7 @@ class drive_21cmSense():
 		len_files = len(ps_filenames)
 		for i in range(len_files):
 			os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
-				--nchan %s %s/%s*.npz' % (dir_pycape,foreground_model,buff,freq,ps_filenames[i],ndays,n_per_day,bwidth,nchan,obs_direc,calib_file))
+				--nchan %s %s/%s*.npz' % (dir_21cmSense,foreground_model,buff,freq,ps_filenames[i],ndays,n_per_day,bwidth,nchan,obs_direc,calib_file))
 
 			# Load 21cm PS
 			model = np.loadtxt(ps_filenames[i])
@@ -63,7 +64,7 @@ class drive_21cmSense():
 			PSdat = model[:,1]
 
 			# Load 21cmSense errors
-			sense = np.load(calib_file+'.drift_mod_%0.3f.npz'%freq)
+			sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq)
 			sense_kb = sense['ks']
 			sense_PSerr = sense['errs']
 
