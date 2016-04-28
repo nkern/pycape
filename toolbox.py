@@ -110,66 +110,64 @@ class workspace():
         ############ Sampler ############
         #################################
 
+	def construct_model(self,theta):
+		# Emulate
+		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
+		model                   = recon[0][self.E.model_lim]
+		model_err               = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
+		# Interpolate model onto observation data arrays
+		self.S.model            = np.interp(self.Obs.x,self.Obs.model_kbins,model)
+		self.S.model_err        = np.interp(self.Obs.x,self.Obs.model_kbins,model_err)
+
+	def gaussian_lnlike(self,theta):
+		self.construct_model(theta)
+		resid = self.Obs.y - self.S.model
+		invcov = self.Obs.invcov
+		return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
+
+	def flat_lnprior(self,theta):
+		within = True
+		for i in range(self.S.N_params):
+			if theta[i] < self.S.param_bounds[i][0] or theta[i] > self.S.param_bounds[i][1]:
+				within = False
+		if within == True:
+			return np.log(1/self.S.param_hypervol)
+		elif within == False:
+			return -np.inf
+
+	def lnprob(theta):
+		lnprior = self.S.lnprior(theta)
+		lnlike = self.S.lnlike(theta)
+		if not np.isfinite(lnprior):
+			return -np.inf
+		return lnlike + lnprior
+
+
 	def sampler_init(self,dic,lnlike=None,lnprior=None, sampler_kwargs={}):
 		"""
 		Initialize workspace self.S for sampler
 		"""
+		# Check if mpi_run is True, b/c we can't pickle functions
+
 		# Initialize workspace
 		self.S = AttrDict(dic)
 
 		# Check to see if an observation exists
 		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
 
-		# Create a model that constructs data given parameters and calculates error
-		def construct_model(theta):
-			# Emulate
-			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
-			model			= recon[0][self.E.model_lim]
-			model_err		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
-			# Interpolate model onto observation data arrays
-			self.S.model		= np.interp(self.Obs.x,self.Obs.model_kbins,model)
-			self.S.model_err	= np.interp(self.Obs.x,self.Obs.model_kbins,model_err)
-		self.S.construct_model = construct_model
-
-		# Specify Likelihoods, Priors and Bayes theorem numerator
-		def gaussian_lnlike(theta):
-			self.S.construct_model(theta)
-			resid = self.Obs.y - self.S.model
-			invcov = self.Obs.invcov
-			return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
-
-		def flat_lnprior(theta):
-			within = True
-			for i in range(self.S.N_params):
-				if theta[i] < self.S.param_bounds[i][0] or theta[i] > self.S.param_bounds[i][1]:
-					within = False
-
-			if within == True:
-				return np.log(1/self.S.param_hypervol)
-
-			elif within == False:
-				return -np.inf	
-
 		# Specify loglike and logprior
 		if lnlike == None:
-			self.S.lnlike = gaussian_lnlike
+			self.S.lnlike = self.gaussian_lnlike
 		else:
 			self.S.lnlike = lnlike	
 
 		if lnprior == None:
-			self.S.lnprior = flat_lnprior
+			self.S.lnprior = self.flat_lnprior
 		else:
 			self.S.lnprior = lnprior
 
 		# Specify log-probability (Bayes Theorem Numerator)
-		def lnprob(theta):
-			lnprior = self.S.lnprior(theta)
-			lnlike = self.S.lnlike(theta)
-			if not np.isfinite(lnprior):
-				return -np.inf
-			return lnlike + lnprior
-
-		self.S.lnprob = lnprob
+		self.S.lnprob = self.lnprob
 
 		# Initialize emcee Ensemble Sampler
 		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
@@ -195,6 +193,14 @@ class workspace():
 		else:
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
+
+	def drive_sampler_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5):
+		"""
+		drive sampler using mpirun
+		"""
+		# First 
+
+	
 
         def sampler_save(self,filename,clobber=False):
                 if filename == None:
