@@ -22,6 +22,7 @@ Optional:
 - PyMC : http://pymc-devs.github.io/pymc
 - 21cmFAST : http://homepage.sns.it/mesinger/Download.html
 - 21cmSense : https://github.com/jpober/21cmSense
+- OpenMPI: https://www.open-mpi.org/
 
 ##### Installation and Running:
 
