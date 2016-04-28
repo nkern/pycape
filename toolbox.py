@@ -225,7 +225,10 @@ class workspace():
 			input = pkl.Unpickler(file)
 			self.S.sampler.__dict__.update(input.load())
 			file.close()
-
+			if i == 0:
+				self.S.sampler.mpi_chain = self.S.sampler.rank0_chain
+			else:
+				self.S.sampler.mpi_chain = np.vstack([self.S.sampler.mpi_chain,self.S.sampler.__dict__['rank%s_chain'%i]])
 
         def sampler_save(self,filename,clobber=False):
                 if filename == None:
