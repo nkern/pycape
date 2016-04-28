@@ -110,7 +110,7 @@ class workspace():
         ############ Sampler ############
         #################################
 
-	def sampler_init(self,dic,lnlike=None,lnprior=None):
+	def sampler_init(self,dic,lnlike=None,lnprior=None, sampler_kwargs={}):
 		"""
 		Initialize workspace self.S for sampler
 		"""
@@ -172,7 +172,7 @@ class workspace():
 		self.S.lnprob = lnprob
 
 		# Initialize emcee Ensemble Sampler
-		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob)
+		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
 
 	def find_mle(self):
 		"""
