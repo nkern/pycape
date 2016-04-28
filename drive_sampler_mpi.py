@@ -5,6 +5,8 @@ from mpi4py import MPI
 import sys
 import emcee
 import cPickle as pkl
+import warnings
+warnings.warn("deprecated", DeprecationWarning)
 
 size = MPI.COMM_WORLD.Get_size()
 rank = MPI.COMM_WORLD.Get_rank()
