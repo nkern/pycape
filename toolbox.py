@@ -184,9 +184,10 @@ class workspace():
 		"""
 		drive sampler
 		"""
-		# Run burn-in iterations
-		end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,burn_num)
-		self.S.sampler.reset()	
+		if burn_num > 0:
+			# Run burn-in iterations
+			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,burn_num)
+			self.S.sampler.reset()	
 
 		# Run MCMC steps
 		if burn_num > 0:
