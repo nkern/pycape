@@ -26,6 +26,9 @@ import corner
 
 class workspace():
 
+	def __init__(self,dic):
+		self.__dict__.update(dic)
+
 	##################################
 	############# General ############
 	##################################
@@ -147,8 +150,6 @@ class workspace():
 		"""
 		Initialize workspace self.S for sampler
 		"""
-		# Check if mpi_run is True, b/c we can't pickle functions
-
 		# Initialize workspace
 		self.S = AttrDict(dic)
 
@@ -169,12 +170,8 @@ class workspace():
 		# Specify log-probability (Bayes Theorem Numerator)
 		self.S.lnprob = self.lnprob
 
-		# First check to see if mpi_run is True, b/c sampler is not pickle-able
-		if self.S.mpi_run == True:
-			pass
-		else:
-			# Initialize emcee Ensemble Sampler
-			self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
+		# Initialize emcee Ensemble Sampler
+		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
 
 	def find_mle(self):
 		"""
@@ -198,23 +195,33 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
-	def drive_sampler_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5):
+	def drive_sampler_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={}):
 		"""
 		drive sampler using mpirun
 		"""
-		# First write mpi_drive.py file
-		"""
-		from mpi4py import MPI
-		import sys
-		size = MPI.COMM_WORLD.Get_size()
-		rank = MPI.COMM_WORLD.Get_rank()
-		name = MPI.Get_processor_name()
-		sys.stdout.write(
-		    "Hello, World! I am process %d of %d on %s.\n"
-		    % (rank, size, name))
-		"""
-		pass
-	
+		# Save workspace
+		self.sampler_init_kwargs = sampler_init_kwargs
+		self.burn_num = burn_num
+		self.step_num = step_num
+		self.pos = pos
+		file = open('Workspace.pkl','wb')
+		output = pkl.Pickler(file)
+		output.dump(self.__dict__)
+		file.close()
+
+		# Use mpirun to run in parallel
+		os.system('mpirun -np %s %s/drive_sampler_mpi.py' % (mpi_np,self.dir_pycape))
+
+		# Initialize Sampler
+		self.sampler_init(sampler_init_kwargs)
+
+		# Load in chains
+		for i in range(mpi_np):
+			file = open(self.dir_pycape+'/mpi_chains/mpi_chain_rank%s.pkl'%i,'rb')
+			input = pkl.Unpickler(file)
+			self.S.sampler.__dict__.update(input.load())
+			file.close()
+
 
         def sampler_save(self,filename,clobber=False):
                 if filename == None:
