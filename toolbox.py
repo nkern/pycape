@@ -60,7 +60,7 @@ class workspace():
 	def emu_save(self,filename=None,clobber=False):
 
 		if filename==None:
-			filename = 'emulator_%s.pkl' % '_'.join(time.asctime().split(' '))
+			filename = 'emulator.pkl'
 
 		if os.path.isfile(filename) == True and clobber == False:
 			print "file exists, quitting..."
@@ -70,14 +70,27 @@ class workspace():
 		output.dump({'E':self.E})
 		file.close()
 
+	def emu_load(self,filename=None):
+		if filename==None:
+			filename='emulator.pkl'
+		file = open(filename,'rb')
+		input = pkl.Unpickler(file)
+		dic = input.load()
+		self.E.__dict__.update(dic)
+		file.close()
+
 	def emu_init(self,variables):
 		self.E = klfuncs(variables)
 
-	def emu_train(self,ydata_tr,param_tr,fid_ydata=None,fid_params=None,kwargs_tr={}):
-		self.E.klinterp(ydata_tr,param_tr,fid_data=fid_ydata,fid_params=fid_params,**kwargs_tr)
+	def emu_train(self,data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={}):
+		self.E.data_tr = data_tr
+		self.E.param_tr = param_tr
+		self.E.fid_data = fid_data
+		self.E.fid_params = fid_params
+		self.E.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 
-	def emu_cross_valid(selfc,ydata_cv,param_cv,fid_ydata=None,fid_params=None):
-		self.E.cross_validate(ydata_cv,param_cv,fid_data=fid_ydata,fid_params=fid_params)
+	def emu_cross_valid(selfc,data_cv,param_cv,fid_data=None,fid_params=None):
+		self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
 	def emu_predict(self,param_pr,use_Nmodes=None):
 		self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
@@ -244,6 +257,9 @@ class workspace():
                 output.dump({'S':self.S})
                 file.close()
 
+
+	def predict_new_TS(self):
+		pass
 
 	############################################
 	############ Build Training Set ############
