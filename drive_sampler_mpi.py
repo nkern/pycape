@@ -6,7 +6,7 @@ import sys
 import emcee
 import cPickle as pkl
 import warnings
-warnings.filterwarnings('ignore',category=DeprecationWarning))
+warnings.filterwarnings('ignore',category=DeprecationWarning)
 
 size = MPI.COMM_WORLD.Get_size()
 rank = MPI.COMM_WORLD.Get_rank()
