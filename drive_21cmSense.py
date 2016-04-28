@@ -58,6 +58,9 @@ class drive_21cmSense():
 			os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
 				--nchan %s %s/%s*.npz' % (dir_21cmSense,foreground_model,buff,freq,ps_filenames[i],ndays,n_per_day,bwidth,nchan,obs_direc,calib_file))
 
+			# Move *.npz file to proper directory
+			os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
+
 			# Load 21cm PS
 			model = np.loadtxt(ps_filenames[i])
 			kb = model[:,0]
