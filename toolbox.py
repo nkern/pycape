@@ -199,7 +199,7 @@ class workspace():
 		drive sampler using mpirun
 		"""
 		# First 
-
+		pass
 	
 
         def sampler_save(self,filename,clobber=False):
