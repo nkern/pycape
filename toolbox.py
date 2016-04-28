@@ -23,6 +23,8 @@ from AttrDict import AttrDict
 from .drive_21cmSense import drive_21cmSense
 import scipy.optimize as opt
 import corner
+import warnings
+warnings.filterwarnings('ignore')
 
 class workspace():
 
@@ -265,6 +267,17 @@ class workspace():
                 output = pkl.Pickler(file)
                 output.dump({'B':self.B})
                 file.close()
+
+
+
+	############################################
+	################# Plotting #################
+	############################################
+
+
+
+
+
 
 
 
