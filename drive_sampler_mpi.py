@@ -14,7 +14,7 @@ sys.stdout.write("Hello, World! I am process %d of %d on %s.\n"% (rank, size, na
 # Load workspace and initial positions of walkers
 file = open('Workspace.pkl','rb')
 input = pkl.Unpickler(file)
-W = input.load()
+W = input.load()['W']
 file.close()
 
 # Initialize sampler

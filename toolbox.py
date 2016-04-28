@@ -206,7 +206,7 @@ class workspace():
 		self.pos = pos
 		file = open('Workspace.pkl','wb')
 		output = pkl.Pickler(file)
-		output.dump(self.__dict__)
+		output.dump({'W':self.__dict__})
 		file.close()
 
 		# Use mpirun to run in parallel
