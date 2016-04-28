@@ -195,10 +195,13 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
-	def drive_sampler_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={}):
+	def drive_sampler_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},workspace=None):
 		"""
 		drive sampler using mpirun
 		"""
+		if workspace == None:
+			raise Exception("Didn't feed a workspace")
+
 		# Save workspace
 		self.sampler_init_kwargs = sampler_init_kwargs
 		self.burn_num = burn_num
@@ -206,7 +209,7 @@ class workspace():
 		self.pos = pos
 		file = open('Workspace.pkl','wb')
 		output = pkl.Pickler(file)
-		output.dump({'W':self.__dict__})
+		output.dump({'W':workspace})
 		file.close()
 
 		# Use mpirun to run in parallel
