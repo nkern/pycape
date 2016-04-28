@@ -210,7 +210,7 @@ class workspace():
 		file.close()
 
 		# Use mpirun to run in parallel
-		os.system('mpirun -np %s %s/drive_sampler_mpi.py' % (mpi_np,self.dir_pycape))
+		os.system('mpirun -np %s python %s/drive_sampler_mpi.py' % (mpi_np,self.dir_pycape))
 
 		# Initialize Sampler
 		self.sampler_init(sampler_init_kwargs)
