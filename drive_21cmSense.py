@@ -38,7 +38,7 @@ class drive_21cmSense():
 			data_filename = 'mock_21cmObs.pkl'
 
 		# Use calibration file to create *.npz file
-		os.system('%s/mk_array_file.py -C %s' % (dir_pycape,calib_file))
+		os.system('%s/mk_array_file.py -C %s' % (dir_21cmSense,calib_file))
 
 		# Move *.npz file to proper directory
 		os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
