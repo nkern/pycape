@@ -135,7 +135,7 @@ class workspace():
 		elif within == False:
 			return -np.inf
 
-	def lnprob(theta):
+	def lnprob(self,theta):
 		lnprior = self.S.lnprior(theta)
 		lnlike = self.S.lnlike(theta)
 		if not np.isfinite(lnprior):
@@ -169,8 +169,12 @@ class workspace():
 		# Specify log-probability (Bayes Theorem Numerator)
 		self.S.lnprob = self.lnprob
 
-		# Initialize emcee Ensemble Sampler
-		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
+		# First check to see if mpi_run is True, b/c sampler is not pickle-able
+		if self.S.mpi_run == True:
+			pass
+		else:
+			# Initialize emcee Ensemble Sampler
+			self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
 
 	def find_mle(self):
 		"""
@@ -198,7 +202,17 @@ class workspace():
 		"""
 		drive sampler using mpirun
 		"""
-		# First 
+		# First write mpi_drive.py file
+		"""
+		from mpi4py import MPI
+		import sys
+		size = MPI.COMM_WORLD.Get_size()
+		rank = MPI.COMM_WORLD.Get_rank()
+		name = MPI.Get_processor_name()
+		sys.stdout.write(
+		    "Hello, World! I am process %d of %d on %s.\n"
+		    % (rank, size, name))
+		"""
 		pass
 	
 
