@@ -24,7 +24,7 @@ from .drive_21cmSense import drive_21cmSense
 import scipy.optimize as opt
 import corner
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore',category=DeprecationWarning))
 
 class workspace():
 
