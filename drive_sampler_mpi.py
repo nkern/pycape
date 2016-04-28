@@ -21,10 +21,10 @@ file.close()
 W.sampler_init(W.sampler_init_kwargs)
 
 # Run chains
-W.drive_sampler(pos[rank],step_num=W.step_num,burn_num=W.burn_num)
+W.drive_sampler(W.pos[rank],step_num=W.step_num,burn_num=W.burn_num)
 
 # Output chains
-file = open(self.dir_pycape+'/mpi_chains/mpi_chain_rank%s.pkl'%rank,'wb')
+file = open(W.dir_pycape+'/mpi_chains/mpi_chain_rank%s.pkl'%rank,'wb')
 output = pkl.Pickler(file)
 output.dump({'rank%s_chain'%rank:W.S.sampler.chain})
 file.close()
