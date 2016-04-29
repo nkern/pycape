@@ -21,6 +21,7 @@ import time
 import emcee
 from AttrDict import AttrDict
 from .drive_21cmSense import drive_21cmSense
+from .common_priors import common_priors
 import scipy.optimize as opt
 import corner
 import warnings
@@ -294,6 +295,9 @@ class workspace():
 
 	def samp_predict_newTS(self):
 		pass
+
+	def samp_common_priors_init(self,dic):
+		self.CP = common_priors(dic)
 
 	############################################
 	############ Build Training Set ############
