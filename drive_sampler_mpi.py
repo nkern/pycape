@@ -20,10 +20,10 @@ W = input.load()['W']
 file.close()
 
 # Initialize sampler
-W.samp_init(W.sampler_init_kwargs)
+W.samp_init(W.sampler_init_kwargs,lnprob_kwargs=W.lnprob_kwargs,sampler_kwargs=W.sampler_kwargs)
 
 # Run chains
-W.samp_drive(W.pos[rank],step_num=W.step_num,burn_num=W.burn_num,**W.sampler_kwargs)
+W.samp_drive(W.pos[rank],step_num=W.step_num,burn_num=W.burn_num)
 
 # Output chains
 file = open(W.dir_pycape+'/mpi_chains/mpi_chain_rank%s.pkl'%rank,'wb')

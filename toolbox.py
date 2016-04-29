@@ -194,7 +194,7 @@ class workspace():
 		return lnlike + lnprior
 
 
-	def samp_init(self, dic, lnlike=None, lnprior=None, lnlike_kwargs={}, sampler_kwargs={}):
+	def samp_init(self, dic, lnlike=None, lnprior=None, lnprob_kwargs={}, sampler_kwargs={}):
 		"""
 		Initialize workspace self.S for sampler
 		"""
@@ -243,7 +243,7 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
-	def samp_drive_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},sampler_kwargs={},workspace=None):
+	def samp_drive_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},lnprob_kwargs={},sampler_kwargs={},workspace=None):
 		"""
 		drive sampler using mpirun
 		"""
@@ -253,6 +253,7 @@ class workspace():
 		# Save workspace
 		self.sampler_init_kwargs = sampler_init_kwargs
 		self.sampler_kwargs =  sampler_kwargs
+		self.lnprob_kwargs = lnprob_kwargs
 		self.burn_num = burn_num
 		self.step_num = step_num
 		self.pos = pos
