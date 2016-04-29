@@ -73,7 +73,7 @@ class workspace():
 		output.dump({'E':self.E})
 		file.close()
 
-
+		if filename==None:
 			filename='emulator.pkl'
 		file = open(filename,'rb')
 		input = pkl.Unpickler(file)
