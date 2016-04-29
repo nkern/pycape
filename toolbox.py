@@ -113,7 +113,7 @@ class workspace():
 	def emu_forwardprop_weighterr(self,theta,use_Nmodes=self.E.N_modes):
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=use_Nmodes)
 		model		= recon.T[self.E.model_lim].T
-		model_err	= np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self..E.model_lim].T,recon_pos_err.T[self.E.model_lim].T))))
+		model_err	= np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T))))
 		return model, model_err
 
 	######################################
