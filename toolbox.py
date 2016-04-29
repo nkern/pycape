@@ -114,7 +114,7 @@ class workspace():
 		if use_Nmodes == None: use_Nmodes = self.E.N_modes
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=use_Nmodes)
 		model		= recon.T[self.E.model_lim].T
-		model_err	= np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T))))
+		model_err	= np.abs(np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T)))))
 		return model, model_err
 
 	######################################
@@ -124,13 +124,17 @@ class workspace():
 	def obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
-	def feed_obs(self,model_kbins,obs_kbins,obs_PSdata,obs_PSerrs):
+	def obs_feed(self,model_kbins,obs_kbins,obs_PSdata,obs_PSerrs):
 		self.Obs.x		= obs_kbins
 		self.Obs.y		= obs_PSdata
 		self.Obs.y_err		= obs_PSerrs
 		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_err
 		self.Obs.invcov		= la.inv(self.Obs.cov)
 		self.Obs.model_kbins	= model_kbins
+
+	def obs_update_cov(self,cov_add):
+		self.Obs.cov += cov_add
+		self.Obs.invcov = la.inv(self.Obs.cov)
 
 	def obs_save(self,filename,clobber=False):
                 if filename == None:
@@ -149,7 +153,7 @@ class workspace():
         ############ Sampler ############
         #################################
 
-	def construct_model(self,theta,add_model_err=False):
+	def samp_construct_model(self,theta,add_model_err=False):
 		# Emulate
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
 		model                   = recon[0][self.E.model_lim]
@@ -161,17 +165,18 @@ class workspace():
 
 		# If add model error is true, add diagonal of covariance and model errs in quadrature
 		if add_model_err == True:
-			if 'cov_temp' not in self.Obs.__dict__:
-				self.Obs.cov_temp = np.copy(self.Obs.cov)
-			self.obs.cov = np.sqrt(self.Obs.cov**2 + np.eye(self.Obs.N_data)*self.S.model_err**2)
-
-	def gaussian_lnlike(self,theta):
-		self.construct_model(theta)
+			self.S.data_cov		= self.Obs.cov + np.eye(self.Obs.N_data)*self.S.model_err
+			self.S.data_invcov	= la.inv(self.S.data_cov)
+		else:
+			self.S.data_cov		= self.Obs.cov
+			self.S.data_invcov	= self.Obs.invcov
+	
+	def samp_gaussian_lnlike(self,theta,add_model_err=False):
+		self.samp_construct_model(theta,add_model_err=add_model_err)
 		resid = self.Obs.y - self.S.model
-		invcov = self.Obs.invcov
-		return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
+		return -0.5 * np.dot( resid.T, np.dot(self.S.data_invcov, resid) )
 
-	def flat_lnprior(self,theta):
+	def samp_flat_lnprior(self,theta):
 		within = True
 		for i in range(self.S.N_params):
 			if theta[i] < self.S.param_bounds[i][0] or theta[i] > self.S.param_bounds[i][1]:
@@ -181,15 +186,15 @@ class workspace():
 		elif within == False:
 			return -np.inf
 
-	def lnprob(self,theta):
+	def samp_lnprob(self,theta,add_model_err=False):
 		lnprior = self.S.lnprior(theta)
-		lnlike = self.S.lnlike(theta)
+		lnlike = self.S.lnlike(theta, add_model_err=add_model_err)
 		if not np.isfinite(lnprior):
 			return -np.inf
 		return lnlike + lnprior
 
 
-	def sampler_init(self,dic,lnlike=None,lnprior=None, sampler_kwargs={}):
+	def samp_init(self, dic, lnlike=None, lnprior=None, lnlike_kwargs={}, sampler_kwargs={}):
 		"""
 		Initialize workspace self.S for sampler
 		"""
@@ -199,30 +204,30 @@ class workspace():
 		# Check to see if an observation exists
 		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
 
-		# Specify loglike and logprior
+		# Specify loglike and logprior, can feed your own, but if not use default
 		if lnlike == None:
-			self.S.lnlike = self.gaussian_lnlike
+			self.S.lnlike = self.samp_gaussian_lnlike
 		else:
 			self.S.lnlike = lnlike	
 
 		if lnprior == None:
-			self.S.lnprior = self.flat_lnprior
+			self.S.lnprior = self.samp_flat_lnprior
 		else:
 			self.S.lnprior = lnprior
 
 		# Specify log-probability (Bayes Theorem Numerator)
-		self.S.lnprob = self.lnprob
+		self.S.lnprob = self.samp_lnprob
 
 		# Initialize emcee Ensemble Sampler
-		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, **sampler_kwargs)
+		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
-	def find_mle(self):
+	def samp_mle(self):
 		"""
 		use scipy.optimize to get maximum likelihood estimate
 		"""
 		pass
 
-	def drive_sampler(self,pos,step_num=500,burn_num=100):
+	def samp_drive(self,pos,step_num=500,burn_num=100):
 		"""
 		drive sampler
 		"""
@@ -238,7 +243,7 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
 
 
-	def drive_sampler_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},sampler_kwargs={},workspace=None):
+	def samp_drive_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},sampler_kwargs={},workspace=None):
 		"""
 		drive sampler using mpirun
 		"""
@@ -273,7 +278,7 @@ class workspace():
 			else:
 				self.S.sampler.mpi_chain = np.vstack([self.S.sampler.mpi_chain,self.S.sampler.__dict__['rank%s_chain'%i]])
 
-        def sampler_save(self,filename,clobber=False):
+        def samp_save(self,filename,clobber=False):
                 if filename == None:
                         filename = 'sampler_%s.pkl' % '_'.join(time.asctime().split(' '))
         
@@ -286,7 +291,7 @@ class workspace():
                 file.close()
 
 
-	def predict_new_TS(self):
+	def samp_predict_newTS(self):
 		pass
 
 	############################################
