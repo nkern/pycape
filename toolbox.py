@@ -29,6 +29,7 @@ warnings.filterwarnings('ignore',category=DeprecationWarning)
 class workspace():
 
 	def __init__(self,dic):
+		""" __init__(dic) where dic is a dictionary of variables to attach to class """
 		self.__dict__.update(dic)
 
 	##################################
@@ -36,6 +37,7 @@ class workspace():
 	##################################
 
 	def workspace_save(self,filename=None,clobber=False):
+		""" workspace_save(filename=None,clobber=False) """
 		if filename == None:
 			filename = 'workspace_%s.pkl' % '_'.join(time.asctime().split(' '))
 
@@ -48,6 +50,7 @@ class workspace():
 		file.close()
 
 	def print_message(self,string,type=1):
+		""" print_message(string,type=1) """
 		if type == 1:
 			print ''
 			print string
@@ -58,7 +61,7 @@ class workspace():
 	##################################
 
 	def emu_save(self,filename=None,clobber=False):
-
+		"""emu_save(filename=None,clobber=False)"""
 		if filename==None:
 			filename = 'emulator.pkl'
 
@@ -70,8 +73,7 @@ class workspace():
 		output.dump({'E':self.E})
 		file.close()
 
-	def emu_load(self,filename=None):
-		if filename==None:
+
 			filename='emulator.pkl'
 		file = open(filename,'rb')
 		input = pkl.Unpickler(file)
@@ -80,9 +82,21 @@ class workspace():
 		file.close()
 
 	def emu_init(self,variables):
+		"""emu_init(variables) where variables is a dict w/ vars to attach to emulator class E"""
 		self.E = klfuncs(variables)
 
+	def emu_cluster(self):
+		pass
+
 	def emu_train(self,data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={}):
+		"""
+		emu_trin(data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={})
+		data_tr		: [N_samples,N_data]
+		param_tr	: [N_samples,N_params]
+		fid_data	: [N_samples,]
+		fid_params	: [N_params,]
+		kwargs_tr	: kwargs to pass to klinterp() 
+		"""
 		self.E.data_tr = data_tr
 		self.E.param_tr = param_tr
 		self.E.fid_data = fid_data
@@ -95,6 +109,12 @@ class workspace():
 	def emu_predict(self,param_pr,use_Nmodes=None):
 		self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
 		return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
+
+	def emu_forwardprop_weighterr(self,theta,use_Nmodes=self.E.N_modes):
+		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=use_Nmodes)
+		model		= recon.T[self.E.model_lim].T
+		model_err	= np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self..E.model_lim].T,recon_pos_err.T[self.E.model_lim].T))))
+		return model, model_err
 
 	######################################
 	############ Observations ############
@@ -128,14 +148,21 @@ class workspace():
         ############ Sampler ############
         #################################
 
-	def construct_model(self,theta):
+	def construct_model(self,theta,add_model_err=False):
 		# Emulate
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
 		model                   = recon[0][self.E.model_lim]
 		model_err               = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
+
 		# Interpolate model onto observation data arrays
 		self.S.model            = np.interp(self.Obs.x,self.Obs.model_kbins,model)
 		self.S.model_err        = np.interp(self.Obs.x,self.Obs.model_kbins,model_err)
+
+		# If add model error is true, add diagonal of covariance and model errs in quadrature
+		if add_model_err == True:
+			if 'cov_temp' not in self.Obs.__dict__:
+				self.Obs.cov_temp = np.copy(self.Obs.cov)
+			self.obs.cov = np.sqrt(self.Obs.cov**2 + np.eye(self.Obs.N_data)*self.S.model_err**2)
 
 	def gaussian_lnlike(self,theta):
 		self.construct_model(theta)
@@ -269,9 +296,6 @@ class workspace():
 		self.B = drive_21cmFAST(dic)
 
 
-
-
-
         def TSbuilder_save(self,filename,clobber=False):
                 if filename == None:
                         filename = 'TSbuilder_%s.pkl' % '_'.join(time.asctime().split(' '))
@@ -290,8 +314,8 @@ class workspace():
 	################# Plotting #################
 	############################################
 
-
-
+	def corner_plot(self):
+		levels = [0.34,0.68,0.90,0.95]
 
 
 
