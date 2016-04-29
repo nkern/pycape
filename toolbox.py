@@ -110,7 +110,8 @@ class workspace():
 		self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
 		return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
 
-	def emu_forwardprop_weighterr(self,theta,use_Nmodes=self.E.N_modes):
+	def emu_forwardprop_weighterr(self,theta,use_Nmodes=None):
+		if use_Nmodes == None: use_Nmodes = self.E.N_modes
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=use_Nmodes)
 		model		= recon.T[self.E.model_lim].T
 		model_err	= np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T))))
