@@ -82,6 +82,15 @@ class workspace():
 		self.E.__dict__.update(dic)
 		file.close()
 
+	def emu_load(self,filename=None):
+		"""emu_load(filename=None)"""
+		if filename == None:
+			filename = 'emulator.pkl'
+		file = open(filename,'rb')
+		input = pkl.Unpickler(file)
+		self.E = input.load()
+		file.close()
+
 	def emu_init(self,variables):
 		"""emu_init(variables) where variables is a dict w/ vars to attach to emulator class E"""
 		self.E = klfuncs(variables)
@@ -325,9 +334,10 @@ class workspace():
 	################# Plotting #################
 	############################################
 
-	def corner_plot(self):
-		levels = [0.34,0.68,0.90,0.95]
-
+	def corner_plot(self,levels=None):
+		if levels == None:
+			levels = [0.34,0.68,0.90,0.95]
+		fig = corner.corner(samples.T[::-1].T, labels=p_latex[::-1], truths=p_true[::-1], range=param_bounds[::-1])
 
 
 

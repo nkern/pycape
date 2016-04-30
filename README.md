@@ -18,6 +18,7 @@ pycape is dependent on a number of public codes, including
 - klip : https://github.com/nkern/klip
 - emcee : http://dan.iel.fm/emcee/current
 - 21cmSense : https://github.com/jpober/21cmSense
+- aipy : https://github.com/AaronParsons/aipy
 
 Optional:
 - PyMC : http://pymc-devs.github.io/pymc
