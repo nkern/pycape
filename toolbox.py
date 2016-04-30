@@ -125,7 +125,7 @@ class workspace():
 		self.E.cluster_ID = np.arange(cluster_num)
 
 		# Assign each cell a training set based on points within a distance of cluster_R * R_mult
-		self.E.cluster_TS = []
+		self.E.clus_TS = []
 		for i in range(cluster_num):
 			within_r = self.E.tree.query_radius(self.E.cluster_cent[i], r = self.E.kmeans.cluster_R_[i] * R_mult)[0]
 			self.E.clus_TS.append(within_r)
