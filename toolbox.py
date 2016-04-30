@@ -101,7 +101,7 @@ class workspace():
 	def emu_cluster(self,grid,R_mult=1.2,tree_kwargs={},kmeans_kwargs={}):
 		"""break the training set into 2**ndim sub-space via KMeans"""
 		# Transform into Cholesky Basis
-		cov = np.inner(grid,grid)/grid.shape[1]
+		cov = np.inner(grid.T,grid.T)/grid.shape[0]
 		L = la.cholesky(cov)
 		invL = la.inv(L)
 		grid = np.dot(invL,grid)
