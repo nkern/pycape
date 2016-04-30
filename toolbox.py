@@ -101,7 +101,7 @@ class workspace():
 		else:
 			self.__dict__[emu_name] = klfuncs(variables)
 
-	def emu_cluster(self,grid,R_mult=1.25,tree_kwargs={},kmeans_kwargs={}):
+	def emu_cluster(self,grid,R_mult=1.2,tree_kwargs={},kmeans_kwargs={}):
 		"""break the training set into clusters via KMeans"""
 		# Transform into Cholesky Basis
 		cov = np.inner(grid.T,grid.T)/grid.shape[0]
@@ -128,9 +128,9 @@ class workspace():
 		self.E.cluster_TS = []
 		for i in range(cluster_num):
 			within_r = self.E.tree.query_radius(self.E.cluster_cent[i], r = self.E.kmeans.cluster_R_[i] * R_mult)[0]
-			self.E.cluster_TS.append(np.dot(L,grid[within_r].T).T)
+			self.E.clus_TS.append(within_r)
 
-		self.E.cluster_TS = np.array(self.E.cluster_TS)
+		self.E.clus_TS = np.array(self.E.clus_TS)
 
 		# Transform cluster centers into original space
 		self.E.cluster_cent = np.dot(L,self.E.cluster_cent.T).T
