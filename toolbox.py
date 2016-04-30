@@ -94,12 +94,15 @@ class workspace():
 		self.E = input.load()
 		file.close()
 
-	def emu_init(self,variables):
+	def emu_init(self,variables,emu_name=None):
 		"""emu_init(variables) where variables is a dict w/ vars to attach to emulator class E"""
-		self.E = klfuncs(variables)
+		if emu_name == None:
+			self.E = klfuncs(variables)
+		else:
+			self.__dict__[emu_name] = klfuncs(variables)
 
-	def emu_cluster(self,grid,R_mult=1.2,tree_kwargs={},kmeans_kwargs={}):
-		"""break the training set into 2**ndim sub-space via KMeans"""
+	def emu_cluster(self,grid,R_mult=1.25,tree_kwargs={},kmeans_kwargs={}):
+		"""break the training set into clusters via KMeans"""
 		# Transform into Cholesky Basis
 		cov = np.inner(grid.T,grid.T)/grid.shape[0]
 		L = la.cholesky(cov)
@@ -131,7 +134,7 @@ class workspace():
 
 		# Transform cluster centers into original space
 		self.E.cluster_cent = np.dot(L,self.E.cluster_cent.T).T
-		self.E.L, self.E.invL = L, invL
+		self.E.kmeans.L, self.E.kmeans.invL = L, invL
 
 	def emu_get_closest_cluster(self,X,k=1):
 		""" get k closest clusters """
@@ -144,7 +147,7 @@ class workspace():
 
 		return close_IDs[:k]
 
-	def emu_train(self,data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={}):
+	def emu_train(self,data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={},emu=None):
 		"""
 		emu_trin(data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={})
 		data_tr		: [N_samples,N_data]
@@ -153,18 +156,24 @@ class workspace():
 		fid_params	: [N_params,]
 		kwargs_tr	: kwargs to pass to klinterp() 
 		"""
-		self.E.data_tr = data_tr
-		self.E.param_tr = param_tr
-		self.E.fid_data = fid_data
-		self.E.fid_params = fid_params
-		self.E.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
+		if emu == None:
+			self.E.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
+		else:
+			emu.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 
-	def emu_cross_valid(selfc,data_cv,param_cv,fid_data=None,fid_params=None):
-		self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
+	def emu_cross_valid(self,data_cv,param_cv,fid_data=None,fid_params=None,emu=None):
+		if emu == None:
+			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
+		else:
+			emu.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
-	def emu_predict(self,param_pr,use_Nmodes=None):
-		self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
-		return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
+	def emu_predict(self,param_pr,use_Nmodes=None,emu=None):
+		if emu == None:
+			self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
+			return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
+		else:
+			emu.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
+			return emu.recon,emu.recon_pos_err,emu.recon_neg_err
 
 	def emu_forwardprop_weighterr(self,theta,use_Nmodes=None):
 		if use_Nmodes == None: use_Nmodes = self.E.N_modes
