@@ -17,6 +17,7 @@ import fnmatch
 from plot_ellipse import plot_ellipse
 import operator
 from klip import klfuncs
+from sklearn.cluster import KMeans
 import time
 import emcee
 from AttrDict import AttrDict
@@ -109,7 +110,7 @@ class workspace():
 		self.E.create_tree(grid,**tree_kwargs)
 
 		# Do clustering
-		self.E.kmeans = self.E.KMeans(**kmeans_kwargs)
+		self.E.kmeans = KMeans(**kmeans_kwargs)
 		self.E.kmeans.fit(grid)
 
 		# Get distance each cluster center is from origin
