@@ -97,8 +97,51 @@ class workspace():
 		"""emu_init(variables) where variables is a dict w/ vars to attach to emulator class E"""
 		self.E = klfuncs(variables)
 
-	def emu_cluster(self):
-		pass
+	def emu_cluster(self,grid,R_mult=1.2,tree_kwargs={},kmeans_kwargs={}):
+		"""break the training set into 2**ndim sub-space via KMeans"""
+		# Transform into Cholesky Basis
+		cov = np.inner(grid,grid)/grid.shape[1]
+		L = la.cholesky(cov)
+		invL = la.inv(L)
+		grid = np.dot(invL,grid)
+
+		# First construct Tree
+		self.E.create_tree(grid,**tree_kwargs)
+
+		# Do clustering
+		self.E.kmeans = self.E.KMeans(**kmeans_kwargs)
+		self.E.kmeans.fit(grid)
+
+		# Get distance each cluster center is from origin
+		self.E.cluster_cent = self.E.kmeans.cluster_centers_
+		self.E.kmeans.cluster_R_ = np.array(map(la.norm,self.E.cluster_cent))
+
+		# Give each cluster an ID
+		cluster_num = len(self.E.cluster_cent)
+		self.E.cluster_ID = np.arange(cluster_num)
+
+		# Assign each cell a training set based on points within a distance of cluster_R * R_mult
+		self.E.cluster_TS = []
+		for i in range(cluster_num):
+			within_r = self.E.kmeans.query_radius(grid, r = self.E.cluster_cent[i] * R_mult)
+			self.E.cluster_TS.append(np.dot(L,grid[within_r]))
+
+		self.E.cluster_TS = np.array(self.E.cluster_TS)
+
+		# Transform cluster centers into original space
+		self.E.cluster_cent = np.dot(L,self.E.cluster_cent)
+		self.E.L, self.E.invL = L, invL
+
+	def emu_get_closest_cluster(self,X,k=1):
+		""" get k closest clusters """
+
+		# Get Euclidean distance
+		cluster_dist = np.array(map(la.norm,self.E.cluster_cent-X))
+		
+		# Sort by distance
+		close_IDs = self.E.cluster_ID[np.argsort(cluster_dist)][::-1]
+
+		return close_IDs[:k]
 
 	def emu_train(self,data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={}):
 		"""
