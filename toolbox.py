@@ -124,7 +124,7 @@ class workspace():
 		# Assign each cell a training set based on points within a distance of cluster_R * R_mult
 		self.E.cluster_TS = []
 		for i in range(cluster_num):
-			within_r = self.E.tree.query_radius(grid, r = self.E.cluster_cent[i] * R_mult)
+			within_r = self.E.tree.query_radius(grid, r = self.E.kmeans.cluster_R_[i] * R_mult)
 			self.E.cluster_TS.append(np.dot(L,grid[within_r].T).T)
 
 		self.E.cluster_TS = np.array(self.E.cluster_TS)
