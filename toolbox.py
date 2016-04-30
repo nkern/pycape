@@ -168,12 +168,18 @@ class workspace():
 	def samp_construct_model(self,theta,add_model_err=False):
 		# Emulate
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
-		model                   = recon[0][self.E.model_lim]
-		model_err               = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
+		model_init                   = recon[0][self.E.model_lim]
+		model_err_init               = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
 
 		# Interpolate model onto observation data arrays
-		self.S.model            = np.interp(self.Obs.x,self.Obs.model_kbins,model)
-		self.S.model_err        = np.interp(self.Obs.x,self.Obs.model_kbins,model_err)
+		model = []
+		model_err = []
+		for i in range(len(self.Obs.x)):
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_init[i]) )
+			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_err_init[i]) )
+
+		self.S.model            = np.array(model)
+		self.S.model_err        = np.array(model_err)
 
 		# If add model error is true, add diagonal of covariance and model errs in quadrature
 		if add_model_err == True:
