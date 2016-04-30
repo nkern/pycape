@@ -130,7 +130,7 @@ class workspace():
 		self.E.cluster_TS = np.array(self.E.cluster_TS)
 
 		# Transform cluster centers into original space
-		self.E.cluster_cent = np.dot(L,self.E.cluster_cent)
+		self.E.cluster_cent = np.dot(L,self.E.cluster_cent.T).T
 		self.E.L, self.E.invL = L, invL
 
 	def emu_get_closest_cluster(self,X,k=1):
