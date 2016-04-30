@@ -18,7 +18,7 @@ class drive_21cmSense():
 		self.__dict__.update(dic)
 
 	def calc_sense(self,calib_file,ps_filenames,data_filename=None,obs_direc=None,write_direc=None,write_data=True,
-			foreground_model='mod',buff=0.1,freq=0.135,ndays=180,n_per_day=6,bwidth=0.008,nchan=82):
+			foreground_model='mod',buff=0.1,freq=[0.135],ndays=180,n_per_day=6,bwidth=0.008,nchan=82):
 		"""
 		(calib_file,ps_filenames,obs_direc=None,write_direc=None)
 		Calculate telescope sensitivity to a 21cm power spectrum
@@ -65,7 +65,7 @@ class drive_21cmSense():
 			PSdat = model[:,1]
 
 			# Load 21cmSense errors
-			sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq)
+			sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq[i])
 			sense_kb = sense['ks']
 			sense_PSerr = sense['errs']
 
