@@ -104,7 +104,7 @@ class workspace():
 		cov = np.inner(grid.T,grid.T)/grid.shape[0]
 		L = la.cholesky(cov)
 		invL = la.inv(L)
-		grid = np.dot(invL,grid)
+		grid = np.dot(invL,grid.T).T
 
 		# First construct Tree
 		self.E.create_tree(grid,**tree_kwargs)
@@ -125,7 +125,7 @@ class workspace():
 		self.E.cluster_TS = []
 		for i in range(cluster_num):
 			within_r = self.E.kmeans.query_radius(grid, r = self.E.cluster_cent[i] * R_mult)
-			self.E.cluster_TS.append(np.dot(L,grid[within_r]))
+			self.E.cluster_TS.append(np.dot(L,grid[within_r].T).T)
 
 		self.E.cluster_TS = np.array(self.E.cluster_TS)
 
