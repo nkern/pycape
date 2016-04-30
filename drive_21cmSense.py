@@ -48,7 +48,7 @@ class drive_21cmSense():
 		sense_PSdata = []
 		sense_PSerrs = []	
 
-		self.valid = []
+		valid = []
 		# Use *.npz file to get sensitivity measurements
 		len_files = len(ps_filenames)
 		for i in range(len_files):

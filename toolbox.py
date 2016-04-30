@@ -63,12 +63,14 @@ class workspace():
 
 	def emu_save(self,filename=None,clobber=False):
 		"""emu_save(filename=None,clobber=False)"""
+
 		if filename==None:
 			filename = 'emulator.pkl'
 
 		if os.path.isfile(filename) == True and clobber == False:
 			print "file exists, quitting..."
 			return
+
 		file = open(filename,'wb')
 		output = pkl.Pickler(file)
 		output.dump({'E':self.E})
