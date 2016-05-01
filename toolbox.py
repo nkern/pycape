@@ -229,8 +229,8 @@ class workspace():
 		model = []
 		model_err = []
 		for i in range(self.S.z_num):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins[i],model_prediction[i]) )
-			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins[i],model_err_prediction[i]) )
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_prediction[i]) )
+			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_prediction[i]) )
 
 		self.S.model            = np.array(model).ravel()
 		self.S.model_err        = np.array(model_err).ravel()
