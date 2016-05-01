@@ -18,7 +18,7 @@ class drive_21cmSense():
 		self.__dict__.update(dic)
 
 	def calc_sense(self,calib_file,ps_filenames,data_filename=None,obs_direc=None,write_direc=None,write_data=True,
-			foreground_model='mod',buff=0.1,freq=[0.135],ndays=180,n_per_day=6,bwidth=0.008,nchan=82):
+			foreground_model='mod',buff=0.1,freq=[0.135],ndays=180,n_per_day=6,bwidth=0.008,nchan=82,lowk_cut=0.15):
 		"""
 		(calib_file,ps_filenames,obs_direc=None,write_direc=None)
 		Calculate telescope sensitivity to a 21cm power spectrum
@@ -68,7 +68,7 @@ class drive_21cmSense():
 			sense_kb = sense['ks']
 			sense_PSerr = sense['errs']
 
-			valid.append( (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True) )
+			valid.append( (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True)&(sense_kb>lowk_cut) )
 
 			# Interpolate between ps_file to get ps at sense_kbins
 			sense_PSdat = np.interp(sense_kb,kb,PSdat)
