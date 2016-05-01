@@ -189,13 +189,14 @@ class workspace():
 	def obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
-	def obs_feed(self,model_kbins,obs_kbins,obs_PSdata,obs_PSerrs):
-		self.Obs.x		= obs_kbins
-		self.Obs.y		= obs_PSdata
-		self.Obs.y_err		= obs_PSerrs
-		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_err
+	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
+		self.Obs.x		= obs_xbins	# mock obs x data (kbins)
+		self.Obs.y		= obs_ydata	# mock obs y data (deldel)
+		self.Obs.y_errs		= obs_yerrs	# mock obs y errs (sensitivity)
+		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_errs
 		self.Obs.invcov		= la.inv(self.Obs.cov)
-		self.Obs.model_kbins	= model_kbins
+		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
+		self.Obs.model_shape	= model_xbins.shape
 
 	def obs_update_cov(self,cov_add):
 		self.Obs.cov += cov_add
@@ -221,18 +222,18 @@ class workspace():
 	def samp_construct_model(self,theta,add_model_err=False):
 		# Emulate
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
-		model_prediction		= recon[0][self.E.model_lim]
-		model_err_prediction		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
+		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
+		model_err_prediction		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
 
 		# Interpolate model onto observation data arrays
 		model = []
 		model_err = []
 		for i in range(self.S.z_num):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_prediction[i]) )
-			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_err_prediction[i]) )
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins[i],model_prediction[i]) )
+			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins[i],model_err_prediction[i]) )
 
-		self.S.model            = np.array(model)
-		self.S.model_err        = np.array(model_err)
+		self.S.model            = np.array(model).ravel()
+		self.S.model_err        = np.array(model_err).ravel()
 
 		# If add model error is true, add diagonal of covariance and model errs in quadrature
 		if add_model_err == True:
