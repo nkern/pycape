@@ -1,0 +1,11 @@
+#############
+## INSTALL ##
+#############
+
+To install, simply move the pycape directory to a folder in your PYTHONPATH, or keep it in your working directory
+
+To add pycape to your PYTHONPATH, add the following syntax to your .bashrc file:
+
+PYTHONPATH=$PYTHONPATH:<path_to_directory_where_pycape_lives>
+export PYTHONPATH
+

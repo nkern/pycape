@@ -26,7 +26,7 @@ Optional:
 - OpenMPI : https://www.open-mpi.org/
 
 ##### Installation and Running:
-
+See INSTALL for installation, and RUNNING to get started on how to use pycape
 
 ##### License:
 See the General Public License for details on usage

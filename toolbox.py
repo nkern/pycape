@@ -221,15 +221,15 @@ class workspace():
 	def samp_construct_model(self,theta,add_model_err=False):
 		# Emulate
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
-		model_init                   = recon[0][self.E.model_lim]
-		model_err_init               = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
+		model_prediction		= recon[0][self.E.model_lim]
+		model_err_prediction		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T))
 
 		# Interpolate model onto observation data arrays
 		model = []
 		model_err = []
-		for i in range(len(self.Obs.x)):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_init[i]) )
-			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_err_init[i]) )
+		for i in range(self.S.z_num):
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_prediction[i]) )
+			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_kbins,model_err_prediction[i]) )
 
 		self.S.model            = np.array(model)
 		self.S.model_err        = np.array(model_err)
