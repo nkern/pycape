@@ -173,8 +173,9 @@ class workspace():
 			self.E.recon_cv = []
 			for i in range(len(data_cv)):
 				emu_w_norm = sum(1/clus[i][1])
-				a_ij_cv = np.zeros(self.E.N_modes)
-				recon_cv = np.zeros(self.E.N_data)
+				a_ij_cv		= np.zeros(self.E.N_modes)
+				weights_cv	= np.zeros(self.E.N_modes)
+				recon_cv	= np.zeros(self.E.N_data)
 				for j in range(k):
 					emu_name	= 'emu_clus%s'%int(clus[i][0][j])
 					emu_dist	= clus[i][1][j]
@@ -183,10 +184,13 @@ class workspace():
 					fid_data=self.__dict__[emu_name].fid_data,fid_params=self.__dict__[emu_name].fid_params)
 					a_ij_cv += self.__dict__[emu_name].a_ij_cv[0]*emu_w
 					recon_cv += self.__dict__[emu_name].recon_cv[0]*emu_w
+					weights += self.__dict__[emu_name].weights[0]*emu_w
 				self.E.a_ij_cv.append(a_ij_cv)
 				self.E.recon_cv.append(recon_cv)
+				self.E.weights_cv.append(weights_cv)
 			self.E.a_ij_cv = np.array(self.E.a_ij_cv)
 			self.E.recon_cv = np.array(self.E.recon_cv)
+			self.E.weights_cv = np.array(self.E.weights_cv)
 		else:
 			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
