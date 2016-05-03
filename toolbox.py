@@ -401,7 +401,7 @@ class workspace():
 		kde = neighbors.KernelDensity(**kd_kwargs)
 		kde.fit(samples[:,np.newaxis])
 		
-		pdf = np.exp(kde.score_samples(
+	#	pdf = np.exp(kde.score_samples(
 
 	def samp_predict_newTS(self):
 		pass
