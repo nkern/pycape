@@ -181,8 +181,8 @@ class workspace():
 					emu_w		= 1/emu_dist / emu_w_norm
 					self.__dict__[emu_name].cross_validate(data_cv[i],param_cv[i],
 					fid_data=self.__dict__[emu_name].fid_data,fid_params=self.__dict__[emu_name].fid_params)
-					a_ij_cv += self.__dict__[emu_name].a_ij_cv*emu_w
-					recon_cv += self.__dict__[emu_name].recon_cv*emu_w
+					a_ij_cv += self.__dict__[emu_name].a_ij_cv[0]*emu_w
+					recon_cv += self.__dict__[emu_name].recon_cv[0]*emu_w
 				self.E.a_ij_cv.append(a_ij_cv)
 				self.E.recon_cv.append(recon_cv)
 			self.E.a_ij_cv = np.array(self.E.a_ij_cv)
