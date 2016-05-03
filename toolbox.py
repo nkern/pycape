@@ -145,7 +145,7 @@ class workspace():
 		cluster_dist = np.array(map(la.norm,self.E.cluster_cent-X))
 		
 		# Sort by distance
-		sort = np.argsort(cluster_dist)[::-1]
+		sort = np.argsort(cluster_dist)
 		cluster_dist = cluster_dist[sort]
 		close_IDs = self.E.cluster_ID[sort]
 
@@ -166,20 +166,37 @@ class workspace():
 		else:
 			emu.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 
-	def emu_cross_valid(self,data_cv,param_cv,fid_data=None,fid_params=None,emu=None):
-		if emu == None:
-			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
+	def emu_cross_valid(self,data_cv,param_cv,fid_data=None,fid_params=None,cluster=False,k=1):
+		if cluster == True:
+			clus = np.array(map(lambda x: self.emu_get_closest_clusters(x, k=k), param_cv))
+			self.E.a_ij_cv = []
+			self.E.recon_cv = []
+			for i in range(len(data_cv)):
+				emu_w_norm = sum(1/clus[i][1])
+				a_ij_cv = np.zeros(W.E.N_modes)
+				recon_cv = np.zeros(W.E.N_data)
+				for j in range(k):
+					emu_name	= 'emu_clus%s'%int(clus[i][0][j])
+					emu_dist	= clus[i][1][j]
+					emu_w		= 1/emu_dist / emu_w_norm
+					self.__dict__[emu_name].cross_validate(data_cv[i],param_cv[i],
+					fid_data=self.__dict__[emu_name].fid_data,fid_params=self.__dict__[emu_name].fid_params)
+					a_ij_cv += self.__dict__[emu_name].a_ij_cv*emu_w
+					recon_cv += self.__dict__[emu_name].recon_cv*emu_w
+				self.E.a_ij_cv.append(a_ij_cv)
+				self.E.recon_cv.append(recon_cv)
+			self.E.a_ij_cv = np.array(self.E.a_ij_cv)
+			self.E.recon_cv = np.array(self.E.recon_cv)
 		else:
-			emu.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
+			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
-	def emu_predict(self,param_pr,use_Nmodes=None,cluster=False,k=1,cluster_weight='linear'):
+	def emu_predict(self,param_pr,use_Nmodes=None,cluster=False,k=1):
 		if cluster == True:
 			# Get k NN
 			clusIDs, clusDist = self.emu_get_closest_clusters(param_pr,k=k)
-			if cluster_weight == 'linear':
-				clus_w = 1/clusDist
-				clus_w_norm = sum(clus_w)
-				clus_w /= clus_w_norm
+			clus_w = 1/clusDist
+			clus_w_norm = sum(clus_w)
+			clus_w /= clus_w_norm
 
 			recon,recon_pos_err,recon_neg_err = [],[],[]
 			for i in range(k):
