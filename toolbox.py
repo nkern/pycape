@@ -173,8 +173,8 @@ class workspace():
 			self.E.recon_cv = []
 			for i in range(len(data_cv)):
 				emu_w_norm = sum(1/clus[i][1])
-				a_ij_cv = np.zeros(W.E.N_modes)
-				recon_cv = np.zeros(W.E.N_data)
+				a_ij_cv = np.zeros(self.E.N_modes)
+				recon_cv = np.zeros(self.E.N_data)
 				for j in range(k):
 					emu_name	= 'emu_clus%s'%int(clus[i][0][j])
 					emu_dist	= clus[i][1][j]
