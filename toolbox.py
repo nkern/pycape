@@ -18,6 +18,7 @@ from plot_ellipse import plot_ellipse
 import operator
 from klip import klfuncs
 from sklearn.cluster import KMeans
+from sklearn import neighbors
 import time
 import emcee
 from AttrDict import AttrDict
@@ -133,23 +134,27 @@ class workspace():
 		self.E.clus_TS = np.array(self.E.clus_TS)
 
 		# Transform cluster centers into original space
-		self.E.cluster_cent = np.dot(L,self.E.cluster_cent.T).T
 		self.E.kmeans.L, self.E.kmeans.invL = L, invL
 
 	def emu_get_closest_cluster(self,X,k=1):
 		""" get k closest clusters """
+		# Transform to cholesky space
+		X = np.dot(self.E.kmeans.invL,X)
 
 		# Get Euclidean distance
 		cluster_dist = np.array(map(la.norm,self.E.cluster_cent-X))
 		
 		# Sort by distance
-		close_IDs = self.E.cluster_ID[np.argsort(cluster_dist)][::-1]
+		sort = np.argsort(cluster_dist)[::-1]
+		cluster_dist = cluster_dist[sort]
+		close_IDs = self.E.cluster_ID[sort]
 
-		return close_IDs[:k]
+		return close_IDs[:k],cluster_dist[:k]
 
 	def emu_train(self,data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={},emu=None):
 		"""
-		emu_trin(data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={})
+		emu_trin(data_tr,param_tr,fid_data=None,fid_params=None,kwargs_tr={},emu=None)
+
 		data_tr		: [N_samples,N_data]
 		param_tr	: [N_samples,N_params]
 		fid_data	: [N_samples,]
@@ -167,13 +172,35 @@ class workspace():
 		else:
 			emu.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
-	def emu_predict(self,param_pr,use_Nmodes=None,emu=None):
-		if emu == None:
+	def emu_predict(self,param_pr,use_Nmodes=None,cluster=False,k=1,cluster_weight='linear'):
+		if cluster == True:
+			# Get k NN
+			clusIDs, clusDist = self.emu_get_closest_clusters(param_pr,k=k)
+			if cluster_weight == 'linear':
+				clus_w = 1/clusDist
+				clus_w_norm = sum(clus_w)
+				clus_w /= clus_w_norm
+
+			recon,recon_pos_err,recon_neg_err = [],[],[]
+			for i in range(k):
+				self.__dict__['emu_clus%s'%i].calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
+				recon.append(self.__dict__['emu_clus%s'%i].recon)
+				recon_pos_err.append(self.__dict__['emu_clus%s'%i].recon_pos_err)
+				recon_neg_err.append(self.__dict__['emu_clus%s'%i].recon_neg_err)
+
+			# Assign cluster weight inversely prop to cluster dist
+			weighted_recon = zip(clus_w,recon)
+			weighted_recon = sum(map(lambda x: reduce(operator.mul,x), weighted_recon))
+                        weighted_recon_pos_err = zip(clus_w,recon_pos_err)
+                        weighted_recon_pos_err = sum(map(lambda x: reduce(operator.mul,x), weighted_recon_pos_err))
+                        weighted_recon_neg_err = zip(clus_w,recon_neg_err)
+                        weighted_recon_neg_err = sum(map(lambda x: reduce(operator.mul,x), weighted_recon_neg_err))
+
+			return weighted_recon, weighted_recon_pos_err, weighted_recon_neg_err
+
+		else:
 			self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
 			return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
-		else:
-			emu.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
-			return emu.recon,emu.recon_pos_err,emu.recon_neg_err
 
 	def emu_forwardprop_weighterr(self,theta,use_Nmodes=None):
 		if use_Nmodes == None: use_Nmodes = self.E.N_modes
@@ -363,6 +390,18 @@ class workspace():
                 output.dump({'S':self.S})
                 file.close()
 
+
+	def samp_getMAP(self,samples,kd_kwargs={'bandwith':0.2}):
+		"""
+		samp_getMAP(samples)
+		- Get the Maximum a Posteriori and Gaussian degeneracy in its vicinity
+		samples : ndarray [n_samples, n_dim]
+		"""
+		# Create Kernel Density map
+		kde = neighbors.KernelDensity(**kd_kwargs)
+		kde.fit(samples[:,np.newaxis])
+		
+		pdf = np.exp(kde.score_samples(
 
 	def samp_predict_newTS(self):
 		pass
