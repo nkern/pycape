@@ -136,7 +136,7 @@ class workspace():
 		# Transform cluster centers into original space
 		self.E.kmeans.L, self.E.kmeans.invL = L, invL
 
-	def emu_get_closest_cluster(self,X,k=1):
+	def emu_get_closest_clusters(self,X,k=1):
 		""" get k closest clusters """
 		# Transform to cholesky space
 		X = np.dot(self.E.kmeans.invL,X)
