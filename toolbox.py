@@ -276,7 +276,7 @@ class workspace():
         ############ Sampler ############
         #################################
 
-	def samp_construct_model(self,theta,add_model_err=False):
+	def samp_construct_model(self,theta,add_model_err=False,fast=True):
 		# Emulate
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
 		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
