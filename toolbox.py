@@ -278,9 +278,12 @@ class workspace():
 
 	def samp_construct_model(self,theta,add_model_err=False,fast=True):
 		# Emulate
-		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
+		if fast == True
+			recon = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
+			model_err_prediction            = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
+		else:
+			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
 		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
-		model_err_prediction		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
 
 		# Interpolate model onto observation data arrays
 		model = []
