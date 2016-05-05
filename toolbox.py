@@ -200,7 +200,7 @@ class workspace():
 		else:
 			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
-	def emu_predict(self,param_pr,use_Nmodes=None,cluster=False,k=1):
+	def emu_predict(self,param_pr,use_Nmodes=None,fast=True,cluster=False,k=1):
 		if cluster == True:
 			# Get k NN
 			clusIDs, clusDist = self.emu_get_closest_clusters(param_pr,k=k)
@@ -226,8 +226,11 @@ class workspace():
 			return weighted_recon, weighted_recon_pos_err, weighted_recon_neg_err
 
 		else:
-			self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
-			return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
+			self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes,fast=fast)
+			if fast == True:
+				return self.E.recon
+			else:
+				return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
 
 	def emu_forwardprop_weighterr(self,theta,use_Nmodes=None):
 		if use_Nmodes == None: use_Nmodes = self.E.N_modes
