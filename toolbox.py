@@ -278,7 +278,7 @@ class workspace():
 
 	def samp_construct_model(self,theta,add_model_err=False):
 		# Emulate
-		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes)
+		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
 		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
 		model_err_prediction		= np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
 
@@ -300,8 +300,8 @@ class workspace():
 			self.S.data_cov		= self.Obs.cov
 			self.S.data_invcov	= self.Obs.invcov
 	
-	def samp_gaussian_lnlike(self,theta,add_model_err=False):
-		self.samp_construct_model(theta,add_model_err=add_model_err)
+	def samp_gaussian_lnlike(self,theta,add_model_err=False,fast=True):
+		self.samp_construct_model(theta,add_model_err=add_model_err,fast=fast)
 		resid = self.Obs.y - self.S.model
 		return -0.5 * np.dot( resid.T, np.dot(self.S.data_invcov, resid) )
 
