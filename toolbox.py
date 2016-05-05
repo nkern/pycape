@@ -315,9 +315,9 @@ class workspace():
 		elif within == False:
 			return -np.inf
 
-	def samp_lnprob(self,theta,add_model_err=False):
+	def samp_lnprob(self,theta,add_model_err=False,fast=True):
 		lnprior = self.S.lnprior(theta)
-		lnlike = self.S.lnlike(theta, add_model_err=add_model_err)
+		lnlike = self.S.lnlike(theta, add_model_err=add_model_err, fast=fast)
 		if not np.isfinite(lnprior):
 			return -np.inf
 		return lnlike + lnprior
