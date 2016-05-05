@@ -280,9 +280,9 @@ class workspace():
 		# Emulate
 		if fast == True:
 			recon = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
-			model_err_prediction            = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
 		else:
 			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
+			model_err_prediction            = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
 		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
 
 		# Interpolate model onto observation data arrays
@@ -290,13 +290,15 @@ class workspace():
 		model_err = []
 		for i in range(self.S.z_num):
 			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_prediction[i]) )
-			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_prediction[i]) )
+			if fast == False:
+				model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_prediction[i]) )
 
 		self.S.model            = np.array(model).ravel()
-		self.S.model_err        = np.array(model_err).ravel()
+		if fast == False:
+			self.S.model_err        = np.array(model_err).ravel()
 
 		# If add model error is true, add diagonal of covariance and model errs in quadrature
-		if add_model_err == True:
+		if add_model_err == True and fast == True:
 			self.S.data_cov		= self.Obs.cov + np.eye(self.Obs.N_data)*self.S.model_err
 			self.S.data_invcov	= la.inv(self.S.data_cov)
 		else:
