@@ -200,9 +200,10 @@ class workspace():
 		else:
 			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
-	def emu_predict(self,param_pr,use_Nmodes=None,fast=True,cluster=False,k=1):
-		if cluster == True:
-			# Get k NN
+	def emu_predict(self,param_pr,use_Nmodes=None,fast=True,emu_as_you_go=False,k=1):
+		if emu_as_you_go == True:
+			# Get k NN in grid
+			clus 
 			clusIDs, clusDist = self.emu_get_closest_clusters(param_pr,k=k)
 			clus_w = 1/clusDist
 			clus_w_norm = sum(clus_w)
@@ -276,12 +277,12 @@ class workspace():
         ############ Sampler ############
         #################################
 
-	def samp_construct_model(self,theta,add_model_err=False,fast=True):
+	def samp_construct_model(self,theta,add_model_err=False,fast=False,emu_as_you_go=False):
 		# Emulate
 		if fast == True:
-			recon = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
+			recon = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast,emu_as_you_go=emu_as_you_go)
 		else:
-			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast)
+			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast,emu_as_you_go=emu_as_you_go)
 			model_err_prediction            = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
 		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
 
@@ -305,8 +306,8 @@ class workspace():
 			self.S.data_cov		= self.Obs.cov
 			self.S.data_invcov	= self.Obs.invcov
 	
-	def samp_gaussian_lnlike(self,theta,add_model_err=False,fast=True):
-		self.samp_construct_model(theta,add_model_err=add_model_err,fast=fast)
+	def samp_gaussian_lnlike(self,theta,**kwargs):
+		self.samp_construct_model(theta,**kwargs)
 		resid = self.Obs.y - self.S.model
 		return -0.5 * np.dot( resid.T, np.dot(self.S.data_invcov, resid) )
 
@@ -320,9 +321,9 @@ class workspace():
 		elif within == False:
 			return -np.inf
 
-	def samp_lnprob(self,theta,add_model_err=False,fast=True):
+	def samp_lnprob(self,theta,**lnlike_kwargs):
 		lnprior = self.S.lnprior(theta)
-		lnlike = self.S.lnlike(theta, add_model_err=add_model_err, fast=fast)
+		lnlike = self.S.lnlike(theta, **lnlike_kwargs)
 		if not np.isfinite(lnprior):
 			return -np.inf
 		return lnlike + lnprior
