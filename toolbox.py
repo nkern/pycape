@@ -29,7 +29,7 @@ import corner
 import warnings
 warnings.filterwarnings('ignore',category=DeprecationWarning)
 
-class workspace():
+class workspace(object):
 
 	def __init__(self,dic):
 		""" __init__(dic) where dic is a dictionary of variables to attach to class """
@@ -41,7 +41,7 @@ class workspace():
 
 	def workspace_save(self,filename=None,clobber=False):
 		""" workspace_save(filename=None,clobber=False) """
-		if filename == None:
+		if filename is None:
 			filename = 'workspace_%s.pkl' % '_'.join(time.asctime().split(' '))
 
 		if clobber == False and os.path.isfile(filename) == True:
@@ -88,7 +88,7 @@ class workspace():
 
 	def emu_load(self,filename=None):
 		"""emu_load(filename=None)"""
-		if filename == None:
+		if filename is None:
 			filename = 'emulator.pkl'
 		file = open(filename,'rb')
 		input = pkl.Unpickler(file)
@@ -97,7 +97,7 @@ class workspace():
 
 	def emu_init(self,variables,emu_name=None):
 		"""emu_init(variables) where variables is a dict w/ vars to attach to emulator class E"""
-		if emu_name == None:
+		if emu_name is None:
 			self.E = klfuncs(variables)
 		else:
 			self.__dict__[emu_name] = klfuncs(variables)
@@ -161,7 +161,7 @@ class workspace():
 		fid_params	: [N_params,]
 		kwargs_tr	: kwargs to pass to klinterp() 
 		"""
-		if emu == None:
+		if emu is None:
 			self.E.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 		else:
 			emu.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
@@ -200,41 +200,11 @@ class workspace():
 		else:
 			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
-	def emu_predict(self,param_pr,use_Nmodes=None,fast=True,emu_as_you_go=False,k=1):
-		if emu_as_you_go == True:
-			# Get k NN in grid
-			clus 
-			clusIDs, clusDist = self.emu_get_closest_clusters(param_pr,k=k)
-			clus_w = 1/clusDist
-			clus_w_norm = sum(clus_w)
-			clus_w /= clus_w_norm
-
-			recon,recon_pos_err,recon_neg_err = [],[],[]
-			for i in range(k):
-				self.__dict__['emu_clus%s'%i].calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes)
-				recon.append(self.__dict__['emu_clus%s'%i].recon)
-				recon_pos_err.append(self.__dict__['emu_clus%s'%i].recon_pos_err)
-				recon_neg_err.append(self.__dict__['emu_clus%s'%i].recon_neg_err)
-
-			# Assign cluster weight inversely prop to cluster dist
-			weighted_recon = zip(clus_w,recon)
-			weighted_recon = sum(map(lambda x: reduce(operator.mul,x), weighted_recon))
-                        weighted_recon_pos_err = zip(clus_w,recon_pos_err)
-                        weighted_recon_pos_err = sum(map(lambda x: reduce(operator.mul,x), weighted_recon_pos_err))
-                        weighted_recon_neg_err = zip(clus_w,recon_neg_err)
-                        weighted_recon_neg_err = sum(map(lambda x: reduce(operator.mul,x), weighted_recon_neg_err))
-
-			return weighted_recon, weighted_recon_pos_err, weighted_recon_neg_err
-
-		else:
-			self.E.calc_eigenmodes(param_pr,use_Nmodes=use_Nmodes,fast=fast)
-			if fast == True:
-				return self.E.recon
-			else:
-				return self.E.recon,self.E.recon_pos_err,self.E.recon_neg_err
+	def emu_predict(self,param_pr,**kwargs):
+		self.E.calc_eigenmodes(param_pr,**kwargs)
 
 	def emu_forwardprop_weighterr(self,theta,use_Nmodes=None):
-		if use_Nmodes == None: use_Nmodes = self.E.N_modes
+		if use_Nmodes is None: use_Nmodes = self.E.N_modes
 		recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=use_Nmodes)
 		model		= recon.T[self.E.model_lim].T
 		model_err	= np.abs(np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T)))))
@@ -261,7 +231,7 @@ class workspace():
 		self.Obs.invcov = la.inv(self.Obs.cov)
 
 	def obs_save(self,filename,clobber=False):
-                if filename == None:
+                if filename is None:
                         filename = 'observation_%s.pkl' % '_'.join(time.asctime().split(' '))
 
                 if clobber == False and os.path.isfile(filename) == True:
@@ -277,22 +247,30 @@ class workspace():
         ############ Sampler ############
         #################################
 
-	def samp_construct_model(self,theta,add_model_err=False,fast=False,emu_as_you_go=False):
+	def samp_construct_model(self,theta,add_model_err=False,fast=False,LAYG=True,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
+		# LAYG
+		if LAYG == True:
+			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
+			grid_NN = self.E.tree.query(parsph,k=k)[1][0]
+			self.emu_train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
+
 		# Emulate
-		if fast == True:
-			recon = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast,emu_as_you_go=emu_as_you_go)
-		else:
-			recon,recon_pos_err,recon_neg_err = self.emu_predict(theta,use_Nmodes=self.S.use_Nmodes,fast=fast,emu_as_you_go=emu_as_you_go)
-			model_err_prediction            = np.array(map(np.mean, np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
-		model_prediction		= recon[0][self.E.model_lim].reshape(self.Obs.model_shape)
+		self.emu_predict(theta,**predict_kwargs)
+		recon = self.E.recon[0]
+		if fast == False:
+			recon_pos_err = self.E.recon_pos_err
+			recon_neg_err = self.E.recon_neg_err
+			model_err_predic = np.array(map(np.mean,np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
+
+		model_predic = recon[self.E.model_lim].reshape(self.Obs.model_shape)
 
 		# Interpolate model onto observation data arrays
 		model = []
 		model_err = []
 		for i in range(self.S.z_num):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_prediction[i]) )
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_predic[i]) )
 			if fast == False:
-				model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_prediction[i]) )
+				model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_predic[i]) )
 
 		self.S.model            = np.array(model).ravel()
 		if fast == False:
@@ -340,12 +318,12 @@ class workspace():
 		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
 
 		# Specify loglike and logprior, can feed your own, but if not use default
-		if lnlike == None:
+		if lnlike is None:
 			self.S.lnlike = self.samp_gaussian_lnlike
 		else:
 			self.S.lnlike = lnlike	
 
-		if lnprior == None:
+		if lnprior is None:
 			self.S.lnprior = self.samp_flat_lnprior
 		else:
 			self.S.lnprior = lnprior
@@ -376,13 +354,13 @@ class workspace():
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(end_pos,step_num)
 		else:
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
-
+		self.end_pos = end_pos
 
 	def samp_drive_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},lnprob_kwargs={},sampler_kwargs={},workspace=None):
 		"""
 		drive sampler using mpirun
 		"""
-		if workspace == None:
+		if workspace is None:
 			raise Exception("Didn't feed a workspace")
 
 		# Save workspace
@@ -415,7 +393,7 @@ class workspace():
 				self.S.sampler.mpi_chain = np.vstack([self.S.sampler.mpi_chain,self.S.sampler.__dict__['rank%s_chain'%i]])
 
         def samp_save(self,filename,clobber=False):
-                if filename == None:
+                if filename is None:
                         filename = 'sampler_%s.pkl' % '_'.join(time.asctime().split(' '))
         
                 if clobber == False and os.path.isfile(filename) == True:
@@ -454,7 +432,7 @@ class workspace():
 
 
         def TSbuilder_save(self,filename,clobber=False):
-                if filename == None:
+                if filename is None:
                         filename = 'TSbuilder_%s.pkl' % '_'.join(time.asctime().split(' '))
         
                 if clobber == False and os.path.isfile(filename) == True:
@@ -472,7 +450,7 @@ class workspace():
 	############################################
 
 	def corner_plot(self,levels=None):
-		if levels == None:
+		if levels is None:
 			levels = [0.34,0.68,0.90,0.95]
 		fig = corner.corner(samples.T[::-1].T, labels=p_latex[::-1], truths=p_true[::-1], range=param_bounds[::-1])
 
