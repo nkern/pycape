@@ -3,7 +3,7 @@ common_priors.py : a list of common priors on physical parameters relevant to Co
 
 """
 
-class common_priors():
+class common_priors(object):
 
 	def __init__(self,dic):
 		self.__dict__.update(dic)

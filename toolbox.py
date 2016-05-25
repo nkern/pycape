@@ -159,49 +159,18 @@ class workspace(object):
 		param_tr	: [N_samples,N_params]
 		fid_data	: [N_samples,]
 		fid_params	: [N_params,]
-		kwargs_tr	: kwargs to pass to klinterp() 
+		kwargs_tr	: kwargs to pass to interp() 
 		"""
 		if emu is None:
-			self.E.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
+			self.E.interp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 		else:
-			emu.klinterp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
+			emu.interp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 
-	def emu_cross_valid(self,data_cv,param_cv,fid_data=None,fid_params=None,cluster=False,k=1):
-		if cluster == True:
-			clus = np.array(map(lambda x: self.emu_get_closest_clusters(x, k=k), param_cv))
-			self.E.a_ij_cv = []
-			self.E.recon_cv = []
-			self.E.weights_cv = []
-			self.E.weights_c95_cv = []
-			for i in range(len(data_cv)):
-				emu_w_norm = sum(1/clus[i][1])
-				a_ij_cv		= np.zeros(self.E.N_modes)
-				weights_cv	= np.zeros(self.E.N_modes)
-				recon_cv	= np.zeros(self.E.N_data)
-				weights_c95_cv	= np.zeros(self.E.N_modes)
-				for j in range(k):
-					emu_name	= 'emu_clus%s'%int(clus[i][0][j])
-					emu_dist	= clus[i][1][j]
-					emu_w		= 1/emu_dist / emu_w_norm
-					self.__dict__[emu_name].cross_validate(data_cv[i],param_cv[i],
-					fid_data=self.__dict__[emu_name].fid_data,fid_params=self.__dict__[emu_name].fid_params)
-					a_ij_cv += self.__dict__[emu_name].a_ij_cv[0]*emu_w
-					recon_cv += self.__dict__[emu_name].recon_cv[0]*emu_w
-					weights_cv += self.__dict__[emu_name].weights_cv[0]*emu_w
-					weights_c95_cv += self.__dict__[emu_name].weights_c95_cv[0]*emu_w
-				self.E.a_ij_cv.append(a_ij_cv)
-				self.E.recon_cv.append(recon_cv)
-				self.E.weights_cv.append(weights_cv)
-				self.E.weights_c95_cv.append(weights_c95_cv)
-			self.E.a_ij_cv = np.array(self.E.a_ij_cv)
-			self.E.recon_cv = np.array(self.E.recon_cv)
-			self.E.weights_cv = np.array(self.E.weights_cv)
-			self.E.weights_c95_cv = np.array(self.E.weights_c95_cv)
-		else:
-			self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
+	def emu_cross_valid(self,data_cv,param_cv,fid_data=None,fid_params=None):
+		self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
 
 	def emu_predict(self,param_pr,**kwargs):
-		self.E.calc_eigenmodes(param_pr,**kwargs)
+		self.E.predict(param_pr,**kwargs)
 
 	def emu_forwardprop_weighterr(self,theta,use_Nmodes=None):
 		if use_Nmodes is None: use_Nmodes = self.E.N_modes
@@ -221,7 +190,7 @@ class workspace(object):
 		self.Obs.x		= obs_xbins	# mock obs x data (kbins)
 		self.Obs.y		= obs_ydata	# mock obs y data (deldel)
 		self.Obs.y_errs		= obs_yerrs	# mock obs y errs (sensitivity)
-		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_errs
+		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_errs**2
 		self.Obs.invcov		= la.inv(self.Obs.cov)
 		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
 		self.Obs.model_shape	= model_xbins.shape
@@ -247,42 +216,51 @@ class workspace(object):
         ############ Sampler ############
         #################################
 
-	def samp_construct_model(self,theta,add_model_err=False,fast=False,LAYG=True,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
+	def samp_construct_model(self,theta,add_model_err=False,fast=False,LAYG=True,LAYG_pretrain=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
-			grid_NN = self.E.tree.query(parsph,k=k)[1][0]
+			grid_D, grid_NN = self.E.tree.query(parsph,k=k)
+			grid_NN = grid_NN[0]
+			grid_D = grid_D[0]
+			if GPhyperNN == True:
+				weight_func = lambda x: 1/x
+				weights = weight_func(grid_D)
+				weights /= sum(weights)
+				theta0 = sum(self.E.GPhyperParams[grid_NN]*weights)
+				kwargs_tr['theta0'] = theta0
+				kwargs_tr['thetaL'] = None
+				kwargs_tr['thetaU'] = None
+
+			if LAYG_pretrain == True:
+				kwargs_tr['theta0'] = self
 			self.emu_train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
 
 		# Emulate
 		self.emu_predict(theta,**predict_kwargs)
-		recon = self.E.recon[0]
-		if fast == False:
-			recon_pos_err = self.E.recon_pos_err
-			recon_neg_err = self.E.recon_neg_err
-			model_err_predic = np.array(map(np.mean,np.abs([recon_pos_err[0][self.E.model_lim],recon_neg_err[0][self.E.model_lim]]).T)).reshape(self.Obs.model_shape)
+		recon		= self.E.recon[0]
+		recon_err	= self.E.recon_err
 
 		model_predic = recon[self.E.model_lim].reshape(self.Obs.model_shape)
+		model_err_predic = recon_err[self.E.model_lim].reshape(self.Obs.model_shape)
 
 		# Interpolate model onto observation data arrays
 		model = []
 		model_err = []
 		for i in range(self.S.z_num):
 			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_predic[i]) )
-			if fast == False:
-				model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_predic[i]) )
+			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_predic[i]) )
 
 		self.S.model            = np.array(model).ravel()
-		if fast == False:
-			self.S.model_err        = np.array(model_err).ravel()
+		self.S.model_err        = np.array(model_err).ravel()
 
 		# If add model error is true, add diagonal of covariance and model errs in quadrature
-		if add_model_err == True and fast == True:
-			self.S.data_cov		= self.Obs.cov + np.eye(self.Obs.N_data)*self.S.model_err
+		if add_model_err == True:
+			self.S.data_cov		= self.Obs.cov + np.eye(self.Obs.cov.shape[0])*self.S.model_err**2
 			self.S.data_invcov	= la.inv(self.S.data_cov)
 		else:
-			self.S.data_cov		= self.Obs.cov
-			self.S.data_invcov	= self.Obs.invcov
+			self.S.data_cov		= np.copy(self.Obs.cov)
+			self.S.data_invcov	= np.copy(self.Obs.invcov)
 	
 	def samp_gaussian_lnlike(self,theta,**kwargs):
 		self.samp_construct_model(theta,**kwargs)
@@ -405,7 +383,6 @@ class workspace(object):
                 file.close()
 
 
-	def samp_getMAP(self,samples,kd_kwargs={'bandwith':0.2}):
 		"""
 		samp_getMAP(samples)
 		- Get the Maximum a Posteriori and Gaussian degeneracy in its vicinity
@@ -417,8 +394,11 @@ class workspace(object):
 		
 	#	pdf = np.exp(kde.score_samples(
 
-	def samp_predict_newTS(self):
-		pass
+	def samp_predict_newTS(self,kd_kwargs={'bandwidth':0.2}):
+		"""
+		"""
+		samples = self.S.sampler.chain[:, :, :].reshape((-1, self.S.ndim))
+		
 
 	def samp_common_priors_init(self,dic):
 		self.CP = common_priors(dic)
@@ -453,6 +433,25 @@ class workspace(object):
 		if levels is None:
 			levels = [0.34,0.68,0.90,0.95]
 		fig = corner.corner(samples.T[::-1].T, labels=p_latex[::-1], truths=p_true[::-1], range=param_bounds[::-1])
+
+
+
+
+
+	def performance_inspection_plots(self):
+		"""
+		
+		- Make plots that are useful for inspecting the performance of the emulator, sampler etc.
+		"""
+		pass
+
+
+
+
+
+
+
+
 
 
 

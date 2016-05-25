@@ -9,7 +9,7 @@ from .DictEZ import create as ezcreate
 from fits_table import fits_table
 import cPickle as pkl
 
-class drive_21cmSense():
+class drive_21cmSense(object):
 
 	def __init__(self,dic):
 		self.__dict__.update(dic)
