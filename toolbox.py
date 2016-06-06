@@ -23,7 +23,7 @@ import time
 import emcee
 from AttrDict import AttrDict
 from .drive_21cmSense import drive_21cmSense
-from .common_priors import common_priors
+from .common_priors import *
 import scipy.optimize as opt
 import corner
 import warnings
@@ -166,9 +166,6 @@ class workspace(object):
 		else:
 			emu.interp(data_tr,param_tr,fid_data=fid_data,fid_params=fid_params,**kwargs_tr)
 
-	def emu_cross_valid(self,data_cv,param_cv,fid_data=None,fid_params=None):
-		self.E.cross_validate(data_cv,param_cv,fid_data=fid_data,fid_params=fid_params)
-
 	def emu_predict(self,param_pr,**kwargs):
 		self.E.predict(param_pr,**kwargs)
 
@@ -216,7 +213,8 @@ class workspace(object):
         ############ Sampler ############
         #################################
 
-	def samp_construct_model(self,theta,add_model_err=False,fast=False,LAYG=True,LAYG_pretrain=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
+	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
+					GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
@@ -234,13 +232,19 @@ class workspace(object):
 
 			if LAYG_pretrain == True:
 				kwargs_tr['theta0'] = self
+
 			self.emu_train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
 
 		# Emulate
 		self.emu_predict(theta,**predict_kwargs)
 		recon		= self.E.recon[0]
 		recon_err	= self.E.recon_err
+		self.samp_interp_mod2obs(recon,recon_err,add_model_err=add_model_err,calc_lnlike_emu_err=calc_lnlike_emu_err)
 
+	def samp_interp_mod2obs(self,recon,recon_err,add_model_err=False,calc_lnlike_emu_err=False,cut_high_fracerr=100.0):
+		""" samp_interp_mod2obs(recon,recon_err,add_model_err=True)
+		- interpolate model data in simulation basis to observation basis (x-axis points)
+		"""
 		model_predic = recon[self.E.model_lim].reshape(self.Obs.model_shape)
 		model_err_predic = recon_err[self.E.model_lim].reshape(self.Obs.model_shape)
 
@@ -261,25 +265,57 @@ class workspace(object):
 		else:
 			self.S.data_cov		= np.copy(self.Obs.cov)
 			self.S.data_invcov	= np.copy(self.Obs.invcov)
-	
-	def samp_gaussian_lnlike(self,theta,**kwargs):
-		self.samp_construct_model(theta,**kwargs)
-		resid = self.Obs.y - self.S.model
-		return -0.5 * np.dot( resid.T, np.dot(self.S.data_invcov, resid) )
 
-	def samp_flat_lnprior(self,theta):
-		within = True
-		for i in range(self.S.N_params):
-			if theta[i] < self.S.param_bounds[i][0] or theta[i] > self.S.param_bounds[i][1]:
+		# Calculate uncertainty in lnlikelihood estimate purely from emulator error
+		if calc_lnlike_emu_err == True:
+			resid = self.Obs.y - self.S.model
+			self.S.lnlike_emu_err_i = -0.5*np.sqrt(2) * resid**2 / self.S.data_cov.diagonal() * self.S.model_err / resid
+			self.S.lnlike_emu_err = np.sqrt( sum(self.S.lnlike_emu_err_i[self.S.model_err/self.S.model<cut_high_fracerr]**2) )
+	
+	def samp_gaussian_lnlike(self,ydata,model,invcov):
+		resid = ydata - model
+		return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
+
+	def samp_flat_lnprior(self,param_bounds):
+		"""
+		- Initialize a flat prior function
+		"""
+		def flat_lnprior(theta,param_bounds=param_bounds):
+			within = True
+			if theta < param_bounds[0] or theta > param_bounds[1]:
 				within = False
-		if within == True:
-			return np.log(1/self.S.param_hypervol)
-		elif within == False:
-			return -np.inf
+			if within == True:
+				return np.log(1/(param_bounds[1]-param_bounds[0]))
+			else:
+				return -np.inf
+
+		self.S.lnprior_funcs.append(flat_lnprior)
+
+	def samp_gauss_lnprior(self,mean,sigma,return_func=False):
+		"""
+		- Initialize a Gaussian prior function
+		"""
+		def gauss_lnprior(theta,mean=mean,sigma=sigma):
+			return np.log(stats.norm.pdf(theta,loc=mean,scale=sigma))
+	
+		if return_func == True:
+			return gauss_lnprior
+		else:	
+			self.S.lnprior_funcs.append(gauss_lnprior)
+
+	def samp_lnprior(self,theta):
+		"""
+		- Call the previously created self.S.lnpriors list that holds the prior functions for each parameter
+		"""
+		lnprior = 0
+		for i in range(len(theta)):
+			lnprior += self.S.lnprior_funcs[i](theta[i])
+		return lnprior
 
 	def samp_lnprob(self,theta,**lnlike_kwargs):
+		self.samp_construct_model(theta,**lnlike_kwargs)
+		lnlike = self.S.lnlike(self.Obs.y,self.S.model,self.S.data_invcov)
 		lnprior = self.S.lnprior(theta)
-		lnlike = self.S.lnlike(theta, **lnlike_kwargs)
 		if not np.isfinite(lnprior):
 			return -np.inf
 		return lnlike + lnprior
@@ -302,9 +338,14 @@ class workspace(object):
 			self.S.lnlike = lnlike	
 
 		if lnprior is None:
-			self.S.lnprior = self.samp_flat_lnprior
+			self.S.lnprior_funcs = []
+			# Initialize flat priors for all parameters
+			for i in range(self.S.N_params):
+				self.samp_flat_lnprior(self.S.param_bounds[i])
 		else:
-			self.S.lnprior = lnprior
+			self.S.lnprior_funcs = lnprior
+
+		self.S.lnprior = self.samp_lnprior
 
 		# Specify log-probability (Bayes Theorem Numerator)
 		self.S.lnprob = self.samp_lnprob
@@ -317,6 +358,27 @@ class workspace(object):
 		use scipy.optimize to get maximum likelihood estimate
 		"""
 		pass
+
+	def samp_cross_valid(self,grid_cv,data_cv,lnlike_kwargs={},compute_like=True):
+		"""
+		samp_cross_valid()
+		- get error on emulated power spectra or likelihood
+		"""
+		grid_len = len(grid_cv)
+		emu_lnlike = []
+		tru_lnlike = []
+		for i in range(grid_len):
+			self.samp_construct_model(grid_cv[i],**lnlike_kwargs)
+			e_lnl = self.S.lnlike(self.Obs.y,self.S.model,self.S.data_invcov)
+			emu_lnlike.append(e_lnl)
+
+			self.samp_interp_mod2obs(data_cv[i],np.zeros(len(data_cv[i])),add_model_err=False,calc_lnlike_emu_err=False)
+			t_lnl = self.S.lnlike(self.Obs.y,self.S.model,self.S.data_invcov)
+			tru_lnlike.append(t_lnl)
+
+		emu_lnlike = np.array(emu_lnlike)
+		tru_lnlike = np.array(tru_lnlike)
+		return emu_lnlike, tru_lnlike
 
 	def samp_drive(self,pos,step_num=500,burn_num=100):
 		"""

@@ -3,25 +3,33 @@ common_priors.py : a list of common priors on physical parameters relevant to Co
 
 """
 
-class common_priors(object):
+def planck_priors(param_name,param_val):
+	"""
+	planck_priors(param_name,param_val)
+	- recent planck priors on CMB parameters
+	- prior is log Gaussian
+	"""
+	omega_b_hh		= 0.02222
+	omega_b_hh_err		= 0.00023
 
-	def __init__(self,dic):
-		self.__dict__.update(dic)
+	omega_c_hh		= 0.1197
+	omega_c_hh_err		= 0.0022
 
-	def neutral_frac_prior(self):
-		pass
+	theta_MC_hundred	= 1.04085
+	theta_MC_hundred_err	= 0.00047
 
-	def brightness_temp_prior(self):
-		pass
+	n_s			= 0.9655
+	n_s_err			= 0.0062
 
-	def cosmological_priors(self):
-		pass
+	ln_tenten_A_s		= 3.089
+	ln_tenten_A_s_err	= 0.036
 
-	def astrophysical_priors(self):
-		pass
+	tau			= 0.078
+	tau_err			= 0.019
 
-	def CMB_priors(self):
-		pass
+	param_names = ['omega_b_hh','omega_c_hh']
+
+
 
 
 
