@@ -17,6 +17,7 @@ import fnmatch
 from plot_ellipse import plot_ellipse
 import operator
 from klip import klfuncs
+from sklearn.gaussian_process import GaussianProcess
 from sklearn.cluster import KMeans
 from sklearn import neighbors
 import time
@@ -214,7 +215,7 @@ class workspace(object):
         #################################
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
-					GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
+					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
@@ -239,9 +240,9 @@ class workspace(object):
 		self.emu_predict(theta,**predict_kwargs)
 		recon		= self.E.recon[0]
 		recon_err	= self.E.recon_err
-		self.samp_interp_mod2obs(recon,recon_err,add_model_err=add_model_err,calc_lnlike_emu_err=calc_lnlike_emu_err)
+		self.samp_interp_mod2obs(recon,recon_err,add_model_err=add_model_err,calc_lnlike_emu_err=calc_lnlike_emu_err,emu_err_mc=emu_err_mc)
 
-	def samp_interp_mod2obs(self,recon,recon_err,add_model_err=False,calc_lnlike_emu_err=False,cut_high_fracerr=100.0):
+	def samp_interp_mod2obs(self,recon,recon_err,add_model_err=False,calc_lnlike_emu_err=False,cut_high_fracerr=100.0,emu_err_mc=False,**kwargs):
 		""" samp_interp_mod2obs(recon,recon_err,add_model_err=True)
 		- interpolate model data in simulation basis to observation basis (x-axis points)
 		"""
@@ -258,6 +259,11 @@ class workspace(object):
 		self.S.model            = np.array(model).ravel()
 		self.S.model_err        = np.array(model_err).ravel()
 
+		# Resample model from Gaussian with scale of model_err if emu_err_mc = True
+		if emu_err_mc == True:
+			resampled_model = np.array([stats.norm.rvs(loc=self.S.model[i],scale=self.S.model_err[i],size=1)[0] for i in range(len(self.S.model))])
+			self.S.model = resampled_model
+
 		# If add model error is true, add diagonal of covariance and model errs in quadrature
 		if add_model_err == True:
 			self.S.data_cov		= self.Obs.cov + np.eye(self.Obs.cov.shape[0])*self.S.model_err**2
@@ -269,7 +275,7 @@ class workspace(object):
 		# Calculate uncertainty in lnlikelihood estimate purely from emulator error
 		if calc_lnlike_emu_err == True:
 			resid = self.Obs.y - self.S.model
-			self.S.lnlike_emu_err_i = -0.5*np.sqrt(2) * resid**2 / self.S.data_cov.diagonal() * self.S.model_err / resid
+			self.S.lnlike_emu_err_i = 0.5*np.sqrt(2) * resid**2 / self.S.data_cov.diagonal() * self.S.model_err / resid
 			self.S.lnlike_emu_err = np.sqrt( sum(self.S.lnlike_emu_err_i[self.S.model_err/self.S.model<cut_high_fracerr]**2) )
 	
 	def samp_gaussian_lnlike(self,ydata,model,invcov):
@@ -359,7 +365,7 @@ class workspace(object):
 		"""
 		pass
 
-	def samp_cross_valid(self,grid_cv,data_cv,lnlike_kwargs={},compute_like=True):
+	def samp_cross_valid(self,grid_cv,data_cv,lnlike_kwargs={},also_record=[]):
 		"""
 		samp_cross_valid()
 		- get error on emulated power spectra or likelihood
@@ -367,18 +373,112 @@ class workspace(object):
 		grid_len = len(grid_cv)
 		emu_lnlike = []
 		tru_lnlike = []
+		other_vars = dict(zip(also_record,[[] for ii in range(len(also_record))]))
 		for i in range(grid_len):
 			self.samp_construct_model(grid_cv[i],**lnlike_kwargs)
 			e_lnl = self.S.lnlike(self.Obs.y,self.S.model,self.S.data_invcov)
 			emu_lnlike.append(e_lnl)
 
-			self.samp_interp_mod2obs(data_cv[i],np.zeros(len(data_cv[i])),add_model_err=False,calc_lnlike_emu_err=False)
+			for name in also_record:
+				other_vars[name].append(self.S.__dict__[name])
+
+			self.samp_interp_mod2obs(data_cv[i],np.zeros(len(data_cv[i])),**lnlike_kwargs)
 			t_lnl = self.S.lnlike(self.Obs.y,self.S.model,self.S.data_invcov)
 			tru_lnlike.append(t_lnl)
 
 		emu_lnlike = np.array(emu_lnlike)
 		tru_lnlike = np.array(tru_lnlike)
-		return emu_lnlike, tru_lnlike
+		return emu_lnlike, tru_lnlike, other_vars
+
+	def samp_marginalized_pdf(self,grid_cv,data_cv,samples,theta0=1.0,nugget=1e-4,
+					lnprob_kwargs={},marg_ax=0,hist_bins=1000):
+		""" solve for marginalized pdf *and its error* given samples of the joint_pdf and a cross validation set
+
+		"""
+		# Find dimensions
+		ndim = len(grid_cv.T)
+
+                # Get MAP
+		def get_map(samples,grid_bounds):
+                	hist_data = np.histogram(samples,range=(grid_bounds[0],grid_bounds[1]),bins=25)
+                	dx = hist_data[1][1] - hist_data[1][0]
+                	xpoints = hist_data[1][1:] - dx/2.
+			pdf = hist_data[0]
+
+			# Get robust measurement of center of pdf
+			x_range = xpoints
+			three_quarter_max = np.max(pdf)*3./4.
+			xmax = x_range[np.where(pdf==np.max(pdf))]
+			xrange_plus_sel = np.where(x_range>xmax)[0]
+			xrange_neg_sel = np.where(x_range<xmax)[0]
+			x_tq_plus = x_range[xrange_plus_sel][np.argsort(np.abs(pdf[xrange_plus_sel]-three_quarter_max))][0]
+			x_tq_neg = x_range[xrange_neg_sel][np.argsort(np.abs(pdf[xrange_neg_sel]-three_quarter_max))][0]
+			pdf_cent = np.mean([x_tq_plus,x_tq_neg])
+			return pdf_cent
+
+		pdf_cent = np.zeros(ndim)
+		for i in range(ndim): pdf_cent[i] = get_map(samples.T[i],grid_bounds[i])
+
+		# Whiten cross validation set
+		Xsph = np.dot(self.E.invL,(grid_cv-self.E.fid_params).T).T
+
+		# Get exact error over cross validation set
+		emu_lnlike,true_lnlike,o_vars = self.samp_cross_valid(grid_cv,data_cv,lnlike_kwargs=lnprob_kwargs)
+		lnlike_err = np.abs(emu_lnlike-true_lnlike)
+
+		# GP Regression for the lnlike_err
+		gp_kwargs = {'regr':'linear','theta0':theta0,'thetaL':None,'thetaU':None,
+                'random_start':1,'verbose':False,'corr':'squared_exponential','nugget':nugget}
+
+		GP = GaussianProcess(**gp_kwargs).fit(Xsph,lnlike_err)
+
+		## Predict lnlike_err for a coarse grid within parameter space
+		# Make coarse grid
+		G = np.array(np.meshgrid( *[np.linspace(grid_bounds[i][0],grid_bounds[i][1],grid_length) for i in range(ndim)] ))
+		G = G.reshape(ndim,ndim*grid_length).T
+
+		# Make coarse histogram of marginalized pdf
+                coarse_hist_data = np.histogram(samples.T[marg_ax],range=(grid_bounds[marg_ax][0],grid_bounds[marg_ax][1]),bins=grid_length)
+                coarse_dx = coarse_hist_data[1][1] - coarse_hist_data[1][0]
+                coarse_xpoints = coarse_hist_data[1][1:] - coarse_dx/2.
+                coarse_pdf = coarse_hist_data[0]
+
+		## Use Cholesky Decomposition to select only cells within 2sigma of Gaussian approximation to joint posterior
+		X = samples - pdf_cent
+		Xcov = np.inner(X.T,X.T)/len(samples)
+		L = la.cholesky(Xcov)
+		invL = la.inv(L)
+
+		# Transform the coarse grid and select those within 2sigma
+		Gsph = np.dot(invL,(G-pdf_cent).T).T
+		Gsph_R = np.sqrt(np.array(map(sum,Gsph**2)))
+		select = np.where(Gsph_R < 2.0)[0]
+
+		# Make prediction
+		Gsph2 = np.dot(W.E.invL,(G-W.E.fid_params).T).T
+		Gsph2 = Gsph2.reshape(ndim,ndim*grid_length).T
+		lnlike_err_pred		= np.zeros(Gsph2.shape)
+		lnlike_err_pred[select]	= GP.predict(Gsph2[select],eval_MSE=False)
+		lnlike_err_pred = lnlike_err_pred.reshape([grid_step for i in range(ndim)])
+
+		# Relate to log-posterior errors
+		lnpost_err = 1*lnlike_err_pred
+
+		# Use Eqn. (5) to get discretized, marginalized posterior error, also need to perform discrete integration
+		post_err = np.zeros(grid_length)
+		for i in range(ndim):
+			if i == marg_ax: continue
+			# Create slice array
+			sl = [slice(0,grid_length) for i in range(ndim)]
+			sl_p,sl_n = slice_arr[:],slice_arr[:]
+			sl_p[marg_ax] = 1
+			sl_n[marg_ax] = 0
+			# Get delta y along this particular axes
+			Delta_y = G[sl_p] - G[sl_n]
+
+
+		# Make a Guess at the skewness (I've found that real skew is ~5*stats.skew()
+		skew_guess = np.abs(stats.skew(xpoints)*5.)
 
 	def samp_drive(self,pos,step_num=500,burn_num=100):
 		"""
@@ -394,7 +494,7 @@ class workspace(object):
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(end_pos,step_num)
 		else:
 			end_pos, end_prob, end_state = self.S.sampler.run_mcmc(pos,step_num)
-		self.end_pos = end_pos
+		self.S.end_pos = end_pos
 
 	def samp_drive_mpi(self,pos,step_num=500,burn_num=100,mpi_np=5,sampler_init_kwargs={},lnprob_kwargs={},sampler_kwargs={},workspace=None):
 		"""
