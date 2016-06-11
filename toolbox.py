@@ -24,6 +24,7 @@ import time
 import emcee
 from AttrDict import AttrDict
 from .drive_21cmSense import drive_21cmSense
+from .drive_camb import drive_camb
 from .common_priors import *
 import scipy.optimize as opt
 import corner

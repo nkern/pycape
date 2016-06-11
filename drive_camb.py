@@ -19,7 +19,7 @@ class drive_camb(object):
 		self.pars.set_cosmology(H0=H0, ombh2=ombh2, omch2=omch2, cosmomc_theta=theta_mc, omk=omk, tau=tau)
 		self.pars.set_dark_energy()
 		self.pars.InitPower.set_params(ns=ns, As=As)
-		self.pars.set_matter_power(reshifts=0.,kmax=2.0)
+		self.pars.set_matter_power(redshifts=0.,kmax=2.0)
 		self.pars.NonLinear = camb.model.NonLinear_none
 		self.results = camb.get_results(self.pars)
 
