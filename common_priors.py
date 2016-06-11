@@ -7,7 +7,7 @@ def planck_priors(param_name,param_val):
 	"""
 	planck_priors(param_name,param_val)
 	- recent planck priors on CMB parameters
-	- prior is log Gaussian
+	- log prior is log Gaussian
 	"""
 	omega_b_hh		= 0.02222
 	omega_b_hh_err		= 0.00023

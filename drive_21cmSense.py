@@ -20,7 +20,7 @@ class drive_21cmSense(object):
 	def calc_sense(self,calib_file,ps_filenames,data_filename=None,obs_direc=None,write_direc=None,write_data=True,
 			foreground_model='mod',buff=[0.1],freq=[0.135],ndays=180,n_per_day=6,bwidth=[0.008],nchan=[82],lowk_cut=0.15):
 		"""
-		(calib_file,ps_filenames)
+		calc_sense(calib_file,ps_filenames)
 		- Calculate telescope sensitivity to a 21cm power spectrum
 		- calib_file should be the calibration file without '.py' ex: hera331.py => hera331
 		- Note that the ps_file should have 1st column as k bins and 2nd column as power spectrum delta^2(k)

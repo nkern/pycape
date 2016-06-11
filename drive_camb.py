@@ -1,7 +1,7 @@
 """
 driver for the Python wrapper of CAMB
 See www.camb.info/
-
+Mainly used to convert from base CMB parameters to derived LSS parameters (e.g. A_s <=> sigma_8)
 """
 import camb
 
@@ -15,7 +15,9 @@ class drive_camb(object):
 		self.pars = camb.CAMBparams()
 
 	def set_params(self,H0=67.5,ombh2=0.022,omch2=0.122,mnu=0.06,omk=0,tau=None,ns=0.965,As=2e-9,theta_mc=None):
-		
+		"""
+		set_params(H0=67.5,ombh2=0.022,omch2=0.122,mnu=0.06,omk=0,tau=None,ns=0.965,As=2e-9,theta_mc=None)
+		"""
 		self.pars.set_cosmology(H0=H0, ombh2=ombh2, omch2=omch2, cosmomc_theta=theta_mc, omk=omk, tau=tau)
 		self.pars.set_dark_energy()
 		self.pars.InitPower.set_params(ns=ns, As=As)
@@ -25,7 +27,7 @@ class drive_camb(object):
 
 	@property
 	def sigma8(self):
-		return camb.get_results(self.pars).get_sigma8()
+		return camb.get_results(self.pars).get_sigma8()[0]
 			
 	@property
 	def theta_mc(self):
