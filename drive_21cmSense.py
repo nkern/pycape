@@ -69,7 +69,7 @@ class drive_21cmSense(object):
 			PSdat = model[:,1]
 
 			# Load 21cmSense errors
-			sense = np.load(obs_direc+'/'+calib_file+'drift_mod_%0.3f.npz'%freq[i])
+			sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq[i])
 			sense_kb = sense['ks']
 			sense_PSerr = sense['errs']
 
