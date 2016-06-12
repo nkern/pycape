@@ -84,7 +84,7 @@ def fracture(positions, Separation=1):
     positions = newPos
     return n.array(positions)
 
-nside = 4. #hex number
+nside = 4 #hex number
 L = 1460 / a.const.len_ns 
 antpos = get_hex_pos(nside,L)
 #antpos = fracture(antpos,Separation=L)
