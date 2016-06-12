@@ -57,7 +57,7 @@ class drive_21cmSense(object):
 		len_files = len(ps_filenames)
 		for i in range(len_files):
 			os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
-				--nchan %s %s/%s*drift_blmin*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
+				--nchan %s %s/%s.drift_blmin*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
 				ndays,n_per_day,bwidth[i],nchan[i],obs_direc,calib_file))
 
 			# Move *.npz file to proper directory
