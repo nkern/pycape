@@ -40,7 +40,7 @@ class drive_21cmSense(object):
 			data_filename = 'mock_21cmObs.pkl'
 
 		# Use calibration file to create *.npz file
-		os.system('python %s/mk_array_file.py -C %s' % (self.dir_21cmSense,calib_file+'.'))
+		os.system('python %s/mk_array_file.py -C %s' % (self.dir_21cmSense,calib_file))
 
 		# Move *.npz file to proper directory
 		os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
@@ -57,7 +57,7 @@ class drive_21cmSense(object):
 		len_files = len(ps_filenames)
 		for i in range(len_files):
 			os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
-				--nchan %s %s/%s*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
+				--nchan %s %s/%s*drift_blmin*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
 				ndays,n_per_day,bwidth[i],nchan[i],obs_direc,calib_file))
 
 			# Move *.npz file to proper directory
@@ -69,7 +69,7 @@ class drive_21cmSense(object):
 			PSdat = model[:,1]
 
 			# Load 21cmSense errors
-			sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq[i])
+			sense = np.load(obs_direc+'/'+calib_file+'drift_mod_%0.3f.npz'%freq[i])
 			sense_kb = sense['ks']
 			sense_PSerr = sense['errs']
 
