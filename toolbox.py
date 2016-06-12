@@ -393,8 +393,8 @@ class workspace(object):
 
 	def samp_marginalized_pdf(self,grid_cv,data_cv,samples,theta0=1.0,nugget=1e-4,
 					lnprob_kwargs={},marg_ax=0,hist_bins=1000):
-		""" solve for marginalized pdf *and its error* given samples of the joint_pdf and a cross validation set
-
+		"""
+		solve for marginalized pdf given samples of the joint_pdf and a cross validation set
 		"""
 		# Find dimensions
 		ndim = len(grid_cv.T)
@@ -546,17 +546,6 @@ class workspace(object):
                 file.close()
 
 
-		"""
-		samp_getMAP(samples)
-		- Get the Maximum a Posteriori and Gaussian degeneracy in its vicinity
-		samples : ndarray [n_samples, n_dim]
-		"""
-		# Create Kernel Density map
-		kde = neighbors.KernelDensity(**kd_kwargs)
-		kde.fit(samples[:,np.newaxis])
-		
-	#	pdf = np.exp(kde.score_samples(
-
 	def samp_predict_newTS(self,kd_kwargs={'bandwidth':0.2}):
 		"""
 		"""
@@ -592,16 +581,14 @@ class workspace(object):
 	################# Plotting #################
 	############################################
 
-	def corner_plot(self,levels=None):
+	def plot_corner(self,levels=None):
 		if levels is None:
 			levels = [0.34,0.68,0.90,0.95]
 		fig = corner.corner(samples.T[::-1].T, labels=p_latex[::-1], truths=p_true[::-1], range=param_bounds[::-1])
 
 
 
-
-
-	def performance_inspection_plots(self):
+	def plot_performance(self):
 		"""
 		
 		- Make plots that are useful for inspecting the performance of the emulator, sampler etc.

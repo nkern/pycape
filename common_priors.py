@@ -1,33 +1,42 @@
 """
 common_priors.py : a list of common priors on physical parameters relevant to Cosmic Dawn and EoR studies
 
+For CMB priors see
+Planck Collaboration (1502.01589)
+Planck Collaboration (1605.03507)
+
 """
 
-def planck_priors(param_name,param_val):
-	"""
-	planck_priors(param_name,param_val)
-	- recent planck priors on CMB parameters
-	- log prior is log Gaussian
-	"""
-	omega_b_hh		= 0.02222
-	omega_b_hh_err		= 0.00023
+cmb_priors1 = {
+'name'			= 'Planck TT,TE,EE+lowP',
+'ombh2'			= 0.02222,
+'ombh2_err'		= 0.00023,
+'omch2'			= 0.1197,
+'omch2_err'		= 0.0022,
+'theta_mc100'		= 1.04085,
+'theta_mc100_err'	= 0.00047,
+'ns'			= 0.9655,
+'ns_err'		= 0.0062,
+'lntentenAs'		= 3.089,
+'lntentenAs_err'	= 0.036,
+'tau'			= 0.078,
+'tau_err'		= 0.019}
 
-	omega_c_hh		= 0.1197
-	omega_c_hh_err		= 0.0022
+cmb_priors2 = {
+'name'			= 'Planck TT+lollipop',
+'ombh2'                 = 0.02222,
+'ombh2_err'             = 0.00023,
+'omch2'                 = 0.1205,
+'omch2_err'             = 0.0022,
+'theta_mc100'           = 1.04085,
+'theta_mc100_err'       = 0.00047,
+'ns'                    = 0.9620,
+'ns_err'                = 0.0050,
+'lntentenAs'            = 3.059,
+'lntentenAs_err'        = 0.020,
+'tau'                   = 0.058,
+'tau_err'               = 0.012}
 
-	theta_MC_hundred	= 1.04085
-	theta_MC_hundred_err	= 0.00047
-
-	n_s			= 0.9655
-	n_s_err			= 0.0062
-
-	ln_tenten_A_s		= 3.089
-	ln_tenten_A_s_err	= 0.036
-
-	tau			= 0.078
-	tau_err			= 0.019
-
-	param_names = ['omega_b_hh','omega_c_hh']
 
 
 
