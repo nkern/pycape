@@ -93,7 +93,7 @@ class drive_21cmSense(object):
 		valid		= np.array(valid)
 
 		# Append to namespace
-		names = ['kbins','PSdata','sense_kbins','sense_PSdata','sense_PSerrs','valid']
+		names = ['kbins','PSdata','sense_kbins','sense_PSdata','sense_PSerrs','valid','freq']
 		data_dic = ezcreate(names,locals())
                 self.update(data_dic)
 
