@@ -8,13 +8,11 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as mp
 from mpl_toolkits.mplot3d import Axes3D
-from fits_table import fits_table, fits_data, fits_append
 import scipy.stats as stats
 from .DictEZ import create as ezcreate
 import numpy.linalg as la
 import astropy.io.fits as fits
 import fnmatch
-from plot_ellipse import plot_ellipse
 import operator
 from klip import klfuncs
 from sklearn.gaussian_process import GaussianProcess
@@ -23,13 +21,23 @@ from sklearn import neighbors
 import time
 import emcee
 from AttrDict import AttrDict
-from .drive_21cmSense import drive_21cmSense
-from .drive_camb import drive_camb
 from .common_priors import *
 import scipy.optimize as opt
 import corner
 import warnings
 warnings.filterwarnings('ignore',category=DeprecationWarning)
+
+try: from .drive_camb import drive_camb
+except: pass
+try: from .drive_21cmSense import drive_21cmSense
+except: pass
+try: from plot_ellipse import plot_ellipse
+except: pass
+try: import corner
+except: pass
+try: from fits_table import fits_table, fits_data, fits_append
+except: pass
+
 
 class workspace(object):
 
