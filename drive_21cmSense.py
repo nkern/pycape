@@ -60,6 +60,7 @@ class drive_21cmSense(object):
 				--nchan %s %s/%s*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
 				ndays,n_per_day,bwidth[i],nchan[i],obs_direc,calib_file))
 
+			raise NameError
 			# Move *.npz file to proper directory
 			os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
 
