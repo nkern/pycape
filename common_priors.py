@@ -8,7 +8,7 @@ Planck Collaboration (1605.03507)
 """
 from collections import OrderedDict
 
-cmb_priors1 = OrderedDict{
+cmb_priors1 = OrderedDict({
 'name'				: 'Planck TT,TE,EE+lowP',
 'H0'                : 67.27,
 'H0_err'            : 0.66,
@@ -27,9 +27,9 @@ cmb_priors1 = OrderedDict{
 'sigma8'            : 0.831,
 'sigma8_err'        : 0.013,
 'zre'				: 10.0,
-'zre_err'			: 1.6}
+'zre_err'			: 1.6})
 
-cmb_priors2 = OrderedDict{
+cmb_priors2 = OrderedDict({
 'name'              : 'Planck TT,TE,EE+lowP+lensing+ext',
 'H0'                : 67.74,
 'H0_err'            : 0.46,
@@ -48,7 +48,7 @@ cmb_priors2 = OrderedDict{
 'sigma8'            : 0.8159,
 'sigma8_err'        : 0.0086,
 'zre'               : 8.8,
-'zre_err'           : 1.2}
+'zre_err'           : 1.2})
 
 cmb_priors3 = {
 'name'			: 'Planck TT+lollipop',
