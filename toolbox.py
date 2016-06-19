@@ -285,7 +285,7 @@ class workspace(object):
 		if calc_lnlike_emu_err == True:
 			resid = self.Obs.y - self.S.model
 			self.S.lnlike_emu_err_i = 0.5*np.sqrt(2) * resid**2 / self.S.data_cov.diagonal() * self.S.model_err / resid
-			self.S.lnlike_emu_err = np.sqrt( sum(self.S.lnlike_emu_err_i[self.S.model_err/self.S.model<cut_high_fracerr]**2) )
+			self.S.lnlike_emu_err = np.sqrt( sum(self.S.lnlike_emu_err_i[(self.S.model_err/self.S.model)<cut_high_fracerr]**2) )
 	
 	def samp_gaussian_lnlike(self,ydata,model,invcov):
 		resid = ydata - model
