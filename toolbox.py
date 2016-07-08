@@ -241,7 +241,7 @@ class workspace(object):
 				kwargs_tr['thetaU'] = None
 
 			if LAYG_pretrain == True:
-				kwargs_tr['theta0'] = self
+				kwargs_tr['theta0'] = None	# Not finished...
 
 			self.emu_train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
 

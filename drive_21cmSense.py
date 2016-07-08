@@ -1,6 +1,9 @@
 """
 Driver for 21cmSense code
-See Pober et al. 2013AJ....145...65P and Pober et al. 2014ApJ...782...66P
+See:
+Parsons et al. 2012ApJ...753...81P
+Pober et al. 2013AJ....145...65P
+Pober et al. 2014ApJ...782...66P
 Code Repo: https://github.com/jpober/21cmSense
 """
 import os
