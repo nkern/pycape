@@ -31,7 +31,7 @@ try: from .drive_camb import drive_camb
 except: pass
 try: from .drive_21cmSense import drive_21cmSense
 except: pass
-try: from.drive_pymc3 import drive_pymc3
+try: from .drive_pymc3 import drive_pymc3
 except: pass
 try: from plot_ellipse import plot_ellipse
 except: pass

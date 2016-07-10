@@ -58,27 +58,30 @@ class drive_pymc3(object):
 		return A
 
 
-		def define_model(self,params,priors,likelihood,Y=[1],sigma=[1]):
+	def define_model(self,params,priors,likelihood=None,Y=[1],sigma=[1]):
 
-			# Get number of parameters
-			N = len(params)
+		# Get number of parameters
+		N = len(params)
 
-			# Initialize model container
-			self.basic_model = pm.Model()
+		# Initialize model container
+		self.basic_model = pm.Model()
 
-			with self.basic_model:
+		with self.basic_model:
 
-				# Assign priors on free dependent parameters
-				for i in range(N):
-					self.__dict__[params[i]] = eval(priors[i])
+			# Assign priors on free dependent parameters
+			for i in range(N):
+				self.__dict__[params[i]] = eval(priors[i])
 
-				#  Create Polynomial Design Matrix
-				A = self.polynomial_design_matrix(params,degree=self.degree,dim=self.dim)
+			#  Create Polynomial Design Matrix
+			self.S.A = self.polynomial_design_matrix(params,degree=self.degree,dim=self.dim)
 
-				# Combine it with the polynomial weights solved for by the emulator to get model prediction
-				mu = eval( ' + '.join(map(lambda x:'*'.join(np.round(x,6)),zip(self.xhat,A))) )
+			# Combine it with the polynomial weights solved for by the emulator to get model prediction
+			mu = eval( ' + '.join(map(lambda x:'*'.join(np.round(x,6)),zip(self.E.xhat,self.S.A))) )
 
-				# Define likelihood
+			# Define likelihood
+			if likelihood is None:
+				Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
+			else:
 				Y_obs = eval(likelihood)
 
 
