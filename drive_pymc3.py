@@ -76,11 +76,11 @@ class drive_pymc3(object):
 			self.A = self.polynomial_design_matrix(params,degree=self.degree,dim=self.dim)
 
 			# Combine it with the polynomial weights solved for by the emulator to get model prediction
-			mu = eval( ' + '.join(map(lambda x:'*'.join(np.round(x,6)),zip(self.xhat,self.A))) )
+			self.mu = eval( ' + '.join(map(lambda x:'*'.join(np.round(x,6)),zip(self.xhat,self.A))) )
 
 			# Define likelihood
 			if likelihood is None:
-				Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=Y)
+				Y_obs = pm.Normal('Y_obs', mu=self.mu, sd=sigma, observed=Y)
 			else:
 				Y_obs = eval(likelihood)
 
