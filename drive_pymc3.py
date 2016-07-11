@@ -73,10 +73,17 @@ class drive_pymc3(object):
 				self.__dict__[params[i]] = eval(priors[i])
 
 			#  Create Polynomial Design Matrix
-			self.A = self.polynomial_design_matrix(params,degree=self.degree,dim=self.dim)
+			self.A = self.polynomial_design_matrix(map(lambda x: 'self.'+x,params),degree=self.degree,dim=self.dim)
 
 			# Combine it with the polynomial weights solved for by the emulator to get model prediction
-			self.mu = eval( ' + '.join(map(lambda x:'*'.join(np.round(x,6)),zip(self.xhat,self.A))) )
+			self.eig_weight = '('+' + '.join(map(lambda x:'*'.join(x),zip(self.xhat,self.A)))+')'
+			self.eig_mode = map(lambda x: x+'*'+self.eig_weight,self.eig_vecs)
+			self.recon = np.array(map(lambda x: '+'.join(x),zip(self.fid_data,self.eig_mode)))
+			self.mu = []
+			for i in range(len(self.recon)):
+				self.mu.append(eval(self.recon[i]))
+
+			self.mu = np.array(self.mu)
 
 			# Define likelihood
 			if likelihood is None:
@@ -85,26 +92,26 @@ class drive_pymc3(object):
 				Y_obs = eval(likelihood)
 
 
-		def get_MAP(self,fmin=None):
-			print '...getting MAP'
-			if fmin is None:
-				self.map_estimate = pm.find_MAP(model=self.basic_model)
-			else:
-				self.map_estimate = pm.find_MAP(model=self.basic_model,fmin=fmin)
+	def get_MAP(self,fmin=None):
+		print '...getting MAP'
+		if fmin is None:
+			self.map_estimate = pm.find_MAP(model=self.basic_model)
+		else:
+			self.map_estimate = pm.find_MAP(model=self.basic_model,fmin=fmin)
 
-		def HMC(self,Nsteps=100):
+	def HMC(self,Nsteps=100):
 
-			with self.basic_model:
+		with self.basic_model:
 
-				# Check for map
-				if 'map_estimate' not in self.__dict__:
-					self.get_MAP()
+			# Check for map
+			if 'map_estimate' not in self.__dict__:
+				self.get_MAP()
 
-				# Initialize sampler
-				step = pm.NUTS(scaling=self.map_estimate)
+			# Initialize sampler
+			step = pm.NUTS(scaling=self.map_estimate)
 
-				# Draw samples
-				self.trace = pm.sample(Nsteps, step, start=self.map_estimate)
+			# Draw samples
+			self.trace = pm.sample(Nsteps, step, start=self.map_estimate)
 
 
 
