@@ -376,7 +376,7 @@ class workspace(object):
 			self.S.lnprior_funcs = []
 			# Initialize flat priors for all parameters
 			for i in range(self.S.N_params):
-				self.samp_flat_lnprior(self.S.param_bounds[i])
+				self.samp_flat_lnprior(self.S.param_bounds[i],index=i)
 		else:
 			self.S.lnprior_funcs = lnprior
 
