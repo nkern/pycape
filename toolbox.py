@@ -320,6 +320,25 @@ class workspace(object):
 		else:	
 			self.S.lnprior_funcs.append(gauss_lnprior)
 
+	def samp_cov_gauss_lnprior(self,mean,precision,index=0,return_func=False):
+		"""
+		- Initialize a Gaussian prior function covarying with other parameters
+		"""
+		# Define multidimensional gaussian variables
+		cov = la.inv(precision)
+		ndim = len(cov)
+		lognormalize = np.log((1/np.sqrt((2*np.pi)**ndim*la.det(cov)))**(1./ndim))
+
+		def cov_gauss_lnprior(theta,mean=mean,precision=precision,index=index,ndim=ndim,lognorm=lognormalize):
+			beta = theta - mean
+			pdf = np.dot(precision.T[index],beta)*beta[index]
+			return lognorm + -0.5 * pdf
+
+		if return_func == True:
+			return cov_gauss_lnprior
+		else:
+			self.S.lnprior_funcs.append(gauss_lnprior)
+
 	def samp_lnprior(self,theta):
 		"""
 		- Call the previously created self.S.lnpriors list that holds the prior functions for each parameter
@@ -336,7 +355,6 @@ class workspace(object):
 		if not np.isfinite(lnprior):
 			return -np.inf
 		return lnlike + lnprior
-
 
 	def samp_init(self, dic, lnlike=None, lnprior=None, lnprob_kwargs={}, sampler_kwargs={}):
 		"""
@@ -409,7 +427,7 @@ class workspace(object):
 		# Find dimensions
 		ndim = len(grid_cv.T)
 
-                # Get MAP
+        # Get MAP
 		def get_map(samples,grid_bounds):
                 	hist_data = np.histogram(samples,range=(grid_bounds[0],grid_bounds[1]),bins=25)
                 	dx = hist_data[1][1] - hist_data[1][0]
