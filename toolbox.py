@@ -308,12 +308,12 @@ class workspace(object):
 
 		self.S.lnprior_funcs.append(flat_lnprior)
 
-	def samp_gauss_lnprior(self,mean,sigma,return_func=False):
+	def samp_gauss_lnprior(self,mean,sigma,index=0,return_func=False):
 		"""
 		- Initialize a Gaussian prior function
 		"""
-		def gauss_lnprior(theta,mean=mean,sigma=sigma):
-			return np.log(stats.norm.pdf(theta,loc=mean,scale=sigma))
+		def gauss_lnprior(theta,mean=mean,sigma=sigma,index=index):
+			return np.log(stats.norm.pdf(theta[index],loc=mean,scale=sigma))
 	
 		if return_func == True:
 			return gauss_lnprior
