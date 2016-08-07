@@ -345,7 +345,7 @@ class workspace(object):
 		"""
 		lnprior = 0
 		for i in range(len(theta)):
-			lnprior += self.S.lnprior_funcs[i](theta[i])
+			lnprior += self.S.lnprior_funcs[i](theta)
 		return lnprior
 
 	def samp_lnprob(self,theta,**lnlike_kwargs):
