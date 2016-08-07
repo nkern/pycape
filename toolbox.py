@@ -293,13 +293,13 @@ class workspace(object):
 		resid = ydata - model
 		return -0.5 * np.dot( resid.T, np.dot(invcov, resid) )
 
-	def samp_flat_lnprior(self,param_bounds):
+	def samp_flat_lnprior(self,param_bounds,index=0):
 		"""
 		- Initialize a flat prior function
 		"""
-		def flat_lnprior(theta,param_bounds=param_bounds):
+		def flat_lnprior(theta,index=index,param_bounds=param_bounds):
 			within = True
-			if theta < param_bounds[0] or theta > param_bounds[1]:
+			if theta[index] < param_bounds[0] or theta[index] > param_bounds[1]:
 				within = False
 			if within == True:
 				return np.log(1/(param_bounds[1]-param_bounds[0]))
