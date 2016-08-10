@@ -219,13 +219,13 @@ class workspace(object):
 		model = model[self.E.model_lim].reshape(self.Obs.model_shape)
 
 		# Interpolate model onto observation data arrays
-		model = []
+		model_interp = []
 		for i in range(self.Obs.z_num):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model[i]) )
+			model_interp.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model[i]) )
 
-		model 		= np.array(model).ravel()
+		model_interp 		= np.array(model_interp).ravel()
 		
-		return model
+		return model_interp
 
 	def obs_save(self,filename,clobber=False):
                 if filename is None:
