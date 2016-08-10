@@ -192,23 +192,39 @@ class workspace(object):
 	############ Observations ############
 	######################################
 
-	def obs_init(self,dic):
+	def Obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
-	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
-		self.Obs.x		= obs_xbins	# mock obs x data (kbins)
-		self.Obs.y		= obs_ydata	# mock obs y data (deldel)
-		self.Obs.y_errs		= obs_yerrs	# mock obs y errs (sensitivity)
-		self.Obs.cov		= np.eye(self.Obs.N_data)*self.Obs.y_errs**2
-		self.Obs.invcov		= la.inv(self.Obs.cov)
+	def Obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
+		self.Obs.x				= obs_xbins	# mock obs x data (kbins)
+		self.Obs.y				= obs_ydata	# mock obs y data (deldel)
+		self.Obs.y_errs			= obs_yerrs	# mock obs y errs (sensitivity)
+		self.Obs.cov			= np.eye(self.Obs.N_data)*self.Obs.y_errs**2
+		self.Obs.invcov			= la.inv(self.Obs.cov)
 		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
 		self.Obs.model_shape	= model_xbins.shape
 
-	def obs_update_cov(self,cov_add):
+	def Obs_update_cov(self,cov_add):
 		self.Obs.cov += cov_add
 		self.Obs.invcov = la.inv(self.Obs.cov)
 
-	def obs_save(self,filename,clobber=False):
+	def Obs_interp_mod2obs(self,model):
+		"""
+		- Interpolate model data within desired limits from simulation basis to observational basis (i.e. k-bins)
+		"""
+		# Cut model data to within desired limits
+		model = model[self.E.model_lim].reshape(self.Obs.model_shape)
+
+		# Interpolate model onto observation data arrays
+		model = []
+		for i in range(self.E.z_num):
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_predic[i]) )
+
+		model 		= np.array(model).ravel()
+		
+		return model
+
+	def Obs_save(self,filename,clobber=False):
                 if filename is None:
                         filename = 'observation_%s.pkl' % '_'.join(time.asctime().split(' '))
 
@@ -224,6 +240,38 @@ class workspace(object):
         #################################
         ############ Sampler ############
         #################################
+
+	def samp_init(self, dic, lnlike=None, lnprior=None, lnprob_kwargs={}, sampler_kwargs={}):
+		"""
+		Initialize workspace self.S for sampler
+		"""
+		# Initialize workspace
+		self.S = AttrDict(dic)
+
+		# Check to see if an observation exists
+		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
+
+		# Specify loglike and logprior, can feed your own, but if not use default
+		if lnlike is None:
+			self.S.lnlike = self.samp_gaussian_lnlike
+		else:
+			self.S.lnlike = lnlike	
+
+		if lnprior is None:
+			self.S.lnprior_funcs = []
+			# Initialize flat priors for all parameters
+			for i in range(self.S.N_params):
+				self.samp_flat_lnprior(self.S.param_bounds[i],index=i)
+		else:
+			self.S.lnprior_funcs = lnprior
+
+		self.S.lnprior = self.samp_lnprior
+
+		# Specify log-probability (Bayes Theorem Numerator)
+		self.S.lnprob = self.samp_lnprob
+
+		# Initialize emcee Ensemble Sampler
+		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
 					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
@@ -249,26 +297,8 @@ class workspace(object):
 
 		# Emulate
 		self.emu_predict(theta,**predict_kwargs)
-		recon		= self.E.recon[0]
-		recon_err	= self.E.recon_err
-		self.samp_interp_mod2obs(recon,recon_err,add_model_err=add_model_err,calc_lnlike_emu_err=calc_lnlike_emu_err,emu_err_mc=emu_err_mc)
-
-	def samp_interp_mod2obs(self,recon,recon_err,add_model_err=False,calc_lnlike_emu_err=False,cut_high_fracerr=100.0,emu_err_mc=False,**kwargs):
-		""" samp_interp_mod2obs(recon,recon_err,add_model_err=True)
-		- interpolate model data in simulation basis to observation basis (x-axis points)
-		"""
-		model_predic = recon[self.E.model_lim].reshape(self.Obs.model_shape)
-		model_err_predic = recon_err[self.E.model_lim].reshape(self.Obs.model_shape)
-
-		# Interpolate model onto observation data arrays
-		model = []
-		model_err = []
-		for i in range(self.S.z_num):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_predic[i]) )
-			model_err.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_err_predic[i]) )
-
-		self.S.model            = np.array(model).ravel()
-		self.S.model_err        = np.array(model_err).ravel()
+		self.S.model 		= self.E.recon[0]
+		self.S.model_err 	= self.E.recon_err
 
 		# Resample model from Gaussian with scale of model_err if emu_err_mc = True
 		if emu_err_mc == True:
@@ -331,8 +361,8 @@ class workspace(object):
 
 		def cov_gauss_lnprior(theta,mean=mean,precision=precision,index=index,ndim=ndim,lognorm=lognormalize):
 			beta = theta - mean
-			pdf = np.dot(precision.T[index],beta)*beta[index]
-			return lognorm + -0.5 * pdf
+			chisq = np.dot(precision.T[index],beta)*beta[index]
+			return lognorm + -0.5 * chisq
 
 		if return_func == True:
 			return cov_gauss_lnprior
@@ -355,38 +385,6 @@ class workspace(object):
 		if not np.isfinite(lnprior):
 			return -np.inf
 		return lnlike + lnprior
-
-	def samp_init(self, dic, lnlike=None, lnprior=None, lnprob_kwargs={}, sampler_kwargs={}):
-		"""
-		Initialize workspace self.S for sampler
-		"""
-		# Initialize workspace
-		self.S = AttrDict(dic)
-
-		# Check to see if an observation exists
-		if 'Obs' not in self.__dict__: raise Exception("Obs class for an observation does not exist, quitting sampler...")
-
-		# Specify loglike and logprior, can feed your own, but if not use default
-		if lnlike is None:
-			self.S.lnlike = self.samp_gaussian_lnlike
-		else:
-			self.S.lnlike = lnlike	
-
-		if lnprior is None:
-			self.S.lnprior_funcs = []
-			# Initialize flat priors for all parameters
-			for i in range(self.S.N_params):
-				self.samp_flat_lnprior(self.S.param_bounds[i],index=i)
-		else:
-			self.S.lnprior_funcs = lnprior
-
-		self.S.lnprior = self.samp_lnprior
-
-		# Specify log-probability (Bayes Theorem Numerator)
-		self.S.lnprob = self.samp_lnprob
-
-		# Initialize emcee Ensemble Sampler
-		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
 	def samp_mle(self):
 		"""
