@@ -221,7 +221,7 @@ class workspace(object):
 		# Interpolate model onto observation data arrays
 		model = []
 		for i in range(self.Obs.z_num):
-			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model_predic[i]) )
+			model.extend( np.interp(self.Obs.x[i],self.Obs.model_xbins[i],model[i]) )
 
 		model 		= np.array(model).ravel()
 		
