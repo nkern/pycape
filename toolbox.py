@@ -219,6 +219,8 @@ class workspace(object):
 	def obs_interp_mod2obs(self,model):
 		"""
 		- Interpolate model data within desired limits from simulation basis to observational basis (i.e. k-bins)
+		- model should be a single row vector with all data
+		- Observation (Obs) and Emulator (E) classes need to have been instatiated
 		"""
 		# Cut model data to within desired limits
 		model = model[self.E.model_lim].reshape(self.Obs.model_shape)
@@ -231,6 +233,26 @@ class workspace(object):
 		model_interp 		= np.array(model_interp).ravel()
 		
 		return model_interp
+
+	def obs_mat2row(self,datavec,mat2row=True):
+		"""
+		- Convert a single data vector in observational basis (in matrix or row vector form)
+			from matrix to row vector or vice versa
+		- Need to have instatiated Observation (Obs) class
+	
+		mat2row : Boolean [True]
+			if True:  Convert matrix form into row vector form
+			if False: Convert row vector form into matrix form
+		"""
+		if mat2row == True:
+			datavec = np.concatenate(datavec.tolist())
+			return datavec
+		else:
+			datavec = list(datavec)
+			datavec2 = []
+			for i in range(len(self.Obs.x)):
+				datavec2.append( np.array([datavec.pop(0) for j in range(len(self.Obs.x[i]))]))
+			return np.array(datavec2)
 
 	def obs_save(self,filename,clobber=False):
                 if filename is None:
