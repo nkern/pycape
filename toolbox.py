@@ -304,7 +304,7 @@ class workspace(object):
 		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
-					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},**kwargs):
+					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},cut_high_fracerr=100.0,**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
