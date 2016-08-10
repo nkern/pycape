@@ -207,6 +207,11 @@ class workspace(object):
 		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
 		self.Obs.model_shape	= model_xbins.shape
 
+		self.Obs.x_ext = []
+		for i in range(self.Obs.z_num):
+			self.Obs.x_ext.extend(self.Obs.x[i])
+		self.Obs.x_ext = np.array(self.Obs.x_ext)
+
 	def obs_update_cov(self,cov_add):
 		self.Obs.cov += cov_add
 		self.Obs.invcov = la.inv(self.Obs.cov)
