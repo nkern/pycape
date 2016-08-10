@@ -323,7 +323,7 @@ class workspace(object):
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
 					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},cut_high_fracerr=100.0,
-					lnlike_cov_err=None,**kwargs):
+					add_lnlike_cov=None,**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
@@ -362,10 +362,10 @@ class workspace(object):
 			self.S.data_cov		= np.copy(self.Obs.cov)
 			self.S.data_invcov	= np.copy(self.Obs.invcov)
 
-		# Add other sources of error to covariance matrix if desired
-		if lnlike_cov_err is not None:
-			self.S.data_cov 	= lnlike_cov_err
-			self.S.data_invcov	= la.inv(self.S.data_cov)
+		# Add additional sources of error to covariance matrix
+		if add_lnlike_cov is not None:
+			self.S.data_cov 	+= add_lnlike_cov
+			self.S.data_invcov 	= la.inv(self.S.data_cov)
 
 		# Calculate uncertainty in lnlikelihood estimate purely from emulator error
 		if calc_lnlike_emu_err == True:
