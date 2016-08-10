@@ -188,6 +188,23 @@ class workspace(object):
 		model_err	= np.abs(np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T)))))
 		return model, model_err
 
+	def emu_fit_hyperparams(self,data_cv,grid_cv,theta0_fid,theta0_test,cost_func=None,nugget_fid=1e-3,nugget_test=None):
+		"""
+		- manually fit for the Gaussian Process hyperparameters
+			given a 'cross' cross validation set, where cv samples fall along single dimension (i.e. a cross)
+		"""
+
+		# Iterate over parameters
+		for i in range(self.N_params):
+			# Set theta0 of all GP to theta0_fid
+
+			# Iterate over CV set
+			for j in range(len(grid_cv)):
+				self.E.cross_validate(grid_cv[i],data_cv[i],predict_kwargs=predict_kwargs)
+
+
+
+
 	######################################
 	############ Observations ############
 	######################################
@@ -271,7 +288,7 @@ class workspace(object):
         ############ Sampler ############
         #################################
 
-	def samp_init(self, dic, lnlike=None, lnprior=None, lnprob_kwargs={}, sampler_kwargs={}):
+	def samp_init(self, dic, lnlike=None, lnprior=None):
 		"""
 		Initialize workspace self.S for sampler
 		"""
@@ -300,11 +317,13 @@ class workspace(object):
 		# Specify log-probability (Bayes Theorem Numerator)
 		self.S.lnprob = self.samp_lnprob
 
-		# Initialize emcee Ensemble Sampler
+	def samp_emcee_init(self,lnprob_kwargs={},sampler_kwargs={}):
+		""" Initialize emcee Ensemble Sampler """
 		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
-					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},cut_high_fracerr=100.0,**kwargs):
+					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},cut_high_fracerr=100.0,
+					lnlike_cov_err=None,**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
@@ -342,6 +361,11 @@ class workspace(object):
 		else:
 			self.S.data_cov		= np.copy(self.Obs.cov)
 			self.S.data_invcov	= np.copy(self.Obs.invcov)
+
+		# Add other sources of error to covariance matrix if desired
+		if lnlike_cov_err is not None:
+			self.S.data_cov 	= lnlike_cov_err
+			self.S.data_invcov	= la.inv(self.S.data_cov)
 
 		# Calculate uncertainty in lnlikelihood estimate purely from emulator error
 		if calc_lnlike_emu_err == True:
@@ -439,7 +463,7 @@ class workspace(object):
 			for name in also_record:
 				other_vars[name].append(self.S.__dict__[name])
 
-			t_lnl = self.S.lnlike(self.Obs.y,data_cv[i],self.Obs.invcov)
+			t_lnl = self.S.lnlike(self.Obs.y,data_cv[i],self.S.data_invcov)
 			tru_lnlike.append(t_lnl)
 
 		emu_lnlike = np.array(emu_lnlike)
