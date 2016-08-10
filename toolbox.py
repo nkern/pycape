@@ -195,6 +195,9 @@ class workspace(object):
 	def obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
+	def obs_update(self,dic):
+		self.Obs.__dict__.update(dic)
+
 	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
 		self.Obs.x				= obs_xbins	# mock obs x data (kbins)
 		self.Obs.y				= obs_ydata	# mock obs y data (deldel)
