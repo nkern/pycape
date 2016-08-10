@@ -192,10 +192,10 @@ class workspace(object):
 	############ Observations ############
 	######################################
 
-	def Obs_init(self,dic):
+	def obs_init(self,dic):
 		self.Obs = drive_21cmSense(dic)
 
-	def Obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
+	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
 		self.Obs.x				= obs_xbins	# mock obs x data (kbins)
 		self.Obs.y				= obs_ydata	# mock obs y data (deldel)
 		self.Obs.y_errs			= obs_yerrs	# mock obs y errs (sensitivity)
@@ -204,11 +204,11 @@ class workspace(object):
 		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
 		self.Obs.model_shape	= model_xbins.shape
 
-	def Obs_update_cov(self,cov_add):
+	def obs_update_cov(self,cov_add):
 		self.Obs.cov += cov_add
 		self.Obs.invcov = la.inv(self.Obs.cov)
 
-	def Obs_interp_mod2obs(self,model):
+	def obs_interp_mod2obs(self,model):
 		"""
 		- Interpolate model data within desired limits from simulation basis to observational basis (i.e. k-bins)
 		"""
@@ -224,7 +224,7 @@ class workspace(object):
 		
 		return model
 
-	def Obs_save(self,filename,clobber=False):
+	def obs_save(self,filename,clobber=False):
                 if filename is None:
                         filename = 'observation_%s.pkl' % '_'.join(time.asctime().split(' '))
 
