@@ -439,8 +439,7 @@ class workspace(object):
 			for name in also_record:
 				other_vars[name].append(self.S.__dict__[name])
 
-			self.samp_interp_mod2obs(data_cv[i],np.zeros(len(data_cv[i])),**lnlike_kwargs)
-			t_lnl = self.S.lnlike(self.Obs.y,self.S.model,self.S.data_invcov)
+			t_lnl = self.S.lnlike(self.Obs.y,data_cv[i],self.Obs.invcov)
 			tru_lnlike.append(t_lnl)
 
 		emu_lnlike = np.array(emu_lnlike)
