@@ -46,11 +46,11 @@ class drive_camb(object):
 
 	@property
 	def ombh2(self):
-		return self.pars.omegab * (hlittle)**2
+		return self.pars.omegab * (self.hlittle)**2
 
 	@property
 	def omch2(self):
-		return self.pars.omegac * (hlittle)**2
+		return self.pars.omegac * (self.hlittle)**2
 
 	@property
 	def get_pars(self):
