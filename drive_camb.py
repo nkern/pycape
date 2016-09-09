@@ -52,10 +52,10 @@ class drive_camb(object):
 	def omch2(self):
 		return self.pars.omegac * (hlittle)**2
 
-    @property
-    def get_pars(self):
-        return dict(zip(['sigma8','theta_mc','hlittle','As','ombh2','omch2'],\
-                    [self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns]))
+	@property
+	def get_pars(self):
+		return dict(zip(['sigma8','theta_mc','hlittle','As','ombh2','omch2'],\
+					[self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns]))
 
 
 
