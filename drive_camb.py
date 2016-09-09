@@ -21,6 +21,7 @@ class drive_camb(object):
 		"""
 		set_params(H0=67.5,ombh2=0.022,omch2=0.122,mnu=0.06,omk=0,tau=None,ns=0.965,As=2e-9,theta_mc=None)
 		"""
+		self.ns = ns
 		self.pars.set_cosmology(H0=H0, ombh2=ombh2, omch2=omch2, cosmomc_theta=theta_mc, omk=omk, tau=tau)
 		self.pars.set_dark_energy()
 		self.pars.InitPower.set_params(ns=ns, As=As)
