@@ -38,9 +38,19 @@ class drive_camb(object):
 
 	@property
 	def hlittle(self):
-		return self.results.hubble_parameter(0)/100.0
+		return self.pars.H0/100.0
 
 	@property
 	def As(self):
 		return self.pars.primordial_power(0.05,0)
+
+	@property
+	def ombh2(self):
+		return self.pars.omegab * (hlittle)**2
+
+	@property
+	def omch2(self):
+		return self.pars.omegac * (hlittle)**2
+
+
 
