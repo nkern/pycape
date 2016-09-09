@@ -2,6 +2,9 @@
 driver for the Python wrapper of CAMB
 See www.camb.info/
 Mainly used to convert from base CMB parameters to derived LSS parameters (e.g. A_s <=> sigma_8)
+
+A_s == power of the primordial curvature power spectrum (k = 0.05 Mpc^-1)
+
 """
 import camb
 
@@ -37,4 +40,7 @@ class drive_camb(object):
 	def hlittle(self):
 		return self.results.hubble_paramter(0)/100.0
 
+	@property
+	def As(self):
+		return self.pars.primordial_power(0.05,0)
 
