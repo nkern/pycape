@@ -27,8 +27,14 @@ class drive_camb(object):
 
 	@property
 	def sigma8(self):
-		return camb.get_results(self.pars).get_sigma8()[0]
+		return self.results.get_sigma8()[0]
 			
 	@property
 	def theta_mc(self):
-		return camb.get_results(self.pars).cosmomc_theta()
+		return self.results.cosmomc_theta()
+
+	@property
+	def hlittle(self):
+		return self.results.hubble_paramter(0)/100.0
+
+
