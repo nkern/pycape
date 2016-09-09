@@ -38,7 +38,7 @@ class drive_camb(object):
 
 	@property
 	def hlittle(self):
-		return self.results.hubble_paramter(0)/100.0
+		return self.results.hubble_parameter(0)/100.0
 
 	@property
 	def As(self):
