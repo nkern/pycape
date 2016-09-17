@@ -7,6 +7,7 @@ A_s == power of the primordial curvature power spectrum (k = 0.05 Mpc^-1)
 
 """
 import camb
+from collections import OrderedDict
 
 class drive_camb(object):
 	"""
@@ -55,7 +56,7 @@ class drive_camb(object):
 
 	@property
 	def get_pars(self):
-		return dict(zip(['sigma8','theta_mc','hlittle','As','ombh2','omch2','ns'],\
+		return OrderedDict(zip(['sigma8','theta_mc','hlittle','As','ombh2','omch2','ns'],\
 					[self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns]))
 
 
