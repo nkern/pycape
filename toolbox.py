@@ -321,7 +321,7 @@ class workspace(object):
 		
 		return model_interp
 
-	def obs_mat2row(self,datavec,mat2row=True):
+	def obs_mat2row(self,datavec,mat2row=True,Nfeatures=1):
 		"""
 		- Convert a single data vector in observational basis (in matrix or row vector form)
 			from matrix to row vector or vice versa
@@ -332,7 +332,12 @@ class workspace(object):
 			if False: Convert row vector form into matrix form
 		"""
 		if mat2row == True:
-			datavec = np.concatenate(datavec.tolist())
+			lengths = map(lambda x: len(x),datavec)
+			features = []
+			for i in range(Nfeatures):
+				features.append(np.concatenate([datavec[j].T[i] if lengths[j] != 0 else [] for j in range(len(datavec))]))
+
+			datavec = np.array(features).T
 			return datavec
 		else:
 			datavec = list(datavec)
