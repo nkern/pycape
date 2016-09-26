@@ -332,13 +332,17 @@ class workspace(object):
 			if False: Convert row vector form into matrix form
 		"""
 		if mat2row == True:
-			lengths = map(lambda x: len(x),datavec)
-			features = []
-			for i in range(Nfeatures):
-				features.append(np.concatenate([datavec[j].T[i] if lengths[j] != 0 else [] for j in range(len(datavec))]))
+			if Nfeatures == 1:
+				datavec = np.concatenate(datavec.tolist())
+				return datavec
+			else:
+				lengths = map(lambda x: len(x),datavec)
+				features = []
+				for i in range(Nfeatures):
+					features.append(np.concatenate([datavec[j].T[i] if lengths[j] != 0 else [] for j in range(len(datavec))]))
 
-			datavec = np.array(features).T
-			return datavec
+				datavec = np.array(features).T
+				return datavec
 		else:
 			datavec = list(datavec)
 			datavec2 = []
