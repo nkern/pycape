@@ -350,7 +350,7 @@ class workspace(object):
 
 	def obs_track(self,varname,mat=True):
 		""" isolate a data variable (track as a str) from self.data_track and return as a matrix or row vec """
-		track = self.obs_track == varname
+		track = W.obs_mat2row(self.obs_track == varname,mat2row=False)
 		track = np.array(map(lambda x: x[0][x[1]],zip(self.Obs.x,track)))
 		if mat == True:
 			return track
