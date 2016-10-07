@@ -348,9 +348,15 @@ class workspace(object):
 				datavec2.append( np.array([datavec.pop(0) for j in range(len(self.Obs.x[i]))]))
 			return np.array(datavec2)
 
-	def obs_track(self,varname,mat=True):
-		""" isolate a data variable (track as a str) from self.data_track and return as a matrix or row vec """
-		track = self.obs_mat2row(self.Obs.track == varname,mat2row=False)
+	def obs_track(self,varnames,mat=True):
+		""" 
+		isolate a data variable (varnames as list of str variables) from self.obs_track
+		return as a matrix or row vec
+		varnames : ['ps','xe','Tb']
+		mat : True/False
+		"""
+		track = reduce(operator.add,map(lambda x: self.Obs.track==x,varnames))
+		track = self.obs_mat2row(track,mat2row=False)
 		track = np.array(map(lambda x: x[0][x[1]],zip(self.Obs.x,track)))
 		if mat == True:
 			return track
