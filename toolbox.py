@@ -345,7 +345,7 @@ class workspace(object):
 		else:
 			datavec = list(datavec)
 			datavec2 = []
-			for i in range(self.Obs.x:
+			for i in range(self.Obs.x):
 				datavec2.append( np.array([datavec.pop(0) for j in range(len(self.Obs.x[i]))]))
 			return np.array(datavec2)
 
