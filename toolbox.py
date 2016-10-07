@@ -273,8 +273,6 @@ class workspace(object):
 
 
 
-
-
 	######################################
 	############ Observations ############
 	######################################
@@ -285,7 +283,7 @@ class workspace(object):
 	def obs_update(self,dic):
 		self.Obs.__dict__.update(dic)
 
-	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs):
+	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs,obs_track):
 		self.Obs.x				= obs_xbins	# mock obs x data (kbins)
 		self.Obs.y				= obs_ydata	# mock obs y data (deldel)
 		self.Obs.y_errs			= obs_yerrs	# mock obs y errs (sensitivity)
@@ -293,6 +291,7 @@ class workspace(object):
 		self.Obs.invcov			= la.inv(self.Obs.cov)
 		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
 		self.Obs.model_shape	= model_xbins.shape
+		self.Obs.track			= obs_track
 
 		self.Obs.x_ext = []
 		for i in range(self.Obs.z_num):
@@ -348,6 +347,15 @@ class workspace(object):
 			for i in range(len(self.Obs.x)):
 				datavec2.append( np.array([datavec.pop(0) for j in range(len(self.Obs.x[i]))]))
 			return np.array(datavec2)
+
+	def obs_track(self,varname,mat=True):
+		""" isolate a data variable (track as a str) from self.data_track and return as a matrix or row vec """
+		track = self.obs_track == varname
+		track = np.array(map(lambda x: x[0][x[1]],zip(self.Obs.x,track)))
+		if mat == True:
+			return track
+		else:
+			return self.obs_mat2row(track)
 
 	def obs_save(self,filename,clobber=False):
                 if filename is None:
