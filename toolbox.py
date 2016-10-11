@@ -15,7 +15,7 @@ import astropy.io.fits as fits
 import fnmatch
 import operator
 from klip import klfuncs
-from sklearn.gaussian_process import GaussianProcess
+from sklearn import gaussian_process
 from sklearn.cluster import KMeans
 from sklearn import neighbors
 import time
@@ -603,7 +603,7 @@ class workspace(object):
 		gp_kwargs = {'regr':'linear','theta0':theta0,'thetaL':None,'thetaU':None,
                 'random_start':1,'verbose':False,'corr':'squared_exponential','nugget':nugget}
 
-		GP = GaussianProcess(**gp_kwargs).fit(Xsph,lnlike_err)
+		GP = gaussian_process.GaussianProcessRegressor(**gp_kwargs).fit(Xsph,lnlike_err)
 
 		## Predict lnlike_err for a coarse grid within parameter space
 		# Make coarse grid
