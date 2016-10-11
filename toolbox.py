@@ -631,7 +631,7 @@ class workspace(object):
 		Gsph2 = np.dot(W.E.invL,(G-W.E.fid_params).T).T
 		Gsph2 = Gsph2.reshape(ndim,ndim*grid_length).T
 		lnlike_err_pred		= np.zeros(Gsph2.shape)
-		lnlike_err_pred[select]	= GP.predict(Gsph2[select],eval_MSE=False)
+		lnlike_err_pred[select]	= GP.predict(Gsph2[select],return_cov=False)
 		lnlike_err_pred = lnlike_err_pred.reshape([grid_step for i in range(ndim)])
 
 		# Relate to log-posterior errors
