@@ -538,6 +538,7 @@ class workspace(object):
 		use scipy.optimize to get maximum likelihood estimate
 		"""
 		pass
+		
 
 	def samp_cross_valid(self,grid_cv,data_cv,lnlike_kwargs={},also_record=[]):
 		"""
