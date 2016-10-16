@@ -283,7 +283,7 @@ class workspace(object):
 	def obs_update(self,dic):
 		self.Obs.__dict__.update(dic)
 
-	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs,obs_track):
+	def obs_feed(self,model_xbins,obs_xbins,obs_ydata,obs_yerrs,obs_track,track_types):
 		self.Obs.x				= obs_xbins	# mock obs x data (kbins)
 		self.Obs.y				= obs_ydata	# mock obs y data (deldel)
 		self.Obs.y_errs			= obs_yerrs	# mock obs y errs (sensitivity)
@@ -292,6 +292,7 @@ class workspace(object):
 		self.Obs.model_xbins	= model_xbins	# simulation x data (kbins)
 		self.Obs.model_shape	= model_xbins.shape
 		self.Obs.track			= obs_track
+		self.Obs.track_types	= track_types
 
 		self.Obs.x_ext = []
 		for i in range(self.Obs.z_num):
@@ -348,7 +349,7 @@ class workspace(object):
 				datavec2.append( np.array([datavec.pop(0) for j in range(len(self.Obs.x[i]))]))
 			return np.array(datavec2)
 
-	def obs_track(self,varnames,arr=None,mat=True):
+	def obs_track(self,varnames,arr=None,mat=True,return_bool=False):
 		""" 
 		isolate a data variable (varnames as list of str variables) from self.obs_track
 		return as a matrix or row vec
@@ -359,10 +360,18 @@ class workspace(object):
 		track = reduce(operator.add,map(lambda x: self.Obs.track==x,varnames))
 		track = self.obs_mat2row(track,mat2row=False)
 		track = np.array(map(lambda x: x[0][x[1]],zip(arr,track)))
+		track_bool = self.obs_mat2row(np.array(map(lambda x: x in varnames, self.Obs.track)),mat2row=False)
+
 		if mat == True:
-			return track
+			if return_bool == True:
+				return track, track_bool
+			else:
+				return track
 		else:
-			return self.obs_mat2row(track)
+			if return_bool == True:
+				return self.obs_mat2row(track), self.obs_mat2row(track_bool)
+			else:
+				return self.obs_mat2row(track)
 
 	def obs_save(self,filename,clobber=False):
                 if filename is None:
@@ -413,6 +422,7 @@ class workspace(object):
 	def samp_emcee_init(self,lnprob_kwargs={},sampler_kwargs={}):
 		""" Initialize emcee Ensemble Sampler """
 		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
+
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
 					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},cut_high_fracerr=100.0,
