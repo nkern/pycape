@@ -356,7 +356,7 @@ class workspace(object):
 		varnames : ['ps','xe','Tb']
 		mat : True/False
 		"""
-		if arr == None: arr = self.Obs.x
+		if arr is None: arr = self.Obs.x
 		track = reduce(operator.add,map(lambda x: self.Obs.track==x,varnames))
 		track = self.obs_mat2row(track,mat2row=False)
 		track = np.array(map(lambda x: x[0][x[1]],zip(arr,track)))
