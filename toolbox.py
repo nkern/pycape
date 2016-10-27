@@ -188,89 +188,6 @@ class workspace(object):
 		model_err	= np.abs(np.array(map(lambda x: map(np.mean,x),map(lambda x: np.array(x).T,zip(recon_pos_err.T[self.E.model_lim].T,recon_pos_err.T[self.E.model_lim].T)))))
 		return model, model_err
 
-	def emu_fit_hyperparams(self,data_cv,grid_cv,theta0_test,
-								kwargs_tr={},predict_kwargs={},invL=None,
-								p_ind=0,nugget_fid=1e-3,nugget_test=None,verbose=False):
-		"""
-		- manually fit for the Gaussian Process hyperparameters
-			given a 'cross' cross validation set, where cv samples fall along single dimension (i.e. a cross)
-		"""
-		# Get grid into decorrelated 'sphered' space
-		if invL == None:
-			invL = self.E.invL
-
-		X_sph_cv = np.dot(invL,(grid_cv-self.E.fid_params).T).T
-
-		# Define regularization coefficient
-		reg_coeff = 10.0
-
-		# Define Cost Function
-		def cost(w_em,w_cv,theta0,weights=None,reg_coeff=10.0):
-			chisq = (w_em-w_cv)**2
-			if weights is not None:
-				chisq *= weights**2
-
-			chisq = np.sum(chisq) + theta0*reg_coeff
-			return chisq
-
-		# Print working parameter
-		if verbose == True:
-			print '-'*40
-			print '...working on parameter '+self.params[p_ind]
-			print '-'*40
-
-		# Get all the emulated and true weights from cv samples
-		w_em = []
-		w_cv = []
-		weights = []
-
-		# Iterate over theta0 choices
-		if verbose == True: print '...training emulator over test theta0 values'
-		for i in range(len(theta0_test)):
-
-			# Assign theta0 test values for each GP
-			for k in range(self.E.N_modegroups):
-				gp_kwargs_arr[k]['theta0'][p_ind] = theta0_test[i]
-
-			kwargs_tr['gp_kwargs_arr'] = gp_kwargs_arr
-
-			# Train emulator with updated theta0 value
-			self.emu_train(self.E.data_tr,self.E.grid_tr,fid_data=self.E.fid_data,fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
-
-			# Get emulated and true weights over all cv samples
-			w_em_theta0 = []
-			for j in range(len(grid_cv)):
-				self.E.cross_validate(grid_cv[j],data_cv[j],predict_kwargs=predict_kwargs)
-				w_em_theta0.append(self.E.weights_cv[0])
-				if i == 0: w_cv.append(W.E.a_ij_cv)
-				if i == 0: weights.append(np.abs(X_sph_cv[j][p_ind]))
-			w_em.append(w_em_theta0)
-
-		w_em = np.array(w_em)
-		w_cv = np.array(w_cv)
-		weights = np.array(weights)
-		weights /= np.min(weights)
-		weights = np.sqrt(weights)
-
-		# Iterate over all the GPs
-		if verbose == True: '...iterating over the GPs to get chi square'
-		chisq = []
-		for k in range(self.E.N_modegroups):
-			if verbose == True: print '...working on GP modegroup #'+str(i)
-			# iterate over the theta0 test values
-			modegroup_chisq = []
-			for i in range(len(theta0_test)):
-				modegroup_chisq.append( cost(w_em[i,:,:].T[self.E.modegroups[k]].T.ravel(), 
-												w_cv.T[self.E.modegroups[k]].T.ravel(),
-												theta0_test[i],
-												weights=np.array(list(weights)*len(self.E.modegroups[k])),
-												reg_coeff=reg_coeff) )
-
-			chisq.append(modegroup_chisq)
-
-		chisq = np.array(chisq)
-
-
 
 
 	######################################
@@ -321,7 +238,7 @@ class workspace(object):
 		
 		return model_interp
 
-	def obs_mat2row(self,datavec,mat2row=True,Nfeatures=1):
+	def obs_mat2row(self,datavec,mat2row=False,Nfeatures=1):
 		"""
 		- Convert a single data vector in observational basis (in matrix or row vector form)
 			from matrix to row vector or vice versa
