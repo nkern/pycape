@@ -286,9 +286,9 @@ class workspace(object):
 				return track
 		else:
 			if return_bool == True:
-				return self.obs_mat2row(track), self.obs_mat2row(track_bool)
+				return self.obs_mat2row(track,mat2row=True), self.obs_mat2row(track_bool,mat2row=True)
 			else:
-				return self.obs_mat2row(track)
+				return self.obs_mat2row(track,mat2row=True)
 
 	def obs_save(self,filename,clobber=False):
                 if filename is None:
