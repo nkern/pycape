@@ -210,6 +210,7 @@ class workspace(object):
 		self.Obs.model_shape	= model_xbins.shape
 		self.Obs.track			= obs_track
 		self.Obs.track_types	= track_types
+		self.E.obs_errs			= obs_yerrs
 
 		self.Obs.x_ext = []
 		for i in range(self.Obs.z_num):
@@ -338,7 +339,8 @@ class workspace(object):
 
 	def samp_emcee_init(self,lnprob_kwargs={},sampler_kwargs={}):
 		""" Initialize emcee Ensemble Sampler """
-		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
+		self.S.sampler = emcee.EnsembleSampler(self.S.nwalkers, self.S.ndim, self.S.lnprob,\
+													kwargs=lnprob_kwargs, **sampler_kwargs)
 
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
@@ -366,17 +368,18 @@ class workspace(object):
 
 		# Emulate
 		self.emu_predict(theta,**predict_kwargs)
-		self.S.model 		= self.E.recon[0]
-		self.S.model_err 	= self.E.recon_err
+		self.S.model 			= self.E.recon[0]
+		self.S.model_err 		= self.E.recon_err
+		self.S.model_err_cov	= self.E.recon_err_cov
 
 		# Resample model from Gaussian with scale of model_err if emu_err_mc = True
 		if emu_err_mc == True:
 			resampled_model = np.array([stats.norm.rvs(loc=self.S.model[i],scale=self.S.model_err[i],size=1)[0] for i in range(len(self.S.model))])
 			self.S.model = resampled_model
 
-		# If add model error is true, add diagonal of covariance and model errs in quadrature
+		# If add model error is true, add model_err_cov
 		if add_model_err == True:
-			self.S.data_cov		= self.Obs.cov + np.eye(self.Obs.cov.shape[0])*self.S.model_err**2
+			self.S.data_cov		= self.Obs.cov + self.S.model_err_cov
 			self.S.data_invcov	= la.inv(self.S.data_cov)
 		else:
 			self.S.data_cov		= np.copy(self.Obs.cov)
@@ -583,7 +586,15 @@ class workspace(object):
 
 	def samp_drive(self,pos,step_num=500,burn_num=100):
 		"""
-		drive sampler
+		drive ensemble sampler
+		pos : ndarray
+			Initial positions of walkers
+
+		step_num : int [500]
+			Number of steps after burn-in
+
+		burn_num : int [100]
+			Number of burn-in steps to be thrown away after taken
 		"""
 		if burn_num > 0:
 			# Run burn-in iterations
