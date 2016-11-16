@@ -387,7 +387,7 @@ class workspace(object):
 
 		# Add overall modeling error
 		if add_overall_modeling_err == True:
-			self.S.data_cov		+= np.eye(len(self.S.model)) * self.S.model * modeling_error
+			self.S.data_cov		+= np.eye(len(self.S.model)) * self.S.model * modeling_err
 			self.data_invcov	= la.inv(self.S.data_cov)
 
 		# Add additional sources of error to covariance matrix
