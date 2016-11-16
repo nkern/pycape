@@ -345,7 +345,7 @@ class workspace(object):
 
 	def samp_construct_model(self,theta,add_model_err=False,calc_lnlike_emu_err=False,fast=False,LAYG=True,LAYG_pretrain=False,
 					emu_err_mc=False,GPhyperNN=False,k=50,kwargs_tr={},predict_kwargs={},cut_high_fracerr=100.0,
-					add_lnlike_cov=None,**kwargs):
+					add_lnlike_cov=None,add_overall_modeling_err=False,modeling_err=0.25,**kwargs):
 		# LAYG
 		if LAYG == True:
 			parsph = np.dot(self.E.invL,np.array([theta-self.E.fid_params]).T).T[0]
@@ -384,6 +384,11 @@ class workspace(object):
 		else:
 			self.S.data_cov		= np.copy(self.Obs.cov)
 			self.S.data_invcov	= np.copy(self.Obs.invcov)
+
+		# Add overall modeling error
+		if add_overall_modeling_err == True:
+			self.S.data_cov		+= np.eye(len(self.S.model)) * self.S.model * modeling_error
+			self.data_invcov	= la.inv(self.S.data_cov)
 
 		# Add additional sources of error to covariance matrix
 		if add_lnlike_cov is not None:
