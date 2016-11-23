@@ -1,12 +1,9 @@
 '''
 This file contains functions that make it easier to work with creating Dictionaries on-the-fly
-
 '''
-
 
 ## Import Modules ##
 from collections import OrderedDict
-
 
 def create(names,locals_vars):
 	'''
@@ -23,6 +20,3 @@ def create(names,locals_vars):
 			dictionary.update({x:locals_vars[x]})
 	
 	return dictionary
-
-
-
