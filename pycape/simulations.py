@@ -1,17 +1,16 @@
 """
-driver for the Python wrapper of CAMB
-See www.camb.info/
-Mainly used to convert from base CMB parameters to derived LSS parameters (e.g. A_s <=> sigma_8)
+simulations.py
 
-A_s == power of the primordial curvature power spectrum (k = 0.05 Mpc^-1)
-
+Drivers for relevant simulations
 """
 import camb
 from collections import OrderedDict
 
-class drive_camb(object):
+__all__ = ['drive_camb','drive_21cmFAST']
+
+class Drive_Camb(object):
 	"""
-	- Drive CAMB to get sigma8 and/or Theta_MC given base CMB parameters
+	- Drive CAMB to get sigma8 <=> A_s and/or H0 <=> Theta_MC mappings given base CMB parameters
 	"""
 
 	def __init__(self,dic):
@@ -60,4 +59,36 @@ class drive_camb(object):
 					[self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns]))
 
 
+class Drive_21cmFAST(object):
+    """
+    Drive the seminumerical simulation 21cmFAST
+    Can be used on a personal machine or can be attached to a dynamic job scheduler
+    """
+
+    def __init__(self,dic):
+        self.__dict__.update(dic)
+
+    def init_machine(self):
+        """
+        - initialize how simulation will be run: on a single processor, on a cluster, etc.
+        """
+        pass
+
+    def init_files(self):
+        """
+        - build necessary directories and files for jobs to be run
+        """
+        pass
+
+    def send_jobs(self):
+        """
+        - run simulation
+        """
+        pass
+
+    def collect_results(self):
+        """
+        - load results from various runs and print to file
+        """
+        pass
 

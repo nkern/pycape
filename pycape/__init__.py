@@ -1,5 +1,5 @@
 """
-## pycape : PYthon toolbox for Cosmic dAwn Parameter Estimation
+## pycape : Python Toolbox for Cosmic Dawn Parameter Estimation
 
 ##### Version: 0.1
 Code Repo : https://github.com/nkern/pycape
@@ -36,11 +36,18 @@ See the GPL License for details on usage
 Nicholas Kern
 """
 
-from .toolbox import workspace
+from emulator import *
+from sampler import *
+from observations import *
+from simulations import *
 
 
-
-
+def print_out(string,type=1):
+    """
+    print a message to stdout
+    """
+    if type == 1:
+        print '\n'+string+'\n'+'-'*40
 
 
 

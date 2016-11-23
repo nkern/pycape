@@ -1,8 +1,11 @@
 """
 ==========
-emfuncs.py
+emulator.py
 ==========
+
+An emulator in python
 """
+
 # Import Modules
 from __future__ import division
 import os
@@ -10,21 +13,19 @@ import sys
 import numpy as np
 import numpy.linalg as la
 import fnmatch
-from ..scripts.DictEZ import create as ezcreate
+from DictEZ import create as ezcreate
 import itertools
 import operator
 import functools
 from sklearn import gaussian_process
-from sklearn.cluster import KMeans
-from sklearn import neighbors
 import astropy.stats as astats
 
 try: from memory_profiler import memory_usage
 except: pass
 
-__all__ = ['EmFuncs']
+__all__ = ['Emu']
 
-class EmFuncs(object):
+class Emu(object):
 	''' perform clustering, Karhunen Loeve Transform (PCA) and interpolation on data vector "data"
 	-- class klfuncs() needs to be fed a dictionary containing the relevant variables, depending on which sub-function will be used:
 		N_samples	: number of samples in training set, indexed with "i"
@@ -34,6 +35,7 @@ class EmFuncs(object):
 	'''
 
 	def __init__(self,dic):
+		self.__name__ = 'Emu'
 		self.__dict__.update(dic)
 		self._trained = False
 
@@ -273,7 +275,7 @@ class EmFuncs(object):
 		self.weights_cv		= np.copy(self.weights)
 		self.weights_err_cv	= np.copy(self.weights_err)
 
-	def interp(self,data,param_samples,\
+	def train(self,data,param_samples,\
 			fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,\
 			use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=True,\
 			group_modes=False,save_chol=False,invL=None,fast=False,**kwargs):
