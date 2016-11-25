@@ -386,7 +386,7 @@ class Emu(object):
 				M = map
 			else:
 				M = pool.map
-			M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
+            M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
 
             if pool is not None:
                 pool.close()
