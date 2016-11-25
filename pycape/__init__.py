@@ -36,10 +36,10 @@ See the GPL License for details on usage
 Nicholas Kern
 """
 
-from .emulator import *
-from .sampler import *
-from .observations import *
-from .simulations import *
+from .emulator import Emu
+from .sampler import Samp
+from .observations import Obs
+from .simulations import Drive_Camb, Drive_21cmFAST
 
 
 def print_out(string,type=1):
