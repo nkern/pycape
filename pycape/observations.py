@@ -58,8 +58,11 @@ class Obs(object):
         self.ydata_cat      = ydata_cat
         self.cat_types      = cat_types
 
-	def update(self,dic):
-		self.__dict__.update(dic)
+    def update(self,dic):
+        """
+        update
+        """
+        self.__dict__.update(dic)
 
     def var_check(self,var):
         """
