@@ -382,17 +382,16 @@ class Emu(object):
 
 			# Fit GPs!
 			# Use parallel processing for hyperparameter regression (optional)
-			if pool is None:
-				M = map
-			else:
-				M = pool.map
+            if pool is None:
+                M = map
+            else:
+                M = pool.map
 
+            # Iterate over GPs
             _ = M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
-
+			GP = np.array(GP)
             if pool is not None:
                 pool.close()
-
-			GP = np.array(GP)
 
 		# Update to namespace
 		self._trained = True
