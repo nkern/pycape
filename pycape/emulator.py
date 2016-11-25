@@ -278,7 +278,7 @@ class Emu(object):
 	def train(self,data,param_samples,\
 			fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,\
 			use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=True,\
-			group_modes=False,save_chol=False,invL=None,fast=False,**kwargs):
+			group_modes=False,save_chol=False,invL=None,fast=False,pool=None,**kwargs):
 		''' fit regression model to then be used for interpolation
 		 	noise_var	: [N_samples] row vector with noise variance for each sample in LLS solution
 
@@ -376,10 +376,18 @@ class Emu(object):
 					if 'alpha' not in gp_kwargs: gp_kwargs['alpha'] = 1e-1
 					gp_kwargs['alpha'] = (gp_kwargs['alpha']/y.T[self.modegroups[j][0]])**2
 
-				# Fit!
-				gp = gaussian_process.GaussianProcessRegressor(**gp_kwargs).fit(self.Xsph,y.T[self.modegroups[j]].T)
-
+				# Create GP
+				gp = gaussian_process.GaussianProcessRegressor(**gp_kwargs)
 				GP.append(gp)
+
+			# Fit GPs!
+			# Use parallel processing for hyperparameter regression (optional)
+			if pool is None:
+				M = map
+			else:
+				M = pool.map
+			M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
+
 			GP = np.array(GP)
 
 		# Update to namespace

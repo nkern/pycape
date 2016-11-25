@@ -6,7 +6,7 @@ Drivers for relevant simulations
 import camb
 from collections import OrderedDict
 
-__all__ = ['drive_camb','drive_21cmFAST']
+__all__ = ['Drive_Camb','Drive_21cmFAST']
 
 class Drive_Camb(object):
 	"""

@@ -38,8 +38,8 @@ Nicholas Kern
 
 from emulator import *
 from sampler import *
-from observations import *
-from simulations import *
+#from observations import *
+#from simulations import *
 
 
 def print_out(string,type=1):

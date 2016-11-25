@@ -5,7 +5,10 @@ plotting.py
 
 __all__ = ['Plotting']
 
-class Plotting(object):
+class Plots(object):
+    """
+    Plots class for making plots
 
+    """
     def __init__(self):
         pass
