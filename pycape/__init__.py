@@ -36,33 +36,7 @@ See the GPL License for details on usage
 Nicholas Kern
 """
 
-#from .emulator import Emu
-#from .sampler import Samp
-#from .observations import Obs
-#from .simulations import Drive_Camb, Drive_21cmFAST
-
-
-def print_out(string,type=1):
-    """
-    print a message to stdout
-    """
-    if type == 1:
-        print '\n'+string+'\n'+'-'*40
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+from .emulator import *
+from .sampler import *
+from .observations import *
+from .simulations import *

@@ -12,8 +12,8 @@ Code Repo: https://github.com/jpober/21cmSense
 """
 import os
 import numpy as np
-from DictEZ import create as ezcreate
-from fits_table import fits_table
+from .scripts.DictEZ import create as ezcreate
+from .scripts.fits_table import fits_table
 import cPickle as pkl
 from py21cmsense import Calc_Sense
 
