@@ -176,70 +176,70 @@ class Obs(object):
         CS = Calc_Sense(**kwargs)
 
 		# Use calibration file to create *.npz file
-		os.system('python %s/mk_array_file.py -C %s' % (self.dir_21cmSense,calib_file))
+        os.system('python %s/mk_array_file.py -C %s' % (self.dir_21cmSense,calib_file))
 
 		# Move *.npz file to proper directory
-		os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
+        os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
 
 		# Configure data arrays
-		kbins = []
-		PSdata = []
-		sense_kbins = []
-		sense_PSdata = []
-		sense_PSerrs = []	
+        kbins = []
+        PSdata = []
+        sense_kbins = []
+        sense_PSdata = []
+        sense_PSerrs = []	
 
-		valid = []
-		# Use *.npz file to get sensitivity measurements
-		len_files = len(ps_filenames)
-		for i in range(len_files):
-			print ''
-			print 'working on file: '+ps_filenames[i]
-			print '-'*30
-			os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
-				--nchan %s %s/%s.drift_blmin*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
-				ndays,n_per_day,bwidth[i],nchan[i],obs_direc,calib_file))
+        valid = []
+        # Use *.npz file to get sensitivity measurements
+        len_files = len(ps_filenames)
+        for i in range(len_files):
+            print ''
+            print 'working on file: '+ps_filenames[i]
+            print '-'*30
+            os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
+                --nchan %s %s/%s.drift_blmin*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
+                ndays,n_per_day,bwidth[i],nchan[i],obs_direc,calib_file))
 
-			# Move *.npz file to proper directory
-			os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
+            # Move *.npz file to proper directory
+            os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
 
-			# Load 21cm PS
-			model = np.loadtxt(ps_filenames[i])
-			kb = model[:,0]
-			PSdat = model[:,1]
+            # Load 21cm PS
+            model = np.loadtxt(ps_filenames[i])
+            kb = model[:,0]
+            PSdat = model[:,1]
 
-			# Load 21cmSense errors
-			sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq[i])
-			sense_kb = sense['ks']
-			sense_PSerr = sense['errs']
+            # Load 21cmSense errors
+            sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq[i])
+            sense_kb = sense['ks']
+            sense_PSerr = sense['errs']
 
-			valid.append( (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True)&(sense_kb>lowk_cut) )
+            valid.append( (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True)&(sense_kb>lowk_cut) )
 
-			# Interpolate between ps_file to get ps at sense_kbins
-			sense_PSdat = np.interp(sense_kb,kb,PSdat)
+            # Interpolate between ps_file to get ps at sense_kbins
+            sense_PSdat = np.interp(sense_kb,kb,PSdat)
 
-			# Append to arrays
-			kbins.append(kb)
-			PSdata.append(PSdat)
-			sense_kbins.append(sense_kb)
-			sense_PSdata.append(sense_PSdat)
-			sense_PSerrs.append(sense_PSerr)	
+            # Append to arrays
+            kbins.append(kb)
+            PSdata.append(PSdat)
+            sense_kbins.append(sense_kb)
+            sense_PSdata.append(sense_PSdat)
+            sense_PSerrs.append(sense_PSerr)	
 
-		kbins		= np.array(kbins)
-		PSdata		= np.array(PSdata)
-		sense_kbins	= np.array(sense_kbins)
-		sense_PSdata	= np.array(sense_PSdata)
-		sense_PSerrs	= np.array(sense_PSerrs)
-		valid		= np.array(valid)
+        kbins		= np.array(kbins)
+        PSdata		= np.array(PSdata)
+        sense_kbins	= np.array(sense_kbins)
+        sense_PSdata	= np.array(sense_PSdata)
+        sense_PSerrs	= np.array(sense_PSerrs)
+        valid		= np.array(valid)
 
-		# Append to namespace
-		names = ['kbins','PSdata','sense_kbins','sense_PSdata','sense_PSerrs','valid','freq']
-		data_dic = ezcreate(names,locals())
-                self.update(data_dic)
+        # Append to namespace
+        names = ['kbins','PSdata','sense_kbins','sense_PSdata','sense_PSerrs','valid','freq']
+        data_dic = ezcreate(names,locals())
+        self.update(data_dic)
 
-		# Write to file
-		if write_data == True:
-			file = open(write_direc+'/'+data_filename,'wb')
-			output = pkl.Pickler(file)
-			output.dump(data_dic)
-			file.close()
+        # Write to file
+        if write_data == True:
+            file = open(write_direc+'/'+data_filename,'wb')
+            output = pkl.Pickler(file)
+            output.dump(data_dic)
+            file.close()
 
