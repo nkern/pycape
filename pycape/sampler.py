@@ -63,7 +63,7 @@ class Samp(object):
         # Initialize flat priors for all parameters if lnprior is none
         for i in range(self.N_params):
             if lnprior is None:
-                self.lnprior_funcs.append(self.flat_lnprior(self.param_bounds[i],index=i))
+                self.lnprior_funcs.append(self.create_flat_lnprior(self.param_bounds[i],index=i))
             else:
                 self.lnprior_funcs.append(lnprior[i])
 
