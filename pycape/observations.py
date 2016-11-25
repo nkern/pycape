@@ -16,6 +16,7 @@ from .scripts.DictEZ import create as ezcreate
 from .scripts.fits_table import fits_table
 import cPickle as pkl
 from py21cmsense import Calc_Sense
+import operator
 
 __all__ = ['Obs']
 
