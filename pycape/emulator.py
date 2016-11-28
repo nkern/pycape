@@ -66,7 +66,7 @@ class Emu(object):
         '''if string in filelist, keep file'''
         return np.array(fnmatch.filter(filelist,string))
 
-    def sphere(self,params,fid_params=None,save_chol=False,invL=None,**kwargs):
+    def sphere(self,params,fid_params=None,save_chol=False,invL=None,attach=True,**kwargs):
         """
         Perform Cholesky decomposition and whiten or 'sphere' the data into non-covarying basis
         Xcov must be positive definite
@@ -85,14 +85,17 @@ class Emu(object):
             L = la.cholesky(Xcov)
             invL = la.inv(L)
 
-        # Transform to non-covarying basis
-        self.Xsph = np.dot(invL,X.T).T
-
         if save_chol == True:
             self.grid_tr = params
             self.fid_params = fid_params
             self.L = L
             self.invL = invL
+
+        # Transform to non-covarying basis
+        if attach == True:
+            self.Xsph = np.dot(invL,X.T).T
+        else:
+            return Xsph
 
     def create_tree(self,data,tree_type='ball',leaf_size=50,metric='euclidean'):
         if tree_type == 'ball':
