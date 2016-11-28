@@ -18,6 +18,7 @@ import itertools
 import operator
 import functools
 from sklearn import gaussian_process
+from sklearn import neighbors
 import astropy.stats as astats
 
 try: from memory_profiler import memory_usage
@@ -275,9 +276,9 @@ class Emu(object):
         self.weights_cv     = np.copy(self.weights)
         self.weights_err_cv = np.copy(self.weights_err)
 
-    def train(self,data,param_samples,\
-            fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,\
-            use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=True,\
+    def train(self,data,param_samples,
+            fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
+            use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=True,
             group_modes=False,save_chol=False,invL=None,fast=False,pool=None,**kwargs):
         ''' fit regression model to then be used for interpolation
             noise_var   : [N_samples] row vector with noise variance for each sample in LLS solution
@@ -387,8 +388,7 @@ class Emu(object):
             else:
                 M = pool.map
 
-            # Iterate over GPs
-            _ = M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
+            M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
             GP = np.array(GP)
             if pool is not None:
                 pool.close()
