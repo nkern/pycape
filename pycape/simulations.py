@@ -3,7 +3,8 @@ simulations.py
 
 Drivers for relevant simulations
 """
-import camb
+try: import camb
+except ImportError: pass
 from collections import OrderedDict
 
 __all__ = ['Drive_Camb','Drive_21cmFAST']

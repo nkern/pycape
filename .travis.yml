@@ -1,2 +1,7 @@
 language: python
-
+matrix:
+    include:
+        - python: "2.7"
+script: pytest
+notifications:
+    email: false

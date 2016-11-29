@@ -12,10 +12,9 @@ Code Repo: https://github.com/jpober/21cmSense
 """
 import os
 import numpy as np
-from .scripts.DictEZ import create as ezcreate
-from .scripts.fits_table import fits_table
 import cPickle as pkl
-from py21cmsense import Calc_Sense
+try: from py21cmsense import Calc_Sense
+except ImportError: pass
 import operator
 
 __all__ = ['Obs']
@@ -238,9 +237,13 @@ class Obs(object):
         valid		= np.array(valid)
 
         # Append to namespace
-        names = ['kbins','PSdata','sense_kbins','sense_PSdata','sense_PSerrs','valid','freq']
-        data_dic = ezcreate(names,locals())
-        self.update(data_dic)
+        self.kbins = kbins
+        self.PSdata = PSdata
+        self.sense_kbins = sense_kbins
+        self.sense_PSdata = sense_PSdata
+        self.sense_PSerrs = sense_PSerrs
+        self.valid = valid
+        self.freq = freq
 
         # Write to file
         if write_data == True:
