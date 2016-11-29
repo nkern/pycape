@@ -1,4 +1,4 @@
 pytest
-scikit-learn
-astropy
-
+scikit-learn==0.18
+astropy==1.2.1
+scipy==0.17.1

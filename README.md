@@ -26,7 +26,10 @@ Optional:
 - OpenMPI : https://www.open-mpi.org/
 
 ##### Installation and Running:
-See INSTALL for installation, and RUNNING to get started on how to use pycape
+To install, simply enter in a shell
+```bash
+python setup.py install
+```
 
 ##### License:
 See the General Public License for details on usage
