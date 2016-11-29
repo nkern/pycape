@@ -2,6 +2,6 @@ language: python
 matrix:
     include:
         - python: "2.7"
-script: pytest
+script: py.test
 notifications:
     email: false
