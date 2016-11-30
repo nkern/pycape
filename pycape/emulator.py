@@ -55,12 +55,27 @@ class Emu(object):
         self.__dict__.update(dic)
 
     def param_check(self,data,params):
-        if self.N_samples != data.shape[0]:
+        try:
+            if self.N_samples != data.shape[0]:
+                self.N_samples = data.shape[0]
+        except:
             self.N_samples = data.shape[0]
-        if self.N_data != data.shape[1]:
-            raise Exception('self.N_data != data.shape[1]')
-        if self.N_params != params.shape[1]:
-            raise Exception('self.N_params != params.shape[1]')
+        try:
+            if self.N_data != data.shape[1]:
+                self.N_data = data.shape[1]
+        except:
+            try:
+                self.N_data = data.shape[1]
+            except:
+                self.N_data = len(data)
+        try:
+            if self.N_params != params.shape[1]:
+                self.N_params = params.shape[1]
+        except:
+            try:
+                self.N_params = params.shape[1]
+            except:
+                self.N_params = len(params)
 
     def keep_file(self,filelist,string):
         '''if string in filelist, keep file'''
@@ -295,7 +310,7 @@ class Emu(object):
             gp_kwargs variables
         '''
         # Check parameters are correct
-        #self.param_check(data,param_samples)
+        self.param_check(data,param_samples)
 
         # Sphere parameter space vector
         self.sphere(param_samples,save_chol=save_chol,invL=invL,fid_params=fid_params)
@@ -324,7 +339,7 @@ class Emu(object):
 
             # Use LLS over training set to solve for weight function polynomials
             if noise_var is None:
-                noise_var = np.array([1]*self.N_samples*self.N_modes)           # all training set samples w/ equal weight
+                noise_var = np.array([2]*self.N_samples*self.N_modes)           # all training set samples w/ equal weight
                 noise_var = noise_var.reshape(self.N_samples,self.N_modes)
 
             if calc_noise == True:
