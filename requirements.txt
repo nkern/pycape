@@ -3,4 +3,3 @@ scipy >= 0.17.1
 pytest
 scikit-learn >= 0.18
 astropy >= 1.2.1
-cPickle
