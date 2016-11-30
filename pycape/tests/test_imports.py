@@ -19,7 +19,7 @@ class TestOne(TestCase):
 
     def test_import3(self):
         try:
-            import whatthe
+            import astropy
         except:
             self.fail('failed import')
 
