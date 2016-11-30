@@ -1,7 +1,11 @@
 from unittest import TestCase
+import os
 
 class TestOne(TestCase):
 
+    def test_init(self):
+        os.system("echo $PATH")
+        os.system("echo $PYTHONPATH")
 
     def test_import(self):
         try:
