@@ -1,7 +1,22 @@
-language: python
+# Set Language
+language: c
+
+# Set Operating Sys
+os: 
+    - linux
+
+sudo: false
+
+env:
+    global:
+        - PYTHON_VERSION=2.7
+        - CONDA_ALL_DEPENDENCIES='Cython scipy matplotlib scikit-learn'
+
 matrix:
     include:
-        - python: "2.7"
+        - os: osx
+          env: CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
+
 script: py.test
 notifications:
     email: false
