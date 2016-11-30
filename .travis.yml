@@ -16,7 +16,7 @@ matrix:
     include:
         - os: osx
           env: CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
-
+install: pip install -r requirements.txt
 script: pytest
 notifications:
     email: false
