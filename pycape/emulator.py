@@ -13,7 +13,7 @@ import sys
 import numpy as np
 import numpy.linalg as la
 import fnmatch
-from scripts.DictEZ import create as ezcreate
+from .scripts.DictEZ import create as ezcreate
 import itertools
 import operator
 import functools

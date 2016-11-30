@@ -10,7 +10,7 @@ setup(
     version     = 0.1,
     author      = 'Nick Kern',
     url         = "http://github.com/nkern/pycape",
-    packages    = ['pycape']
+    packages    = ['pycape','pycape.scripts','pycape.tests'],
     )
 
 
