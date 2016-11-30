@@ -28,3 +28,9 @@ class TestOne(TestCase):
             import sklearn
         except:
             self.fail('failed import')
+
+    def test_imort5(self):
+        try:
+            import os
+        except:
+            self.fail('failed')
