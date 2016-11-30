@@ -10,7 +10,8 @@ setup(
     version     = 0.1,
     author      = 'Nick Kern',
     url         = "http://github.com/nkern/pycape",
-    packages    = ['pycape','pycape.scripts','pycape.tests'],
+    packages    = ['pycape','pycape.scripts','pycape.tests',\
+                   'pycape.ObsData','pycape.ObsData.config_files']
     )
 
 
