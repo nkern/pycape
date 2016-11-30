@@ -8,7 +8,7 @@ setup(
     description = 'emulator for 21cm studies',
     author      = 'Nick Kern',
     url         = "http://github.com/nkern/pycape",
-    packages    = ['pycape','pycape.scripts','pycape.tests',\
+    packages    = ['pycape','pycape.scripts',\
                    'pycape.ObsData','pycape.ObsData.config_files']
     )
 
