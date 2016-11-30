@@ -17,6 +17,6 @@ matrix:
         - os: osx
           env: CONDA_DEPENDENCIES=$CONDA_ALL_DEPENDENCIES
 
-script: py.test
+script: pytest
 notifications:
     email: false
