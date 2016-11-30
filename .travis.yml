@@ -20,8 +20,6 @@ install:
     - conda create -q -n test-env python=$TRAVIS_PYTHON_VERSION scikit-learn numpy scipy matplotlib astropy
     - source activate test-env
     - export PYTHONPATH=$HOME/miniconda/envs/test-env/lib/python2.7/site-packages:$PYTHONPATH
-    - echo $PATH
-    - echo $HOME
     - python setup.py install
 
 # Test
