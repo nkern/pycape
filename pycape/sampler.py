@@ -5,6 +5,7 @@ Samp class for MCMC sampling of posterior
 """
 import numpy as np
 import emcee
+import scipy.linalg as la
 
 __all__ = ['Samp']
 
