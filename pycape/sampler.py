@@ -368,7 +368,7 @@ class Samp(object):
             for name in also_record:
                 other_vars[name].append(self.__dict__[name])
 
-            tru_lnl = self.lnlike(self.O.ydata,self.data_cv[i],self.data_invcov)
+            tru_lnl = self.lnlike(self.O.ydata,data_cv[i],self.data_invcov)
             tru_lnlike.append(tru_lnl)
 
         emu_lnlike = np.array(emu_lnlike)
