@@ -12,6 +12,7 @@ Code Repo: https://github.com/jpober/21cmSense
 """
 import os
 import numpy as np
+import scipy.linalg as la
 import cPickle as pkl
 try: from py21cmsense import Calc_Sense
 except ImportError: pass
@@ -57,6 +58,9 @@ class Obs(object):
         self.ydata_cat      = ydata_cat
         self.cat_types      = cat_types
 
+        self.x_ext          = np.concatenate(list(self.xdata))
+        self.cov            = np.eye(self.O.N_data)*self.yerrs**2
+        self.invcov         = la.inv(self.cov)
     def update(self,dic):
         """
         update

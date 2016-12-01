@@ -153,7 +153,7 @@ class Samp(object):
         self.model_ydata            = self.E.recon[0]
         self.model_ydata_err        = self.E.recon_err
         self.model_ydata_err_cov    = self.E.recon_err_cov
-        self.data_cov = np.copy(self.O.cov)
+        self.data_cov               = np.copy(self.O.cov)
 
         # Add emulator error cov output at theta
         if add_model_cov == True:
