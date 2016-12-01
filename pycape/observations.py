@@ -59,6 +59,7 @@ class Obs(object):
         self.cat_types      = cat_types
 
         self.x_ext          = np.concatenate(list(self.xdata))
+        self.N_data         = len(self.x_ext)
         self.cov            = np.eye(self.N_data)*self.yerrs**2
         self.invcov         = la.inv(self.cov)
 
