@@ -362,7 +362,7 @@ class Samp(object):
         # Iterate over CV samples
         for i in range(grid_len):
             self.construct_model(grid_cv[i], **lnlike_kwargs)
-            emu_lnl = self.lnlike(self.O.ydata,self.model,self.data_invcov)
+            emu_lnl = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov)
             emu_lnlike.append(emu_lnl)
 
             for name in also_record:
