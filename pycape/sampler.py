@@ -122,7 +122,8 @@ class Samp(object):
                                                 kwargs=lnprob_kwargs, **sampler_kwargs)
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
-                        add_overall_modeling_error=False, modeling_error=0.20, **kwargs):
+                        add_overall_modeling_error=False, modeling_error=0.20,
+                        add_model_cov=False, **kwargs):
         """
         Generate model prediction at walker position theta, create lnlike covariance matrix
 
