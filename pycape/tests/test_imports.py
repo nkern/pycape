@@ -2,10 +2,13 @@ from unittest import TestCase
 
 class TestImport(TestCase):
 
-    def __init__(self):
-        import numpy
-        import astropy
-        import scipy
-        import sklearn
-        import emcee
-        import matplotlib
+    def test_one(self):
+        try:
+            import numpy
+            import astropy
+            import scipy
+            import sklearn
+            import emcee
+            import matplotlib
+        except:
+            self.fail('failed imports')
