@@ -3,7 +3,8 @@ sampler.py
 
 Samp class for MCMC sampling of posterior
 """
-
+import numpy as np
+import emcee
 
 __all__ = ['Samp']
 
