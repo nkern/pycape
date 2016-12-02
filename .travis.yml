@@ -22,6 +22,9 @@ install:
     - export PYTHONPATH=$HOME/miniconda/envs/test-env/lib/python2.7/site-packages:$PYTHONPATH
     - python setup.py install
 
+    # Install rest of pip deps
+    - pip install -r requirements.txt
+
 # Test
 script: py.test
 
