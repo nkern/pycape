@@ -118,6 +118,22 @@ class Emu(object):
         elif tree_type == 'kd':
             self.tree = neighbors.KDTree(data,leaf_size=leaf_size,metric=metric)
 
+    def nearest(self, theta, k=10, use_tree=False):
+        """
+        Get Nearest Neighbors from sphered theta
+        """
+        if use_tree == True:
+            if 'tree' not in self.__dict__:
+                self.sphere(self.grid_tr)
+                self.create_tree(self.Xsph)
+            grid_D, grid_NN = self.tree.query(theta, k=k)
+        else:
+            R = np.array(map(la.norm, self.Xsph-theta))
+            near = np.argsort(R)
+            grid_D, grid_NN = self.Xsph[near][:k], near[:k]
+
+        return grid_D, grid_NN
+
     def poly_design_mat(self,Xrange,dim=2,degree=6):
         """
         - Create polynomial design matrix given discrete values for dependent variables

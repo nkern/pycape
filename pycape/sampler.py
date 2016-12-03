@@ -124,7 +124,7 @@ class Samp(object):
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
                         add_overall_modeling_error=False, modeling_error=0.20,
-                        add_model_cov=False, **kwargs):
+                        add_model_cov=False, LAYG=False, k=None, kwargs_tr={},  **kwargs):
         """
         Generate model prediction at walker position theta, create lnlike covariance matrix
 
@@ -149,6 +149,13 @@ class Samp(object):
             raise Exception("This Samp class has no Emu attached to it...")
         elif self.hasObs == False:
             raise Exception("This Samp class has no Obs attached to it...")
+
+        # Check for LAYG
+        if LAYG == True:
+            parsph = np.dot(self.E.invL,np.array(theta - self.E.fid_params))
+            grid_D, grid_NN = self.E.nearest(parsph, k=k, use_tree=False)
+            self.E.train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,
+                    fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
 
         # Emulate
         self.E.predict(theta, **predict_kwargs)
