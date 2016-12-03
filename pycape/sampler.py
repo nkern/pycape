@@ -152,8 +152,9 @@ class Samp(object):
 
         # Check for LAYG
         if LAYG == True:
-            parsph = np.dot(self.E.invL,np.array(theta - self.E.fid_params))
-            grid_D, grid_NN = self.E.nearest(parsph, k=k, use_tree=False)
+            self.E.sphere(theta, fid_params=self.E.fid_params, invL=self.E.invL)
+            grid_D, grid_NN = self.E.nearest(self.E.Xsph, k=k, use_tree=False)
+            self.klt_project(self.E.data_tr[grid_NN])
             self.E.train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,
                     fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
 

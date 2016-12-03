@@ -254,8 +254,6 @@ class Emu(object):
 
         # Solve for per-sample eigenmode weight constants
         w_tr = np.dot(D,eig_vecs.T)
-        w_norm = np.array(map(lambda x: np.abs(x).max()/2,w_tr.T)).T
-        w_tr /= w_norm
 
         # Truncate eigenmodes to N_modes # of modes
         eig_vals        = eig_vals[:self.N_modes]
@@ -264,6 +262,9 @@ class Emu(object):
         tot_var         = sum(eig_vals)
         rec_var         = sum(eig_vals)
         frac_var        = rec_var/tot_var
+
+        w_norm = np.array(map(lambda x: np.abs(x).max()/2,w_tr.T)).T
+        w_tr /= w_norm
 
         # Update to Namespace
         names = ['D','Dstd','data_tr','Dcov','eig_vals','eig_vecs','w_tr','tot_var','rec_var','frac_var','fid_data','w_norm']
