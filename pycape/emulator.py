@@ -312,7 +312,7 @@ class Emu(object):
 
     def train(self,data,param_samples,
             fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
-            use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=True,
+            use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=False,
             group_modes=False,save_chol=False,invL=None,fast=False,pool=None,**kwargs):
         ''' fit regression model to then be used for interpolation
             noise_var   : [N_samples] row vector with noise variance for each sample in LLS solution
