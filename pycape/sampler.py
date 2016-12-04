@@ -157,7 +157,7 @@ class Samp(object):
             grid_D, grid_NN = self.E.nearest(par_sph, k=k, use_tree=False)
             self.E.klt_project(self.E.data_tr[grid_NN])
             self.E.train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_data=self.E.fid_data,
-                    fid_params=self.E.fid_params,kwargs_tr=kwargs_tr)
+                    fid_params=self.E.fid_params,**kwargs_tr)
 
         # Emulate
         self.E.predict(theta, **predict_kwargs)
