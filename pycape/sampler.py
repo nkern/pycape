@@ -358,7 +358,7 @@ class Samp(object):
         self.end_pos = end_pos
 
 
-    def cross_validate(self,grid_cv,data_cv,lnlike_kwargs={},also_record=[]):
+    def cross_validate(self,grid_cv,data_cv,lnlike_kwargs={}):
         """
         Cross validate against posterior distribution 
 
@@ -374,26 +374,12 @@ class Samp(object):
         also_record : list (default=[])
             list of other Samp variable output to store
         """
-        # Initialize lists
-        grid_len = len(grid_cv)
-        emu_lnlike = []
-        tru_lnlike = []
-        other_vars = dict(zip(also_record,[[] for ii in range(len(also_record))]))
         # Iterate over CV samples
-        for i in range(grid_len):
-            self.construct_model(grid_cv[i], **lnlike_kwargs)
-            emu_lnl = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov)
-            emu_lnlike.append(emu_lnl)
+        self.construct_model(grid_cv, **lnlike_kwargs)
+        emu_lnlike = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov)
+        tru_lnlike = self.lnlike(self.O.ydata,data_cv,self.data_invcov)
 
-            for name in also_record:
-                other_vars[name].append(self.__dict__[name])
-
-            tru_lnl = self.lnlike(self.O.ydata,data_cv[i],self.data_invcov)
-            tru_lnlike.append(tru_lnl)
-
-        emu_lnlike = np.array(emu_lnlike)
-        tru_lnlike = np.array(tru_lnlike)
-        return emu_lnlike, tru_lnlike, other_vars
+        return emu_lnlike, tru_lnlike
 
 
 
