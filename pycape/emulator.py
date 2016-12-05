@@ -573,9 +573,10 @@ class Emu(object):
 
         # Calculate Error
         if use_pca == True:
-            emode_err = weights_err*self.eig_vecs
-            recon_err = np.sqrt( np.array(map(sum,emode_err.T**2)) )
-            recon_err_cov = np.sum(np.outer(self.eig_vecs[j],self.eig_vecs[j])*weights_err[0][j]**2 for j in range(self.N_modes))
+            emode_err = np.array(map(lambda x: (x*self.eig_vecs.T).T, weights_err))
+            recon_err = np.sqrt( np.array(map(lambda x: np.sum(x,axis=0),emode_err**2)) )
+            recon_err_cov = np.array([[np.outer(self.eig_vecs[j],self.eig_vecs[j])*weights_err[i][j]**2 for j in range(self.N_modes)] for i in range(len(recon))])
+            recon_err_cov = np.sum(recon_err_cov, axis=1)
 
         else:
             recon_err = weights_err
