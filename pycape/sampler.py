@@ -311,11 +311,6 @@ class Samp(object):
 
         # Evaluate lnprior
         lnprior = self.lnprior(theta)
-        if type(lnprior) == float:
-            if np.isfinite(lnprior) == False:
-                return -np.inf
-        else:
-            lnprior[np.where(np.isfinite(lnprior)==False)] = -np.inf
 
         return lnlike + lnprior
 
