@@ -184,10 +184,11 @@ class Samp(object):
         """
         A typical Gaussian log-likelihood function
         """
-        ndim = ydata.ndim
         resid = ydata - model
-        return -0.5 * np.dot(resid, np.dot(invcov, resid.T))
-
+        lnlike = -0.5 * np.dot(resid, np.dot(invcov, resid.T))
+        if type(lnlike) == np.ndarray:
+            lnlike = lnlike.diagonal()
+        return lnlike
 
     def create_gauss_lnprior(self,mean,sigma,index=0,return_func=False):
         """
