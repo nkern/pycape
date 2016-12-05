@@ -490,7 +490,7 @@ class Emu(object):
 
         # Transform to whitened parameter space
         Xpred_shape = Xpred.shape
-        Xpred_sph = np.dot(self.invL,(Xpred-self.fid_params).T)
+        Xpred_sph = np.dot(self.invL,(Xpred-self.fid_params).T).T
 
         if use_Nmodes is None:
             use_Nmodes = self.N_modes
@@ -498,8 +498,8 @@ class Emu(object):
         # Polynomial Interpolation
         if self.reg_meth == 'poly':
             # Calculate weights
-            if Xpred_sph.ndim == 1: Xpred_sph = Xpred_sph.reshape(len(Xpred_sph),1)
-            A = self.poly_design_mat(Xpred_sph,dim=self.N_params,degree=self.poly_deg)
+            if Xpred_sph.ndim == 1: Xpred_sph = Xpred_sph.reshape(1,len(Xpred_sph))
+            A = self.poly_design_mat(Xpred_sph.T,dim=self.N_params,degree=self.poly_deg)
             weights = np.dot(A,self.xhat)
 
             # Renormalize weights
@@ -529,21 +529,21 @@ class Emu(object):
             for j in range(iterate):
                 if GPs != None:
                     if fast == True:
-                        w = GPs[j].predict(Xpred_sph.T,return_cov=False)
+                        w = GPs[j].predict(Xpred_sph,return_cov=False)
                         weights.extend(w.T)
                         MSE.extend(np.zeros(w.shape).T)
                     else:
-                        w,mse = GPs[j].predict(Xpred_sph.T,return_cov=True)
+                        w,mse = GPs[j].predict(Xpred_sph,return_cov=True)
                         mse = np.sqrt(mse.diagonal())
                         weights.extend(w.T)
                         MSE.extend(np.ones(w.shape).T*mse)
                 else:
                     if fast == True:
-                        w = self.GP[j].predict(Xpred_sph.T,return_cov=False)
+                        w = self.GP[j].predict(Xpred_sph,return_cov=False)
                         weights.extend(w.T)
                         MSE.extend(np.zeros(w.shape).T)
                     else:
-                        w,mse = self.GP[j].predict(Xpred_sph.T,return_cov=True)
+                        w,mse = self.GP[j].predict(Xpred_sph,return_cov=True)
                         mse = np.sqrt(mse.diagonal())
                         weights.extend(w.T)
                         MSE.extend(np.ones(w.shape).T*mse)
@@ -573,7 +573,7 @@ class Emu(object):
 
         # Calculate Error
         if use_pca == True:
-            emode_err = weights_err.T*self.eig_vecs
+            emode_err = weights_err*self.eig_vecs
             recon_err = np.sqrt( np.array(map(sum,emode_err.T**2)) )
             recon_err_cov = np.sum(np.outer(self.eig_vecs[j],self.eig_vecs[j])*weights_err[0][j]**2 for j in range(self.N_modes))
 
