@@ -315,7 +315,7 @@ class Samp(object):
 
         return lnlike + lnprior
 
-    def samp_drive(self, pos0, step_num=500, burn_num=500, save_progress=False, save_step=500, fname='chainhist_step'):
+    def samp_drive(self, pos0, step_num=10, burn_num=0, save_progress=False, save_step=500, fname='chainhist_step'):
         """
         Drive MCMC ensemble sampler
 
