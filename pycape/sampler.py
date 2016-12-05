@@ -266,7 +266,7 @@ class Samp(object):
 
         def cov_gauss_lnprior(theta, mean=mean, precision=precision, index=index, ndim=ndim, lognorm=lognormalize):
             beta = theta - mean
-            chisq = np.dot(precition.T[index],beta)*beta[index]
+            chisq = np.dot(precision.T[index],beta)*beta[index]
             return lognorm + -0.5 * chisq
 
         if return_func == True:
