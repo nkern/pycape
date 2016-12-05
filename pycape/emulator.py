@@ -473,7 +473,7 @@ class Emu(object):
             self.N_modegroups = N_modegroups
             self.modegroups = modegroups
 
-    def predict(self,param_vals,use_Nmodes=None,GPs=None,fast=False,solve_simul=False,\
+    def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
         use_pca=True,group_modes=False,**kwargs):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
@@ -489,9 +489,8 @@ class Emu(object):
         self.csm = np.sqrt([3.841,5.991,7.815,9.488,11.070,12.592,14.067,15.507,16.919])
 
         # Transform to whitened parameter space
-        param_vals_shape = param_vals.shape
-        param_vals = (param_vals.T - self.fid_params).T
-        par_sph = np.dot(self.invL,param_vals)
+        Xpred_shape = Xpred.shape
+        Xpred_sph = np.dot(self.invL,(Xpred-self.fid_params).T)
 
         if use_Nmodes is None:
             use_Nmodes = self.N_modes
@@ -499,8 +498,8 @@ class Emu(object):
         # Polynomial Interpolation
         if self.reg_meth == 'poly':
             # Calculate weights
-            if par_sph.ndim == 1: par_sph = par_sph.reshape(len(par_sph),1)
-            A = self.poly_design_mat(par_sph,dim=self.N_params,degree=self.poly_deg)
+            if Xpred_sph.ndim == 1: Xpred_sph = Xpred_sph.reshape(len(Xpred_sph),1)
+            A = self.poly_design_mat(Xpred_sph,dim=self.N_params,degree=self.poly_deg)
             weights = np.dot(A,self.xhat)
 
             # Renormalize weights
@@ -530,29 +529,29 @@ class Emu(object):
             for j in range(iterate):
                 if GPs != None:
                     if fast == True:
-                        w = GPs[j].predict(par_sph.T,return_cov=False)
+                        w = GPs[j].predict(Xpred_sph.T,return_cov=False)
                         weights.extend(w.T)
                         MSE.extend(np.zeros(w.shape).T)
                     else:
-                        w,mse = GPs[j].predict(par_sph.T,return_cov=True)
+                        w,mse = GPs[j].predict(Xpred_sph.T,return_cov=True)
                         mse = np.sqrt(mse.diagonal())
                         weights.extend(w.T)
                         MSE.extend(np.ones(w.shape).T*mse)
                 else:
                     if fast == True:
-                        w = self.GP[j].predict(par_sph.T,return_cov=False)
+                        w = self.GP[j].predict(Xpred_sph.T,return_cov=False)
                         weights.extend(w.T)
                         MSE.extend(np.zeros(w.shape).T)
                     else:
-                        w,mse = self.GP[j].predict(par_sph.T,return_cov=True)
+                        w,mse = self.GP[j].predict(Xpred_sph.T,return_cov=True)
                         mse = np.sqrt(mse.diagonal())
                         weights.extend(w.T)
                         MSE.extend(np.ones(w.shape).T*mse)
 
             weights,MSE = np.array(weights).T,np.array(MSE).T
             if weights.ndim == 1:
-                weights = weights.reshape(param_vals_shape[1],len(weights))
-                MSE = MSE.reshape(param_vals_shape[1],len(weights))
+                weights = weights.reshape(Xpred_shape[1],len(weights))
+                MSE = MSE.reshape(Xpred_shape[1],len(weights))
 
             # Renormalize weights
             weights *= self.w_norm
@@ -587,7 +586,7 @@ class Emu(object):
 
         # Construct data product and error on data product
         if fast == False:
-            names = ['recon','weights','MSE','weights_err','par_sph','recon_err','recon_err_cov']
+            names = ['recon','weights','MSE','weights_err','Xpred_sph','recon_err','recon_err_cov']
             self.update(ezcreate(names,locals()))
         else:
             self.recon = recon
