@@ -161,7 +161,7 @@ class Samp(object):
 
         # Emulate
         self.E.predict(theta, **predict_kwargs)
-        self.model_ydata            = self.E.recon[0]
+        self.model_ydata            = self.E.recon
         self.model_ydata_err        = self.E.recon_err
         self.model_ydata_err_cov    = self.E.recon_err_cov
         self.data_cov               = np.copy(self.O.cov)
@@ -184,8 +184,10 @@ class Samp(object):
         """
         A typical Gaussian log-likelihood function
         """
+        ndim = ydata.ndim
         resid = ydata - model
-        return -0.5 * np.dot(resid.T, np.dot(invcov, resid))
+        return -0.5 * np.dot(resid, np.dot(invcov, resid.T))
+
 
     def create_gauss_lnprior(self,mean,sigma,index=0,return_func=False):
         """
@@ -280,10 +282,20 @@ class Samp(object):
         theta : ndarray (dtype=float, shape=[N_params,])
             row vector of walker position
         """
-        lnprior = 0
-        for i in range(len(theta)):
-            lnprior += self.lnprior_funcs[i](theta)
-        return lnprior
+        ndim = theta.ndim
+        if ndim == 1:
+            lnprior = 0
+            for i in range(len(theta)):
+                lnprior += self.lnprior_funcs[i](theta)
+            return lnprior
+        else:
+            lnprior = []
+            for j in range(len(theta)):
+                lnp = 0
+                for i in range(len(theta.T)):
+                    lnp += self.lnprior_funcs[i](theta[j])
+                lnprior.append(lnp)
+            return np.array(lnprior)
 
     def lnprob(self,theta,**lnlike_kwargs):
         """
@@ -299,8 +311,11 @@ class Samp(object):
 
         # Evaluate lnprior
         lnprior = self.lnprior(theta)
-        if not np.isfinite(lnprior):
-            return -np.inf
+        if type(lnprior) == float:
+            if np.isfinite(lnprior) == False:
+                return -np.inf
+        else:
+            lnprior[np.where(np.isfinite(lnprior)==False)] = -np.inf
 
         return lnlike + lnprior
 
