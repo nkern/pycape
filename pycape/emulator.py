@@ -344,6 +344,9 @@ class Emu(object):
         elif use_pca == False:
             y = data
 
+        if 'N_modegroups' not in self.__dict__:
+                self.group_eigenmodes(emode_variance_div=emode_variance_div)
+
         # Calculate noise estimates
         if calc_noise == True:
             self.cluster_noise(self.Xsph, y)
