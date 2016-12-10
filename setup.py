@@ -1,6 +1,9 @@
 import sys
 import os
-from setuptools import setup
+try:
+    from setuptools import setup
+except:
+    from distutils.core import setup
 
 setup(
     name            = 'pycape',
