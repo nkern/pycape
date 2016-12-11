@@ -19,13 +19,17 @@ class TestEmu(unittest.TestCase):
         y = y[:,np.newaxis]
 
         # Instantiate
-        variables = {'reg_meth':'gaussian','gp_kwargs':{},'N_modes':1}
+        variables = {'reg_meth':'gaussian','gp_kwargs':{},'N_modes':1,'N_samples':len(X),
+                    'scale_by_std':False}
         E = Emu(variables)
+
+        E.sphere(X, save_chol=True)
 
         # Train
         E.train(y, X, use_pca=False)
+        E.w_norm = np.ones(100)
 
         # Predict
-        yp = np.vstack([(np.random.random(10)-0.5)*10, (np.random.random(10)-0.5)*10]).T
-
+        Xp = np.array(np.meshgrid(*[np.linspace(-3,3,10),np.linspace(-3,3,10)])).reshape(2,100).T
+        yp = E.predict(Xp, use_pca=False)
 

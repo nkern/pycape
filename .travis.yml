@@ -25,6 +25,12 @@ install:
     # Install rest of pip deps
     - pip install -r requirements.txt
 
+    # Install non-pip deps
+    # Install aipy
+    - git clone https://github.com/AaronParsons/aipy
+    - python aipy/setup.py install --install-lib aipy --install-scripts aipy
+    - export PYTHONPATH=$HOME/aipy:$PYTHONPATH
+
 # Test
 script: py.test
 
