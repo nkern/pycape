@@ -30,6 +30,8 @@ install:
     - git clone https://github.com/AaronParsons/aipy
     - python aipy/setup.py install --install-lib aipy --install-scripts aipy
     - export PYTHONPATH=$HOME/aipy:$PYTHONPATH
+    - echo $HOME
+    - ls $HOME
 
 # Test
 script: py.test
