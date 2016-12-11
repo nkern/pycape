@@ -1,10 +1,7 @@
 import numpy as np
 from pycape import Emu
 import unittest
-
-raise Warning('Hello!')
-
-print("goodbye")
+import warnings
 
 class TestEmu(unittest.TestCase):
 

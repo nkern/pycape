@@ -3,9 +3,14 @@ simulations.py
 
 Drivers for relevant simulations
 """
-try: import camb
-except ImportError: pass
+import os
+import warnings
 from collections import OrderedDict
+
+try:
+    import camb
+except ImportError:
+    warnings.warn('\nCould not import camb')
 
 __all__ = ['Drive_Camb','Drive_21cmFAST']
 

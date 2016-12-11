@@ -14,9 +14,13 @@ import os
 import numpy as np
 import scipy.linalg as la
 import cPickle as pkl
-try: from py21cmsense import Calc_Sense
-except ImportError: pass
+import warnings
 import operator
+
+try:
+    from py21cmsense import Calc_Sense
+except ImportError:
+    warnings.warn('\n Could not import py21cmsense')
 
 __all__ = ['Obs']
 
