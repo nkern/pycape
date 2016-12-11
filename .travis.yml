@@ -27,7 +27,10 @@ install:
 
     # Install non-pip deps
     # Install aipy
+    - pwd
     - git clone https://github.com/AaronParsons/aipy $HOME/aipy
+    - ls $HOME
+    - ls $HOME/aipy
     - python aipy/setup.py install --install-lib aipy --install-scripts aipy
     - export PYTHONPATH=$HOME/aipy:$PYTHONPATH
     - echo $HOME
