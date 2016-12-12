@@ -15,30 +15,39 @@ class TestEmu(unittest.TestCase):
         """
         Simple Emulator Test Using no PCA
         """
-        fail = False
-        X = np.array(map(lambda x: x.ravel(), np.meshgrid(np.linspace(-5,5,10),np.linspace(-5,5,10))))
-        y = np.sinc(np.sqrt(X[0]**2 + X[1]**2))
+        N_data = 5
+        X = np.linspace(1,10,N_data)
+        y = 3.0*X + stats.norm.rvs(0,0.1,len(X))
+        yerrs = np.ones(len(y))*0.1
 
-        X = X.T
-        y = y[:,np.newaxis]
+        # Generate training set
+        N_samples = 25
+        data_tr = []
+        grid_tr = []
+        for theta in np.linspace(0.1,10,N_samples):
+            data_tr.append(theta*X)
+            grid_tr.append(np.array([theta]))
+
+        data_tr = np.array(data_tr)
+        grid_tr = np.array(grid_tr)
 
         # Instantiate
-        variables = {'reg_meth':'gaussian','gp_kwargs':{},'N_modes':1,'N_samples':len(X),
+        N_modes = N_data
+        variables = {'reg_meth':'gaussian','gp_kwargs':{},'N_modes':N_modes,'N_samples':N_samples,
                 'scale_by_std':False,'scale_by_obs_errs':False}
-        E = Emu(variables)
+        E = pycape.Emu(variables)
 
-        E.sphere(X, save_chol=True)
+        E.sphere(grid_tr, save_chol=True)
 
         # Train
-        E.train(y, X, use_pca=False)
-        E.w_norm = np.ones(100)[:,np.newaxis]
+        E.fid_params = np.array([5.0])
+        E.fid_data = E.fid_params[0]*X
+        E.train(data_tr, grid_tr, fid_data=E.fid_data, fid_params=E.fid_params, use_pca=False, invL=E.invL)
+        E.w_norm = np.ones(N_modes)
+        E.recon_err_norm = np.ones(N_data)
 
-        E.fid_data=np.ones(100)
-        E.recon_err_norm = np.ones(100)
-
-        # Predict
-        Xp = np.array(np.meshgrid(*[np.linspace(-3,3,10),np.linspace(-3,3,10)])).reshape(2,100).T
-        yp = E.predict(Xp, use_pca=False)
+        pred_kwargs = {'use_pca':False,'fast':True}
+        _ = E.predict(np.array([3.0])[:,np.newaxis], **pred_kwargs)
 
 if __name__ == '__main__':
     unittest.main()
