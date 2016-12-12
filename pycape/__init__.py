@@ -40,7 +40,5 @@ from .observations import *
 from .simulations import *
 import os
 
-@property
-def __packagepath__():
-    return os.path.dirname(os.path.realpath(__file__))
+__packagepath__ = os.path.dirname(os.path.realpath(__file__))
 
