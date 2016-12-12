@@ -40,6 +40,5 @@ class TestEmu(unittest.TestCase):
         Xp = np.array(np.meshgrid(*[np.linspace(-3,3,10),np.linspace(-3,3,10)])).reshape(2,100).T
         yp = E.predict(Xp, use_pca=False)
 
-
 if __name__ == '__main__':
     unittest.main()
