@@ -4,6 +4,7 @@ import pycape
 import warnings
 import py21cmsense
 import os
+import cPickle as pkl
 
 class TestObs(unittest.TestCase):
 
