@@ -3,7 +3,11 @@ drive_pystan.py : driver for pystan
 
 """
 
-import pystan
+import warnings
+try:
+    import pystan
+except:
+    warnings.warn('\nCould not import pystan')
 
 model_code = """
 data {

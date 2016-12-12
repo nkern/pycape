@@ -13,11 +13,15 @@ Nicholas Kern
 """
 
 import numpy as np
-import pymc3 as pm
 import itertools
 import operator
 import functools
 import scipy.optimize as optimize
+import warnings
+try:
+    import pymc3 as pm
+except:
+    warnings.warn('\nCould not import pymc3')
 
 class drive_pymc3(object):
 

@@ -17,9 +17,11 @@ pycape is dependent on a number of public codes.
 - emcee : http://dan.iel.fm/emcee/current
 - astropy >= 1.2.1
 - aipy : https://github.com/AaronParsons/aipy
+
 The packages above can be pip installed.
 
 - 21cmSense : https://github.com/nkern/21cmSense
+
 You can install 21cmSense by cloning the above repo and then adding the 21cmSense directory to your PYTHONPATH
 by adding the following to .bashrc
 ```bash
