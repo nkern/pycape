@@ -2,6 +2,7 @@ import numpy as np
 from pycape import Emu
 import unittest
 import warnings
+import scipy.stats as stats
 
 class TestEmu(unittest.TestCase):
 

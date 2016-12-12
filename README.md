@@ -16,12 +16,11 @@ pycape is dependent on a number of public codes, including
 - matplotlib >= 1.5.1
 - sklearn >= 0.18
 - emcee : http://dan.iel.fm/emcee/current
+- astropy >= 1.2.1
 
 Optional:
 - aipy : https://github.com/AaronParsons/aipy
-- PyMC : http://pymc-devs.github.io/pymc
-- 21cmFAST : http://homepage.sns.it/mesinger/Download.html
-- OpenMPI : https://www.open-mpi.org/
+- 21cmSense : https://github.com/nkern/21cmSense
 
 ### Download
 To download, simply clone this repo
@@ -34,6 +33,8 @@ To install, cd into the downloaded pycape repo and run the setupy.py script as
 ```bash
 python setup.py install
 ```
+
+
 
 ### Running:
 pycape is not an end-to-end analysis package; It is a collection of tools one can combine to meet their science goal.
