@@ -564,7 +564,7 @@ class Emu(object):
             if use_pca == True:
                 recon = np.dot(weights.T[:use_Nmodes].T,self.eig_vecs[:use_Nmodes])
             else:
-                recon = weights.T[0]
+                recon = weights.T
 
             if self.scale_by_std == True:
                 recon *= self.Dstd
@@ -582,7 +582,9 @@ class Emu(object):
             recon_err_cov = np.sum(recon_err_cov, axis=1)
 
         else:
-            recon_err = weights_err
+            recon_err = weights_err.T
+            recon_err_cov = np.array([np.eye(len(recon[i]),len(recon[i])) * recon_err[i] for i in range(len(recon))])
+
 
         # Normalize Error
         recon_err *= self.recon_err_norm

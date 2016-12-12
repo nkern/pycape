@@ -1,14 +1,28 @@
-from unittest import TestCase
+import unittest
 
-class TestImport(TestCase):
+class TestImport(unittest.TestCase):
 
-    def test_basic_imports(self):
-        try:
-            import numpy
-            import astropy
-            import scipy
-            import sklearn
-            import emcee
-            self.assertGreatEqual(float(sklearn.__version__), 0.18, msg='sklearn must be >= 0.18')
-        except:
-            self.fail('failed basic emulator imports')
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_numpy(self):
+        import numpy
+
+    def test_astropy(self):
+        import astropy
+
+    def test_scipy(self):
+        import scipy
+
+    def test_sklearn(self):
+        import sklearn
+        self.assertGreaterEqual(float(sklearn.__version__), 0.18, msg='sklearn must be >= 0.18')
+
+    def test_emcee(self):
+        import emcee
+
+if __name__ == '__main__':
+    unittest.main()

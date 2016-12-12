@@ -20,7 +20,7 @@ import operator
 try:
     from py21cmsense import Calc_Sense
 except ImportError:
-    warnings.warn('\n Could not import py21cmsense')
+    warnings.warn('\nCould not import py21cmsense')
 
 __all__ = ['Obs']
 
