@@ -34,8 +34,11 @@ See the GPL License for details on usage
 ##### Authors:
 Nicholas Kern
 """
-
 from .emulator import *
 from .sampler import *
 from .observations import *
 from .simulations import *
+import os
+
+__path__ = os.path.dirname(os.path.realpath(__file__))
+
