@@ -27,6 +27,7 @@ install:
 
     # Install source builds
     - bash source_builds.sh
+    - echo $PYTHONPATH
 
 # Test
 script: py.test
