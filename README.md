@@ -38,12 +38,8 @@ To install, cd into the downloaded pycape repo and run the setupy.py script as
 ```bash
 python setup.py install
 ```
-
-
-
 ### Running:
 pycape is not an end-to-end analysis package; It is a collection of tools one can combine to meet their science goal.
-For examples on how to use these tools, see the Examples directory.
 
 ### License:
 See the General Public License for details on usage
