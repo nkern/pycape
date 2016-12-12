@@ -34,7 +34,8 @@ class TestObs(unittest.TestCase):
         file.close()
 
         # Configure data
-        z_num = 44
+        z_array = np.arange(5.5,27.01,0.5)
+        z_num = len(z_array)
         names = ['sense_kbins','sense_PSdata','sense_PSerrs']
         for n in names:
             mock_data[n] = np.array(mock_data[n],object)
