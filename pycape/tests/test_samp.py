@@ -41,14 +41,13 @@ class TestSamp(unittest.TestCase):
         E.sphere(grid_tr, save_chol=True)
 
         # Train
-        E.train(data_tr, grid_tr, use_pca=False)
-        E.w_norm = np.ones(N_modes)
-
-        E.fid_data = np.zeros(N_data)
         E.fid_params = np.array([5.0])
+        E.fid_data = E.fid_params[0]*X
+        E.train(data_tr, grid_tr, fid_data=E.fid_data, fid_params=E.fid_params, use_pca=False, invL=E.invL)
+        E.w_norm = np.ones(N_modes)
         E.recon_err_norm = np.ones(N_data)
 
-        pred_kwargs = {'use_pca':False}
+        pred_kwargs = {'use_pca':False,'fast':True}
         _ = E.predict(np.array([3.0])[:,np.newaxis], **pred_kwargs)
 
         # Make Obs class
