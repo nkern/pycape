@@ -19,7 +19,6 @@ class TestImport(unittest.TestCase):
 
     def test_sklearn(self):
         import sklearn
-        self.assertGreaterEqual(float(sklearn.__version__), 0.18, msg='sklearn must be >= 0.18')
 
     def test_emcee(self):
         import emcee
