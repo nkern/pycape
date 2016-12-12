@@ -11,7 +11,7 @@ from __future__ import division
 import os
 import sys
 import numpy as np
-import numpy.linalg as la
+import scipy.linalg as la
 import fnmatch
 from .scripts.DictEZ import create as ezcreate
 import itertools

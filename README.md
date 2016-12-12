@@ -9,19 +9,22 @@ Code Repo : https://github.com/nkern/pycape
 pycape is specially designed to work in the regime when 1. evaluating the simulated 21cm power spectrum with a single set of parameters is time intensive (on the order of hours+), 2. the number of dimensions in one's parameter space is large (5-10+) and 3. the size of one's parameter space is vast.
 
 ### Dependencies:
-pycape is dependent on a number of public codes, including
-- Standard Python 2.7 libraries
+pycape is dependent on a number of public codes.
 - NumPy >= 1.10.4
 - SciPy >= 0.17.0
 - matplotlib >= 1.5.1
 - sklearn >= 0.18
 - emcee : http://dan.iel.fm/emcee/current
 - astropy >= 1.2.1
-
-Optional:
 - aipy : https://github.com/AaronParsons/aipy
-- 21cmSense : https://github.com/nkern/21cmSense
+The packages above can be pip installed.
 
+- 21cmSense : https://github.com/nkern/21cmSense
+You can install 21cmSense by cloning the above repo and then adding the 21cmSense directory to your PYTHONPATH
+by adding the following to .bashrc
+```bash
+export PYTHONPATH=<where_21cmSense_lives>/21cmSense:$PYTHONPATH
+```
 ### Download
 To download, simply clone this repo
 ```bash

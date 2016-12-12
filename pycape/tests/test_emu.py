@@ -1,5 +1,5 @@
 import numpy as np
-from pycape import Emu
+import pycape
 import unittest
 import warnings
 import scipy.stats as stats
