@@ -56,9 +56,19 @@ class TestSamp(unittest.TestCase):
         O = pycape.Obs(X,X,y,yerrs,ydata_cat,ydata_cat_types)
 
         N_params = 1
-        param_bounds = [0.1, 10]
+        param_bounds = [[0.1, 10]]
         S = pycape.Samp(N_params, param_bounds, Emu=E, Obs=O)
-    
+
+        sampler_kwargs = {} 
+        nwalkers = 10
+        ndim = 1
+        lnprob_kwargs = {'predict_kwargs':pred_kwargs}
+        S.emcee_init(nwalkers, ndim, S.lnprob, lnprob_kwargs=lnprob_kwargs, sampler_kwargs=sampler_kwargs)
+
+        pos = np.array(map(lambda x: x + x*stats.norm.rvs(0,0.05,nwalkers),E.fid_params)).T
+
+        S.samp_drive(pos,step_num=1,burn_num=0)
+
 
 if __name__ == '__main__':
     unittest.main()
