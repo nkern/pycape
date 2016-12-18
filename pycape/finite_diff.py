@@ -148,17 +148,20 @@ def calc_partials(f, theta, diff_vec, second_order=True):
 def propose_O2(H,J,gamma=0.5):
     """
     Give a second order Newton-Raphson proposal step from current position theta given Hessian H and Jacobian J
+    In order to find local minima
     """
-    return gamma*np.dot(la.inv(H),J.T).ravel()
+    # Evaluate proposal step
+    prop = np.dot(la.inv(H),J.T).ravel()
+    return gamma * prop
 
-def propose_O1(J, dx=0.5):
+
+
+
+def propose_O1(J, dy=0.5):
     """
     Give a first order proposal step to minimize a function
     """
-    prop = J * dx
+    prop = dy / J
     prop[J > 0] *= -1
     return prop
-
-
-
 
