@@ -11,6 +11,8 @@ import numpy as np
 import scipy.linalg as la
 import traceback
 
+__all__ = ['FiniteDiff']
+
 class FiniteDiff(object):
 
     def __init__(self):
@@ -216,13 +218,13 @@ class FiniteDiff(object):
 
         return np.array(steps)
 
-    def hess(self, theta):
-        pos_mat, neg_mat = self.calc_partials(self.f, theta, self.diff_vec, second_order=True)
-        H, J = self.calc_hessian(self.f(theta), pos_mat, neg_mat, self.diff_vec)
+    def hess(self, theta, f, diff_vec):
+        pos_mat, neg_mat = self.calc_partials(f, theta, diff_vec, second_order=True)
+        H, J = self.calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
         return H
 
-    def jac(self, theta):
-        pos_mat, neg_mat = self.calc_partials(self.f, theta, self.diff_vec, second_order=False)
-        J = self.calc_jacobian(self.f, pos_mat, self.diff_vec, neg_mat=neg_mat)
+    def jac(self, theta, f, diff_vec):
+        pos_vec, neg_vec = self.calc_partials(f, theta, diff_vec, second_order=False)
+        J = self.calc_jacobian(f, pos_vec, diff_vec, neg_vec=neg_vec)
         return J[0]
 
