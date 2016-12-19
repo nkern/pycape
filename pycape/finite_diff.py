@@ -75,7 +75,7 @@ def second_central(f, f_neg1, f_pos1, f_neg2, f_pos2, f_neg1_neg2, f_pos1_pos2, 
     """
     return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
 
-def calc_jacobian(f, pos_mat, diff_vec, neg_mat=None):
+def calc_jacobian(f, pos_vec, diff_vec, neg_vec=None):
     """
     Calculate the approximate Jacobian Matrix
     """
@@ -83,9 +83,9 @@ def calc_jacobian(f, pos_mat, diff_vec, neg_mat=None):
     J = np.empty((1,ndim))
     for i in range(ndim):
         if neg_mat is None:
-            J[0,i] = first_forward(f, pos_mat[i,i], diff_vec[i])
+            J[0,i] = first_forward(f, pos_vec[i], diff_vec[i])
         else:
-            J[0,i] = first_central(neg_mat[i,i], pos_mat[i,i], diff_vec[i])
+            J[0,i] = first_central(neg_vec[i], pos_vec[i], diff_vec[i])
     return J
 
 def calc_hessian(f, pos_mat, neg_mat, diff_vec, out_jacobian=True):
