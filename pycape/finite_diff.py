@@ -173,14 +173,14 @@ def find_root(f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True):
     steps = []
     for i in range(nsteps):
         try:
-            steps.append(1*theta)
+            steps.append(np.copy(theta))
             pos_mat, neg_mat = calc_partials(f, theta, diff_vec, second_order=second_order)
             H, J = calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
             if second_order == True:
                 prop = propose_O2(H, J[0], gamma=gamma)
             else:
                 prop = propose_O1(J[0], gamma=gamma)
-            theta += prop
+            theta = 1*theta + prop
         except:
             print("Optimization failed... releasing steps already done")
             traceback.print_exc()
