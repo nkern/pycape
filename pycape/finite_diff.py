@@ -82,7 +82,7 @@ def calc_jacobian(f, pos_vec, diff_vec, neg_vec=None):
     ndim = len(diff_vec)
     J = np.empty((1,ndim))
     for i in range(ndim):
-        if neg_mat is None:
+        if neg_vec is None:
             J[0,i] = first_forward(f, pos_vec[i], diff_vec[i])
         else:
             J[0,i] = first_central(neg_vec[i], pos_vec[i], diff_vec[i])
