@@ -3,6 +3,7 @@ import pycape
 import unittest
 import warnings
 import scipy.stats as stats
+import scipy.linalg as la
 
 class TestEmu(unittest.TestCase):
 
@@ -49,6 +50,18 @@ class TestEmu(unittest.TestCase):
 
         pred_kwargs = {'use_pca':False,'fast':True}
         _ = E.predict(np.array([3.0])[:,np.newaxis], **pred_kwargs)
+
+    def test_cholesky(self):
+        """
+        Test to make sure cholesky decomposition works
+        """
+        # Generate Random sample
+        d = np.vstack([stats.norm.rvs(100,10,1000), stats.norm.rvs(0.5,0.1,1000)]).T
+        E = Emu({})
+        E.sphere(d, save_chol=True)
+        if E.Xsph.T[0].max() > 10 and E.Xsph.T[0].min() < -10:
+            print("Cholesky probably not working correctly, perhaps la.cholesky(Xcov) is transposed?")
+            self.fail("")
 
 if __name__ == '__main__':
     unittest.main()

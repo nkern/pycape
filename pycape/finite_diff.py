@@ -9,6 +9,7 @@ Nicholas Kern
 """
 import numpy as np
 import scipy.linalg as la
+import traceback
 
 def first_central(f_neg,f_pos,dx):
     """
@@ -151,17 +152,39 @@ def propose_O2(H,J,gamma=0.5):
     In order to find local minima
     """
     # Evaluate proposal step
-    prop = np.dot(la.inv(H),J.T).ravel()
+    prop = -np.dot(la.inv(H),J.T).ravel()
 
     # Enforce minimization
-    prop[(J > 0)&(prop > 0)] *= -1
+    #prop[(J > 0)&(prop > 0)] *= -1
 
     return gamma * prop
 
-def propose_O1(J, dy=0.5):
+def propose_O1(J, gamma=0.5):
     """
     Give a first order proposal step to minimize a function
     """
-    prop = dy / J
+    prop = -gamma*J
     return prop
+
+def find_root(f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True):
+    """
+    Find root
+    """
+    steps = []
+    for i in range(nsteps):
+        try:
+            steps.append(1*theta)
+            pos_mat, neg_mat = calc_partials(f, theta, diff_vec, second_order=second_order)
+            H, J = calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
+            if second_order == True:
+                prop = propose_O2(H, J[0], gamma=gamma)
+            else:
+                prop = propose_O1(J[0], gamma=gamma)
+            theta += prop
+        except:
+            print("Optimization failed... releasing steps already done")
+            traceback.print_exc()
+            return np.array(steps)
+
+
 

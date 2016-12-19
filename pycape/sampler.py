@@ -288,7 +288,7 @@ class Samp(object):
             lnprior = 0
             for i in range(len(theta)):
                 lnprior += self.lnprior_funcs[i](theta)
-            return lnprior
+            return np.array([lnprior])
         else:
             lnprior = []
             for j in range(len(theta)):
