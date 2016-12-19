@@ -186,5 +186,6 @@ def find_root(f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True):
             traceback.print_exc()
             return np.array(steps)
 
+    return np.array(steps)
 
 
