@@ -75,14 +75,17 @@ def second_central(f, f_neg1, f_pos1, f_neg2, f_pos2, f_neg1_neg2, f_pos1_pos2, 
     """
     return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
 
-def calc_jacobian(f, pos_mat, neg_mat, diff_vec):
+def calc_jacobian(f, pos_mat, diff_vec, neg_mat=None):
     """
     Calculate the approximate Jacobian Matrix
     """
     ndim = len(diff_vec)
     J = np.empty(1,ndim)
     for i in range(ndim):
-        J[0,i] = first_central(neg_mat[i,i], pos_mat[i,i], diff_vec[i])
+        if neg_mat is None:
+            J[0,i] = first_forward(f, pos_mat[i,i], diff_vec[i])
+        else:
+            J[0,i] = first_central(neg_mat[i,i], pos_mat[i,i], diff_vec[i])
     return J
 
 def calc_hessian(f, pos_mat, neg_mat, diff_vec, out_jacobian=True):
@@ -184,7 +187,10 @@ def find_root(f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True):
         try:
             steps.append(np.copy(theta))
             pos_mat, neg_mat = calc_partials(f, theta, diff_vec, second_order=second_order)
-            H, J = calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
+            if second_order == True:
+                H, J = calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
+            else:
+                J = calc_jacobian(f(theta), pos_mat, neg_mat, diff_vec)
             if second_order == True:
                 prop = propose_O2(H, J[0], gamma=gamma)
             else:
