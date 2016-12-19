@@ -75,6 +75,15 @@ def second_central(f, f_neg1, f_pos1, f_neg2, f_pos2, f_neg1_neg2, f_pos1_pos2, 
     """
     return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
 
+def calc_jacobian(f, pos_mat, neg_mat, diff_vec):
+    """
+    Calculate the approximate Jacobian Matrix
+    """
+    ndim = len(diff_vec)
+    J = np.empty(1,ndim)
+    for i in range(ndim):
+        J[0,i] = first_central(neg_mat[i,i], pos_mat[i,i], diff_vec[i])
+    return J
 
 def calc_hessian(f, pos_mat, neg_mat, diff_vec, out_jacobian=True):
     """
@@ -155,7 +164,7 @@ def propose_O2(H,J,gamma=0.5):
     prop = -np.dot(la.inv(H),J.T).ravel()
 
     # Enforce minimization
-    #prop[(J > 0)&(prop > 0)] *= -1
+    prop[(J > 0)&(prop > 0)] *= -1
 
     return gamma * prop
 
