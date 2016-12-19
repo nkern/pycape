@@ -11,7 +11,7 @@ pycape is specially designed to work in the regime when 1. evaluating the simula
 ### Dependencies:
 pycape is dependent on a number of public codes.
 - NumPy >= 1.10.4
-- SciPy >= 0.17.0
+- SciPy >= 0.18.0
 - matplotlib >= 1.5.1
 - sklearn >= 0.18
 - emcee : http://dan.iel.fm/emcee/current
