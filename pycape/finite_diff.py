@@ -163,6 +163,5 @@ def propose_O1(J, dy=0.5):
     Give a first order proposal step to minimize a function
     """
     prop = dy / J
-    prop[J > 0] *= -1
     return prop
 

@@ -95,7 +95,7 @@ class Emu(object):
         # Find cholesky
         if invL is None:
             # Find Covariance
-            Xcov = np.inner(X.T,X.T)/self.N_samples
+            Xcov = np.cov(X.T) #np.inner(X.T,X.T)/self.N_samples
 
             L = la.cholesky(Xcov)
             invL = la.inv(L)
