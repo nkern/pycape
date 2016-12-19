@@ -80,7 +80,7 @@ def calc_jacobian(f, pos_mat, diff_vec, neg_mat=None):
     Calculate the approximate Jacobian Matrix
     """
     ndim = len(diff_vec)
-    J = np.empty(1,ndim)
+    J = np.empty((1,ndim))
     for i in range(ndim):
         if neg_mat is None:
             J[0,i] = first_forward(f, pos_mat[i,i], diff_vec[i])
