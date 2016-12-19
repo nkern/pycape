@@ -167,7 +167,7 @@ def propose_O2(H,J,gamma=0.5):
     prop = -np.dot(la.inv(H),J.T).ravel()
 
     # Enforce minimization
-    prop[(J > 0)&(prop > 0)] *= -1
+    #prop[(J > 0)&(prop > 0)] *= -1
 
     return gamma * prop
 
@@ -202,5 +202,4 @@ def find_root(f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True):
             return np.array(steps)
 
     return np.array(steps)
-
 
