@@ -81,7 +81,7 @@ class Emu(object):
         '''if string in filelist, keep file'''
         return np.array(fnmatch.filter(filelist,string))
 
-    def sphere(self,params,fid_params=None,save_chol=False,invL=None,attach=True,**kwargs):
+    def sphere(self,params,fid_params=None,save_chol=False,invL=None,attach=True):
         """
         Perform Cholesky decomposition and whiten or 'sphere' the data into non-covarying basis
         Xcov must be positive definite
@@ -96,7 +96,6 @@ class Emu(object):
         if invL is None:
             # Find Covariance
             Xcov = np.cov(X.T) #np.inner(X.T,X.T)/self.N_samples
-
             L = la.cholesky(Xcov)
             invL = la.inv(L)
 
@@ -107,8 +106,9 @@ class Emu(object):
             self.invL = invL
 
         # Transform to non-covarying basis
+        Xsph = np.dot(invL, X.T).T
         if attach == True:
-            self.Xsph = np.dot(invL,X.T).T
+            self.Xsph = Xsph
         else:
             return Xsph
 
