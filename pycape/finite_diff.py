@@ -82,7 +82,7 @@ class FiniteDiff(object):
         """
         return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
 
-    def calc_jacobian(self, f, pos_vec, diff_vec, neg_vec=None):
+    def calc_jacobian(self, f, pos_vec, diff_vec, neg_vec=None, attach=True):
         """
         Calculate the approximate Jacobian Matrix
         f           : scalar
@@ -104,9 +104,13 @@ class FiniteDiff(object):
                 J[0,i] = self.first_forward(f, pos_vec[i], diff_vec[i])
             else:
                 J[0,i] = self.first_central(neg_vec[i], pos_vec[i], diff_vec[i])
+
+        if attach == True:
+            self.J = J
+
         return J
 
-    def calc_hessian(self, f, pos_mat, neg_mat, diff_vec, out_jacobian=True):
+    def calc_hessian(self, f, pos_mat, neg_mat, diff_vec, out_jacobian=True, attach=True):
         """
         Calculate the approximate Hessian Matrix
 
@@ -144,8 +148,12 @@ class FiniteDiff(object):
                 if out_jacobian == True and j==i: J[0,i] = self.first_central(neg_mat[i,i], pos_mat[i,i], diff_vec[i])
 
         if out_jacobian == True:
+            if attach == True:
+                self.H, self.J = H, J
             return H, J
         else:
+            if attach == True:
+                self.H = H
             return H
 
     def calc_partials(self, f, theta, diff_vec, second_order=True):
@@ -198,14 +206,17 @@ class FiniteDiff(object):
         Find root
         """
         steps = []
+        grads = []
         for i in range(nsteps):
             try:
                 steps.append(np.copy(theta))
                 pos_mat, neg_mat = self.calc_partials(f, theta, diff_vec, second_order=second_order)
                 if second_order == True:
                     H, J = self.calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
+                    grads.append([self.H, self.J])
                 else:
                     J = self.calc_jacobian(f(theta), pos_mat, neg_mat, diff_vec)
+                    grads.append([self.J])
                 if second_order == True:
                     prop = self.propose_O2(H, J[0], gamma=gamma)
                 else:
@@ -216,7 +227,7 @@ class FiniteDiff(object):
                 traceback.print_exc()
                 return np.array(steps)
 
-        return np.array(steps)
+        return np.array(steps), np.array(grads)
 
     def hess(self, theta):
         pos_mat, neg_mat = self.calc_partials(self.f, theta, self.diff_vec, second_order=True)
