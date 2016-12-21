@@ -81,7 +81,7 @@ class FiniteDiff(object):
         """
         return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
 
-    def second_central_auto(f, f_pos, f_neg, dx):
+    def second_central_auto(self, f, f_pos, f_neg, dx):
         """
         Calculate second derivative f_xx
         f           : scalar
