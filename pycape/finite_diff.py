@@ -48,8 +48,7 @@ class FiniteDiff(object):
         """
         return (f_pos-f)/dx
 
-
-    def second_central(self, f, f_neg1, f_pos1, f_neg2, f_pos2, f_neg1_neg2, f_pos1_pos2, dx1, dx2):
+    def second_central_cross(self, f, f_neg1, f_pos1, f_neg2, f_pos2, f_neg1_neg2, f_pos1_pos2, dx1, dx2):
         """
         Central finite difference approximation for second order partial derivative of f
 
@@ -81,6 +80,19 @@ class FiniteDiff(object):
                     dx2
         """
         return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
+
+    def second_central_auto(f, f_pos, f_neg, dx):
+        """
+        Calculate second derivative f_xx
+        f           : scalar
+
+        f_pos       : scalar
+
+        f_neg       : scalar
+
+        dx          : scalar
+        """
+        return (f_pos - 2*f + f_neg)/(dx**2)
 
     def calc_jacobian(self, f, pos_vec, diff_vec, neg_vec=None, attach=True):
         """
@@ -142,9 +154,14 @@ class FiniteDiff(object):
         if out_jacobian == True: J = np.empty((1,ndim))
         for i in range(ndim):
             for j in range(i, ndim):
-                hess = self.second_central(f, neg_mat[i,i], pos_mat[i,i], neg_mat[j,j], pos_mat[j,j], neg_mat[i,j], pos_mat[i,j], diff_vec[i], diff_vec[j])
-                H[i,j] = hess
-                if i != j: H[j,i] = hess
+                if i == j:
+                    hess = self.second_central_auto(f, pos_mat[i,i], neg_mat[i,i], diff_vec[i])
+                    H[i,i] = 1 * hess
+                else:
+                    hess = self.second_central_cross(f, neg_mat[i,i], pos_mat[i,i], neg_mat[j,j], 
+                                                pos_mat[j,j], neg_mat[i,j], pos_mat[i,j], diff_vec[i], diff_vec[j])
+                    H[i,j] = 1 * hess
+                    H[j,i] = 1 * hess
                 if out_jacobian == True and j==i: J[0,i] = self.first_central(neg_mat[i,i], pos_mat[i,i], diff_vec[i])
 
         if out_jacobian == True:
@@ -178,6 +195,9 @@ class FiniteDiff(object):
                 f_neg       = f(theta_neg)
                 pos_mat[i,j] = 1 * f_pos
                 neg_mat[i,j] = 1 * f_neg
+                if i != j:
+                    pos_mat[j,i] = 1 * f_pos
+                    neg_mat[j,i] = 1 * f_neg
 
         if second_order == True:
             return pos_mat, neg_mat
@@ -215,7 +235,7 @@ class FiniteDiff(object):
                     H, J = self.calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
                     grads.append([self.H, self.J])
                 else:
-                    J = self.calc_jacobian(f(theta), pos_mat, neg_mat, diff_vec)
+                    J = self.calc_jacobian(f(theta), pos_mat, diff_vec, neg_vec=neg_mat)
                     grads.append([self.J])
                 if second_order == True:
                     prop = self.propose_O2(H, J[0], gamma=gamma)
