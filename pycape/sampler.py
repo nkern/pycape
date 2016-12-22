@@ -298,7 +298,7 @@ class Samp(object):
                 lnprior.append(lnp)
             return np.array(lnprior)
 
-    def lnprob(self,theta,**lnlike_kwargs):
+    def lnprob(self, theta, out_lnlike=False, **lnlike_kwargs):
         """
         Evaluate log-like and log-prior to get log-posterior (numerator of Bayes Thm.)
         theta : ndarray (dtype=float, shape=[N_params,])
@@ -313,7 +313,11 @@ class Samp(object):
         # Evaluate lnprior
         lnprior = self.lnprior(theta)
 
-        return lnlike + lnprior
+        # Output lnprob or lnlike
+        if out_lnlke == True:
+            return lnlike
+        else:
+            return lnlike + lnprior
 
     def samp_drive(self, pos0, step_num=10, burn_num=0, save_progress=False, save_step=500, fname='chainhist_step'):
         """
