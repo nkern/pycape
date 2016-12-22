@@ -221,15 +221,20 @@ class FiniteDiff(object):
         prop = -gamma*J
         return prop
 
-    def find_root(self, f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True):
+    def find_root(self, f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True, bounds=None):
         """
         Find root
         """
+        ndim = len(diff_vec)
+
         steps = []
         grads = []
         for i in range(nsteps):
             try:
+                # Append steps
                 steps.append(np.copy(theta))
+
+                # Approximate partial derivatives
                 pos_mat, neg_mat = self.calc_partials(f, theta, diff_vec, second_order=second_order)
                 if second_order == True:
                     H, J = self.calc_hessian(f(theta), pos_mat, neg_mat, diff_vec)
@@ -237,15 +242,23 @@ class FiniteDiff(object):
                 else:
                     J = self.calc_jacobian(f(theta), pos_mat, diff_vec, neg_vec=neg_mat)
                     grads.append([self.J])
+
+                # Compute proposal step
                 if second_order == True:
                     prop = self.propose_O2(H, J[0], gamma=gamma)
                 else:
                     prop = self.propose_O1(J[0], gamma=gamma)
-                theta = 1*theta + prop
+
+                # Check within bounds
+                within = True
+                for i in range(ndim):
+                    if bounds is None: continue
+                    if (1*theta + prop)[i] < bounds[i][0] or (1*theta + prop)[i] > bounds[i][1]: continue
+                    else: theta = 1*theta - 0.1*prop
             except:
                 print("Optimization failed... releasing steps already done")
                 traceback.print_exc()
-                return np.array(steps)
+                return np.array(steps), np.array(grads)
 
         return np.array(steps), np.array(grads)
 
