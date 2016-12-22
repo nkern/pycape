@@ -257,7 +257,7 @@ class FiniteDiff(object):
                     elif (1*theta + prop)[i] < bounds[i][0] or (1*theta + prop)[i] > bounds[i][1]:
                         continue
                     else:
-                        theta = 1*theta - 0.1*prop
+                        theta = 1*theta + prop
             except:
                 print("Optimization failed... releasing steps already done")
                 traceback.print_exc()
