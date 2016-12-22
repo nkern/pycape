@@ -314,7 +314,7 @@ class Samp(object):
         lnprior = self.lnprior(theta)
 
         # Output lnprob or lnlike
-        if out_lnlke == True:
+        if out_lnlike == True:
             return lnlike
         else:
             return lnlike + lnprior
