@@ -262,6 +262,7 @@ class FiniteDiff(object):
                 if within == 1:
                     theta = 1*new_theta
                 else:
+                    print('step #'+str(int(i))+' out of bounds')
                     theta = 1*theta - 0.1*prop
 
             except:
