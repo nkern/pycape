@@ -250,14 +250,20 @@ class FiniteDiff(object):
                     prop = self.propose_O1(J[0], gamma=gamma)
 
                 # Check within bounds
-                within = True
+                within = 1
+                new_theta = 1*theta + prop
                 for i in range(ndim):
                     if bounds is None:
-                        theta = 1*theta - 0.1*prop
-                    elif (1*theta + prop)[i] < bounds[i][0] or (1*theta + prop)[i] > bounds[i][1]:
-                        continue
-                    else:
-                        theta = 1*theta + prop
+                        pass
+                    elif new_theta[i] < bounds[i][0] or new_theta[i] > bounds[i][1]:
+                        within *= 0
+
+                # Update position
+                if within == 1:
+                    theta = 1*new_theta
+                else:
+                    theta = 1*theta - 0.1*prop
+
             except:
                 print("Optimization failed... releasing steps already done")
                 traceback.print_exc()
