@@ -252,9 +252,12 @@ class FiniteDiff(object):
                 # Check within bounds
                 within = True
                 for i in range(ndim):
-                    if bounds is None: continue
-                    if (1*theta + prop)[i] < bounds[i][0] or (1*theta + prop)[i] > bounds[i][1]: continue
-                    else: theta = 1*theta - 0.1*prop
+                    if bounds is None:
+                        theta = 1*theta - 0.1*prop
+                    elif (1*theta + prop)[i] < bounds[i][0] or (1*theta + prop)[i] > bounds[i][1]:
+                        continue
+                    else:
+                        theta = 1*theta - 0.1*prop
             except:
                 print("Optimization failed... releasing steps already done")
                 traceback.print_exc()
