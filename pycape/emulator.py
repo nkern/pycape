@@ -477,7 +477,7 @@ class Emu(object):
             self.modegroups = modegroups
 
     def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
-        use_pca=True,group_modes=False,**kwargs):
+        use_pca=True,group_modes=False,sphere=True,**kwargs):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
 
@@ -493,7 +493,10 @@ class Emu(object):
 
         # Transform to whitened parameter space
         Xpred_shape = Xpred.shape
-        Xpred_sph = np.dot(self.invL,(Xpred-self.fid_params).T).T
+        if sphere == True:
+            Xpred_sph = np.dot(self.invL,(Xpred-self.fid_params).T).T
+        else:
+            Xpred_sph = Xpred
 
         if use_Nmodes is None:
             use_Nmodes = self.N_modes
