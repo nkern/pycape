@@ -277,13 +277,20 @@ class Samp(object):
         else:
             self.lnprior_funcs.append(cov_gauss_lnprior)
 
-    def lnprior(self,theta):
+    def lnprior(self, theta, sphere=False):
         """
         Call the previously generated lnprior_funcs
         theta : ndarray (dtype=float, shape=[N_params,])
             row vector of walker position
+
+        sphere : bool (default=False)
+            if False: un-sphere theta
+            else: nothing
         """
         ndim = theta.ndim
+        if sphere == False:
+            theta = np.dot(self.E.L, theta) + self.E.fid_params
+
         if ndim == 1:
             lnprior = 0
             for i in range(len(theta)):
@@ -311,7 +318,7 @@ class Samp(object):
         lnlike = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov) 
 
         # Evaluate lnprior
-        lnprior = self.lnprior(theta)
+        lnprior = self.lnprior(theta, **predict_kwargs)
 
         # Output lnprob or lnlike
         if out_lnlike == True:
