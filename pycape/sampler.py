@@ -318,7 +318,7 @@ class Samp(object):
         lnlike = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov) 
 
         # Evaluate lnprior
-        lnprior = self.lnprior(theta, sphere=lnlike_kwargs['predict_kwargs']['sphere'])
+        lnprior = self.lnprior(theta, **lnlike_kwargs['predict_kwargs'])
 
         # Output lnprob or lnlike
         if out_lnlike == True:
