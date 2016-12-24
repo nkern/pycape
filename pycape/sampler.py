@@ -172,7 +172,7 @@ class Samp(object):
 
         # Add overall modeling error (21cmFAST ~ 15%)
         if add_overall_modeling_error == True:
-            self.data_cov += np.eye(len(self.model)) * self.model * modeling_error
+            self.data_cov += np.eye(len(self.model_ydata)) * self.model_ydata * modeling_error
 
         # Add other covariances in quadrature
         if add_lnlike_cov is not None:
