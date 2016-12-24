@@ -277,7 +277,7 @@ class Samp(object):
         else:
             self.lnprior_funcs.append(cov_gauss_lnprior)
 
-    def lnprior(self, theta, sphere=False, **kwargs):
+    def lnprior(self, theta, sphere=True, **kwargs):
         """
         Call the previously generated lnprior_funcs
         theta : ndarray (dtype=float, shape=[N_params,])
