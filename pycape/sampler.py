@@ -124,7 +124,7 @@ class Samp(object):
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
                         add_overall_modeling_error=False, modeling_error=0.20,
-                        add_model_cov=False, LAYG=False, k=None, kwargs_tr={},  **kwargs):
+                        add_model_cov=False, LAYG=False, k=None, kwargs_tr={}):
         """
         Generate model prediction at walker position theta, create lnlike covariance matrix
 
@@ -161,10 +161,11 @@ class Samp(object):
 
         # Emulate
         self.E.predict(theta, **predict_kwargs)
+        self.model_shape            = self.E.recon.shape
         self.model_ydata            = self.E.recon
         self.model_ydata_err        = self.E.recon_err
         self.model_ydata_err_cov    = self.E.recon_err_cov
-        self.data_cov               = np.copy(self.O.cov)
+        self.data_cov               = np.array([np.copy(self.O.cov) for i in range(self.model_shape[0])])
 
         # Add emulator error cov output at theta
         if add_model_cov == True:
@@ -172,22 +173,24 @@ class Samp(object):
 
         # Add overall modeling error (21cmFAST ~ 15%)
         if add_overall_modeling_error == True:
-            self.data_cov += np.eye(len(self.model_ydata)) * self.model_ydata * modeling_error
+            self.data_cov += np.array([np.eye(len(self.model_ydata[i])) * self.model_ydata[i] * modeling_error for i in range(self.model_shape[0])])
 
         # Add other covariances in quadrature
         if add_lnlike_cov is not None:
             self.data_cov += add_lnlike_cov
 
-        self.data_invcov = la.inv(self.data_cov)
+        self.data_invcov = np.array([la.inv(self.data_cov[i]) for i in range(self.model_shape[0])])
 
-    def gauss_lnlike(self,ydata,model,invcov):
+    def gauss_lnlike(self, ydata, model, invcov):
         """
         A typical Gaussian log-likelihood function
         """
         resid = ydata - model
-        lnlike = -0.5 * np.dot(resid, np.dot(invcov, resid.T))
-        if type(lnlike) == np.ndarray:
-            lnlike = lnlike.diagonal()
+        shape = resid.shape
+        if len(shape) == 1:
+            lnlike = -0.5 * np.dot(resid, np.dot(invcov, resid.T))
+        else:
+            lnlike = np.array([-0.5 * np.dot(resid[i], np.dot(invcov[i], resid[i])) for i in range(shape[0])])
         return lnlike
 
     def create_gauss_lnprior(self,mean,sigma,index=0,return_func=False):
