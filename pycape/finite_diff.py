@@ -221,7 +221,7 @@ class FiniteDiff(object):
         prop = -gamma*J
         return prop
 
-    def find_root(self, f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=True, bounds=None):
+    def find_root(self, f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=False, bounds=None, tempering=False, Temp_high=True):
         """
         Find root
         """

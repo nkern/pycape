@@ -308,11 +308,16 @@ class Samp(object):
                 lnprior.append(lnp)
             return np.array(lnprior)
 
-    def lnprob(self, theta, out_lnlike=False, **lnlike_kwargs):
+    def lnprob(self, theta, output='lnprob', **lnlike_kwargs):
         """
         Evaluate log-like and log-prior to get log-posterior (numerator of Bayes Thm.)
         theta : ndarray (dtype=float, shape=[N_params,])
             row vector of walker position
+
+        output : string (default='lnprob')
+            if 'lnlike': return log-likelihood
+            elif 'lnprior': return log-prior
+            else: return log-posterior
         """
         # Create Model Prediction
         self.construct_model(theta,**lnlike_kwargs)
@@ -324,9 +329,14 @@ class Samp(object):
         lnprior = self.lnprior(theta, **lnlike_kwargs['predict_kwargs'])
 
         # Output lnprob or lnlike
-        if out_lnlike == True:
-            return lnlike
-        else:
+        try:
+            if output == 'lnlike':
+                return lnlike
+            elif output == 'lnprior':
+                return lnprior
+            else:
+                return lnlike + lnprior
+        except:
             return lnlike + lnprior
 
     def samp_drive(self, pos0, step_num=10, burn_num=0, save_progress=False, save_step=500, fname='chainhist_step'):
