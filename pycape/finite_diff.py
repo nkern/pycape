@@ -287,10 +287,8 @@ class FiniteDiff(object):
                     prop = self.propose_O1(J[0], gamma=gamma)
 
                 # Check if step_size is set
-                if step_size is not None and step_size.ndim == 1:
+                if bounds is not None and step_size is not None:
                     prop *= step_size * bound_sizes / np.abs(prop)
-                elif step_size is not None and step_size.ndim > 1:
-                    prop *= step_size[i] * bound_sizes / np.abs(prop)
 
                 # Check within bounds
                 within = 1
