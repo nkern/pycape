@@ -221,12 +221,49 @@ class FiniteDiff(object):
         prop = -gamma*J
         return prop
 
-    def find_root(self, f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=False, bounds=None, tempering=False, Temp_high=True):
+    def find_root(self, f, theta, diff_vec, nsteps=10, gamma=0.1, second_order=False, bounds=None, step_size=None):
         """
         Find root
+
+        f : function 
+            a function that returns a scalar when passed an ndarray of shape theta
+
+        theta : ndarray 
+            starting point
+
+        diff_vec : ndarray
+            difference vector containing step size for gradient evaluation with shape theta
+
+        nsteps : int (default=10)
+            number of steps to take
+
+        gamma : int or ndarray (default=0.1)
+            learning rate: gradient coefficient
+
+        second_order : bool (default=False)
+            if True: use second order proposal
+            if False: use first order proposal
+
+        bounds : ndarray (default=None)
+            hard bounds for search
+
+        step_size : int or ndarray (default=None)
+            if not None: force step size to of magnitude to be a fraction of bound extent: prop =  bound_size * step_size / np.abs(prop)
+            if step_size.ndim == 2: prop = bound_sizes * step_size[i] / np.abs(prop)
         """
+        # Get ndim
         ndim = len(diff_vec)
 
+        # Check bounds and step_size
+        if step_size is not None and bounds is None:
+            print('If step_size is not None bounds must be not None')
+            raise Exception
+
+        # Get param size
+        if bounds is not None:
+            bound_sizes = np.abs(np.array(map(lambda x: x[1]-x[0], bounds)))
+
+        # Iterate over nsteps
         steps = []
         grads = []
         for i in range(nsteps):
@@ -248,6 +285,12 @@ class FiniteDiff(object):
                     prop = self.propose_O2(H, J[0], gamma=gamma)
                 else:
                     prop = self.propose_O1(J[0], gamma=gamma)
+
+                # Check if step_size is set
+                if step_size is not None and step_size.ndim == 1:
+                    prop *= step_size * bound_sizes / np.abs(prop)
+                elif step_size is not None and step_size.ndim > 1:
+                    prop *= step_size[i] * bound_size / np.abs(prop)
 
                 # Check within bounds
                 within = 1
