@@ -290,7 +290,7 @@ class FiniteDiff(object):
                 if step_size is not None and step_size.ndim == 1:
                     prop *= step_size * bound_sizes / np.abs(prop)
                 elif step_size is not None and step_size.ndim > 1:
-                    prop *= step_size[i] * bound_size / np.abs(prop)
+                    prop *= step_size[i] * bound_sizes / np.abs(prop)
 
                 # Check within bounds
                 within = 1
