@@ -206,7 +206,7 @@ class FiniteDiff(object):
 
     def propose_O2(self, H,J,gamma=0.5):
         """
-        Give a second order Newton-Raphson proposal step from current position theta given Hessian H and Jacobian J
+        Give a second order proposal step from current position theta given Hessian H and Jacobian J
         In order to find local minima
         """
         # Evaluate proposal step
@@ -288,7 +288,13 @@ class FiniteDiff(object):
 
                 # Check if step_size is set
                 if bounds is not None and step_size is not None:
-                    prop *= step_size * bound_sizes / np.abs(prop)
+                    if type(step_size) is np.ndarray:
+                        if step_size.ndim == 1:
+                            prop *= step_size * bound_sizes / np.abs(prop)
+                        elif step_size.ndim == 2:
+                            prop *= step_size[i] * bound_sizes / np.abs(prop)
+                    elif type(step_size) is float or type(step_size) is int:
+                        prop *= step_size * bound_sizes / np.abs(prop)
 
                 # Check within bounds
                 within = 1
@@ -322,4 +328,10 @@ class FiniteDiff(object):
         pos_vec, neg_vec = self.calc_partials(self.f, theta, self.diff_vec, second_order=False)
         J = self.calc_jacobian(self.f, pos_vec, self.diff_vec, neg_vec=neg_vec)
         return J[0]
+
+
+
+
+
+
 
