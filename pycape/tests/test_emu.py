@@ -57,7 +57,7 @@ class TestEmu(unittest.TestCase):
         """
         # Generate Random sample
         d = np.vstack([stats.norm.rvs(100,10,1000), stats.norm.rvs(0.5,0.1,1000)]).T
-        E = pycape.Emu({})
+        E = pycape.Emu({'N_samples':1000})
         E.sphere(d, save_chol=True)
         if E.Xsph.T[0].max() > 10 and E.Xsph.T[0].min() < -10:
             print("Cholesky probably not working correctly, perhaps la.cholesky(Xcov) is transposed?")
