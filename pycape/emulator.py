@@ -95,7 +95,9 @@ class Emu(object):
         # Find cholesky
         if invL is None:
             # Find Covariance
-            Xcov = np.cov(X.T) #np.inner(X.T,X.T)/self.N_samples
+            Xcov = np.cov(X.T, ddof=1) #np.inner(X.T,X.T)/self.N_samples
+            if Xcov.ndim < 2:
+                Xcov = np.array([[Xcov]])
             L = la.cholesky(Xcov).T
             invL = la.inv(L)
 
@@ -242,7 +244,7 @@ class Emu(object):
             D /= self.obs_errs
 
         # Find Covariance
-        Dcov = np.inner(D.T,D.T)/self.N_samples
+        Dcov = np.cov(D.T, ddof=1) #np.inner(D.T,D.T)/self.N_samples
 
         # Solve for eigenvectors and values using SVD
         u,eig_vals,eig_vecs = la.svd(Dcov)
