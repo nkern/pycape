@@ -119,7 +119,13 @@ class Obs(object):
             elif False: convert from row2mat
         """
         if mat2row == True:
-            datavec = np.concatenate(datavec.tolist())
+            try:
+                datavec = np.concatenate(datavec.tolist())
+            except ValueError:
+                datavec_temp = []
+                for i in range(len(datavec)):
+                    datavec_temp.extend(list(datavec[i]))
+                datavec = np.array(datavec_temp)
             return datavec
 
         else:
