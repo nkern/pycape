@@ -153,7 +153,7 @@ class Obs(object):
         # get categories
         track = reduce(operator.add,map(lambda x: self.ydata_cat==x,catnames))
         track = self.mat2row(track,mat2row=False)
-        track = np.array(map(lambda x: x[0][x[1]],zip(arr,track)))
+        track = np.array(map(lambda x: x[0][x[1]] if len(x[0]) > 0 else np.array([]), zip(arr,track)))
         track_bool = self.mat2row(np.array(map(lambda x: x in catnames, self.ydata_cat)),mat2row=False)
 
         if mat == True:
