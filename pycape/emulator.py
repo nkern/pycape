@@ -290,6 +290,66 @@ class Emu(object):
         self.w_tr /= self.w_norm
 
 
+    def kfold_cv(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},
+                       kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1):
+        """
+        Cross validate emulator
+
+        Input:
+        ------
+        grid_cv : ndarray
+
+        data_cv : ndarray
+
+        use_pca : bool (default=True)
+
+        predict_kwargs : dict (default={})
+
+        data_tr : ndarray (default=None)
+
+        grid_tr : ndarray (default=None)
+
+        kfold_Nclus : int (default=None)
+        
+        kfold_Nsamp : int (default=None)
+
+        kwargs_tr : dict (default={})
+
+        RandomState : int (default=1)
+
+        Output:
+        -------
+        self.recon_cv
+        self.recon_err_cv
+        self.weights_cv
+        self.weights_err_cv
+        """
+        # Check for kfold cross validation
+        if kfold_Nclus is not None:
+            assert(kfold_Nsamp is not None)
+            # Assign random cv sets
+            rd = np.random.RandomState(RandomState)
+            size = kfold_Nclus*kfold_Nsamp
+            rando = rd.choice(np.arange(len(data_cv)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
+            rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_cv))) for i in range(kfold_Nclus)])
+
+            # Iterate over sets
+            recon_cv = []
+            recon_err_cv = []
+            for i in range(kfold_Nclus):
+                data_tr = data_cv[~rando[i]]
+                grid_tr = grid_cv[~rando[i]]
+                # Train     
+                self.train(data_tr,grid_tr,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
+                # Cross Valid
+                self.cross_validate(grid_cv[rando[i]], data_cv[rando[i]], use_pca=use_pca, predict_kwargs=predict_kwargs)
+                recon_cv.extend(self.recon_cv)
+                recon_err_cv.extend(self.recon_err_cv)
+
+            recon_cv = np.array(recon_cv)[np.argsort(rando.ravel())]
+            recon_err_cv = np.array(recon_err_cv)[np.argsort(rando.ravel())]
+            return recon_cv, recon_err_cv
+
     def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={}):
         # Sphere data
         X = grid_cv - self.fid_params
@@ -307,7 +367,7 @@ class Emu(object):
             self.weights_true_cv = np.dot(D,self.eig_vecs.T)    
 
         # Predict
-        self.predict(grid_cv.T,**predict_kwargs)
+        self.predict(grid_cv,**predict_kwargs)
         self.recon_cv       = np.copy(self.recon)
         self.recon_err_cv   = np.copy(self.recon_err)
         self.weights_cv     = np.copy(self.weights)
