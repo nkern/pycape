@@ -20,6 +20,7 @@ import functools
 from sklearn import gaussian_process
 from sklearn import neighbors
 import astropy.stats as astats
+import emcee
 
 try: from memory_profiler import memory_usage
 except: pass
@@ -230,7 +231,7 @@ class Emu(object):
             D /= self.Dstd
 
         if self.scale_by_obs_errs == True:
-            D /= self.obs_errs
+            D /= self.yerrs
 
         # Find Covariance
         Dcov = np.cov(D.T, ddof=1) #np.inner(D.T,D.T)/self.N_samples
@@ -283,7 +284,7 @@ class Emu(object):
 
 
     def kfold_cv(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},
-                       kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1):
+                       kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1, pool=None):
         """
         Cross validate emulator
 
@@ -315,37 +316,37 @@ class Emu(object):
         recon_err_cv
         recon_grid
         """
-        # Check for kfold cross validation
-        if kfold_Nclus is not None:
-            assert(kfold_Nsamp is not None)
-            # Assign random cv sets
-            rd = np.random.RandomState(RandomState)
-            size = kfold_Nclus*kfold_Nsamp
-            rando = rd.choice(np.arange(len(data_cv)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
-            rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_cv))) for i in range(kfold_Nclus)])
+        # Assign random cv sets
+        rd = np.random.RandomState(RandomState)
+        size = kfold_Nclus*kfold_Nsamp
+        rando = rd.choice(np.arange(len(data_cv)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
+        rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_cv))) for i in range(kfold_Nclus)])
 
-            # Iterate over sets
-            recon_grid = []
-            recon_cv = []
-            recon_err_cv = []
-            for i in range(kfold_Nclus):
-                print "...working on kfold clus "+str(i+1)+":\n"+"-"*26
-                data_tr = data_cv[~rando[i]]
-                grid_tr = grid_cv[~rando[i]]
-                # Train     
-                self.train(data_tr,grid_tr,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
-                # Cross Valid
-                self.cross_validate(grid_cv[rando[i]], data_cv[rando[i]], use_pca=use_pca, predict_kwargs=predict_kwargs)
-                recon_cv.extend(self.recon_cv)
-                recon_err_cv.extend(self.recon_err_cv)
-                recon_grid.extend(grid_cv[rando[i]])
+        # Define operation
 
-            recon_cv = np.array(recon_cv)
-            recon_err_cv = np.array(recon_err_cv)
-            recon_grid = np.array(recon_grid)
-            return recon_cv, recon_err_cv, recon_grid
+        # Iterate over sets
 
-    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={}):
+        recon_grid = []
+        recon_cv = []
+        recon_err_cv = []
+        for i in range(kfold_Nclus):
+            print "...working on kfold clus "+str(i+1)+":\n"+"-"*26
+            data_tr = data_cv[~rando[i]]
+            grid_tr = grid_cv[~rando[i]]
+            # Train     
+            self.train(data_tr,grid_tr,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
+            # Cross Valid
+            self.cross_validate(grid_cv[rando[i]], data_cv[rando[i]], use_pca=use_pca, predict_kwargs=predict_kwargs)
+            recon_cv.extend(self.recon_cv)
+            recon_err_cv.extend(self.recon_err_cv)
+            recon_grid.extend(grid_cv[rando[i]])
+
+        recon_cv = np.array(recon_cv)
+        recon_err_cv = np.array(recon_err_cv)
+        recon_grid = np.array(recon_grid)
+        return recon_cv, recon_err_cv, recon_grid
+
+    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False):
         # Sphere data
         X = grid_cv - self.fid_params
         Xsph = np.dot(self.invL,X.T).T
@@ -362,11 +363,15 @@ class Emu(object):
             self.weights_true_cv = np.dot(D,self.eig_vecs.T)    
 
         # Predict
-        self.predict(grid_cv,**predict_kwargs)
-        self.recon_cv       = np.copy(self.recon)
-        self.recon_err_cv   = np.copy(self.recon_err)
-        self.weights_cv     = np.copy(self.weights)
-        self.weights_err_cv = np.copy(self.weights_err)
+        if output == True:
+            recon, recon_err, recon_err_cov, weights, weights_err = self.predict(grid_cv,output=output,**predict_kwargs)
+            return recon, recon_err, recon_err_cov, weights, weights_err
+        else:
+            self.predict(grid_cv,output=output,**predict_kwargs)
+            self.recon_cv = self.recon
+            self.recon_err_cv = self.recon_err
+            self.weights_cv = self.weights
+            self.weights_err_cv = self.weights_err
 
     def train(self,data,param_samples,
             fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
@@ -491,7 +496,6 @@ class Emu(object):
 
         Input:
         ------
-
         """
         # Rescale grid
         grid_od = np.array(map(lambda x: np.dot(self.invL, (x - self.fid_params).T).T, grid_od))
@@ -513,6 +517,13 @@ class Emu(object):
 
         optima = np.array(optima).T
         return optima
+
+    def hypersolve_emcee(self, GP, theta, bounds, nstep=10, nwalkers=50, vectorize=True):
+        ndim = len(theta)
+        fun = GP.log_marginal_likelihood
+        pos = np.array([stats.uniform.rvs(loc=bounds[i][0],scale=bounds[i][1]-bounds[i][0],size=nwalkers) for i in range(ndim)])
+        S = emcee.EnsembleSampler
+
 
     def group_eigenmodes(self,emode_variance_div=10.0):
         '''
@@ -542,7 +553,7 @@ class Emu(object):
             self.modegroups = modegroups
 
     def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
-        use_pca=True,group_modes=False,sphere=True,**kwargs):
+        use_pca=True,group_modes=False,sphere=True,output=False):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
 
@@ -658,15 +669,18 @@ class Emu(object):
         recon_err_cov *= self.recon_err_norm**2
 
         # Construct data product and error on data product
-        if fast == False:
-            names = ['recon','weights','MSE','weights_err','Xpred_sph','recon_err','recon_err_cov']
-            self.update(ezcreate(names,locals()))
+        if output == True:
+            return recon, recon_err, recon_err_cov, weights, weights_err
         else:
-            self.recon = recon
-            self.recon_err = recon_err
-            self.weights = weights
-            self.weights_err = weights_err
-            self.recon_err_cov = recon_err_cov
+            if fast == False:
+                names = ['recon','weights','MSE','weights_err','Xpred_sph','recon_err','recon_err_cov']
+                self.update(ezcreate(names,locals()))
+            else:
+                self.recon = recon
+                self.recon_err = recon_err
+                self.weights = weights
+                self.weights_err = weights_err
+                self.recon_err_cov = recon_err_cov
 
 
 
