@@ -511,7 +511,7 @@ class Emu(object):
         names = ['xhat','stand_err','GP']
         self.update(ezcreate(names,locals()))
 
-    def hype_regress_1D(self, grid_od, data_od, n_restarts=3):
+    def hype_regress_1D(self, grid_od, data_od, n_restarts=4, alpha=1e-3):
         """
         Regress for hyperparameters across each dimension individually
 
@@ -520,7 +520,7 @@ class Emu(object):
 
         """
         # Rescale grid
-        grid_od = np.array(map(lambda x: np.dot(E.invL, (x - E.fid_params).T).T, grid_od))
+        grid_od = np.array(map(lambda x: np.dot(self.invL, (x - self.fid_params).T).T, grid_od))
 
         # Solve for weights
         self.klt_project(data_od)
@@ -532,7 +532,10 @@ class Emu(object):
         for p in range(self.N_params):
             xdata = grid_od[p].T[p][:,np.newaxis]
             ydata = ydata_od[p].T
-            GP = np.array(map(lambda x: gaussian_process.GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=n_restarts).fit(xdata,x), ydata))
+            GP = np.array(map(lambda x: gaussian_process.GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=n_restarts, alpha=alpha).fit(xdata,x), ydata))
+            optima.append(np.array(map(lambda x: x.kernel_.length_scale, GP)))
+
+        return optima = np.array(optima).T
 
     def GPhyperParam_NN(self,k=10,kwargs_tr={}):
         self.E.GPhyperParams = []
