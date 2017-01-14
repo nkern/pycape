@@ -275,7 +275,7 @@ class Emu(object):
             D /= self.Dstd
 
         if self.scale_by_obs_errs == True:
-            D /= self.obs_errs
+            D /= self.yerrs
 
         # Project onto eigenvectors
         self.w_tr = np.dot(D,self.eig_vecs.T)
@@ -358,7 +358,7 @@ class Emu(object):
                 D /= self.Dstd
 
             if self.scale_by_obs_errs == True:
-                D /= self.obs_errs
+                D /= self.yerrs
 
             self.weights_true_cv = np.dot(D,self.eig_vecs.T)    
 
@@ -597,7 +597,7 @@ class Emu(object):
                 recon *= self.Dstd
 
             if self.scale_by_obs_errs == True:
-                recon *= self.obs_errs
+                recon *= self.yerrs
 
             recon += self.fid_data
 
@@ -649,7 +649,7 @@ class Emu(object):
                 recon *= self.Dstd
 
             if self.scale_by_obs_errs == True:
-                recon  *= self.obs_errs
+                recon  *= self.yerrs
 
             recon += self.fid_data
 
