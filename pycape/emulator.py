@@ -514,6 +514,7 @@ class Emu(object):
     def hype_regress_1D(self, grid_od, data_od, n_restarts=4, alpha=1e-3):
         """
         Regress for hyperparameters across each dimension individually
+        Make sure norotate = True
 
         Input:
         ------
@@ -535,7 +536,8 @@ class Emu(object):
             GP = np.array(map(lambda x: gaussian_process.GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=n_restarts, alpha=alpha).fit(xdata,x), ydata))
             optima.append(np.array(map(lambda x: x.kernel_.length_scale, GP)))
 
-        return optima = np.array(optima).T
+        optima = np.array(optima).T
+        return optima
 
     def GPhyperParam_NN(self,k=10,kwargs_tr={}):
         self.E.GPhyperParams = []
