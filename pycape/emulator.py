@@ -81,10 +81,15 @@ class Emu(object):
         '''if string in filelist, keep file'''
         return np.array(fnmatch.filter(filelist,string))
 
-    def sphere(self,params,fid_params=None,save_chol=False,invL=None,attach=True):
+    def sphere(self,params,fid_params=None,save_chol=False,invL=None,attach=True,norotation=False):
         """
         Perform Cholesky decomposition and whiten or 'sphere' the data into non-covarying basis
         Xcov must be positive definite
+        Input:
+        ------
+
+        norotation : bool (default=False)
+            Ensure the coordinate system is not rotated when sphereing
         """
         if fid_params is None:
             fid_params = np.array(map(np.median,params.T))
@@ -99,6 +104,8 @@ class Emu(object):
             if Xcov.ndim < 2:
                 Xcov = np.array([[Xcov]])
             L = la.cholesky(Xcov).T
+            if norotation == True:
+                L = np.eye(len(L)) * L.diagonal()
             invL = la.inv(L)
 
         if save_chol == True:
@@ -216,7 +223,7 @@ class Emu(object):
         self.update(ezcreate(names,locals()))
 
 
-    def klt(self,data_tr,fid_data=None):
+    def klt(self,data_tr,fid_data=None,norm=True):
         ''' compute KL transform and calculate eigenvector weights for each sample in training set (TS)
             data        : [N_samples, N_data] 2D matrix, containing data of TS
             fid_data    : [N_data] row vector, containing fiducial data
@@ -265,8 +272,11 @@ class Emu(object):
         rec_var         = sum(eig_vals)
         frac_var        = rec_var/tot_var
 
-        w_norm = np.array(map(lambda x: np.abs(x).max()/2,w_tr.T)).T
-        w_tr /= w_norm
+        if norm == True:
+            w_norm = np.array(map(lambda x: np.abs(x).max()/2,w_tr.T)).T
+            w_tr /= w_norm
+        else:
+            w_norm = np.ones(self.N_modes)
 
         # Update to Namespace
         names = ['D','Dstd','data_tr','Dcov','eig_vals','eig_vecs','w_tr','tot_var','rec_var','frac_var','fid_data','w_norm']
@@ -319,10 +329,9 @@ class Emu(object):
 
         Output:
         -------
-        self.recon_cv
-        self.recon_err_cv
-        self.weights_cv
-        self.weights_err_cv
+        recon_cv
+        recon_err_cv
+        recon_grid
         """
         # Check for kfold cross validation
         if kfold_Nclus is not None:
@@ -501,6 +510,29 @@ class Emu(object):
         self._trained = True
         names = ['xhat','stand_err','GP']
         self.update(ezcreate(names,locals()))
+
+    def hype_regress_1D(self, grid_od, data_od, n_restarts=3):
+        """
+        Regress for hyperparameters across each dimension individually
+
+        Input:
+        ------
+
+        """
+        # Rescale grid
+        grid_od = np.array(map(lambda x: np.dot(E.invL, (x - E.fid_params).T).T, grid_od))
+
+        # Solve for weights
+        self.klt_project(data_od)
+        ydata_od = self.w_tr
+
+        # Iterate over independent dimensions
+        kernel = gaussian_process.kernels.RBF(length_scale=1.0)
+        optima = []
+        for p in range(self.N_params):
+            xdata = grid_od[p].T[p][:,np.newaxis]
+            ydata = ydata_od[p].T
+            GP = np.array(map(lambda x: gaussian_process.GaussianProcessRegressor(kernel=kernel, n_restarts_optimizer=n_restarts).fit(xdata,x), ydata))
 
     def GPhyperParam_NN(self,k=10,kwargs_tr={}):
         self.E.GPhyperParams = []
