@@ -205,24 +205,6 @@ class Emu(object):
             sq_err = np.abs(np.dot(resid.T,resid)/(Ashape[0]-Ashape[1]))
             return xhat, np.sqrt(sq_err)
 
-    def cluster_noise(self,basis,z):
-        # Do K-Means clustering to get samples, if so KM_nclus must be defined in variables
-        KM_est = KMeans(n_clusters=self.KM_nclus)
-        KM_est.fit(basis)
-        KM_clus = np.array(map(lambda x:np.where(KM_est.labels_==x)[0] ,range(self.KM_nclus)))
-        KM_std = np.empty((self.N_samples,self.N_modes))
-        for j in range(self.N_modes):
-            for l in range(self.KM_nclus):
-                KM_std.T[j][KM_clus[l]] = np.std(z.T[j][KM_clus[l]])
-            # Make sure std is not zero
-            zeros = KM_std.T[j] < 1e-10
-            if len(np.where(zeros==True)[0]) > 0:
-                KM_std.T[j][zeros] = np.median(KM_std.T[j][~zeros])
-
-        names = ['KM_est','KM_clus','KM_std']
-        self.update(ezcreate(names,locals()))
-
-
     def klt(self,data_tr,fid_data=None,norm=True):
         ''' compute KL transform and calculate eigenvector weights for each sample in training set (TS)
             data        : [N_samples, N_data] 2D matrix, containing data of TS
@@ -388,7 +370,7 @@ class Emu(object):
 
     def train(self,data,param_samples,
             fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
-            use_pca=True,compute_klt=True,calc_noise=False,norm_noise=False,verbose=False,
+            use_pca=True,compute_klt=True,norm_noise=False,verbose=False,
             group_modes=False,save_chol=False,invL=None,fast=False,pool=None,norotate=False):
         ''' fit regression model to then be used for interpolation
             noise_var   : [N_samples] row vector with noise variance for each sample in LLS solution
@@ -422,10 +404,6 @@ class Emu(object):
         if 'N_modegroups' not in self.__dict__:
                 self.group_eigenmodes(emode_variance_div=emode_variance_div)
 
-        # Calculate noise estimates
-        if calc_noise == True:
-            self.cluster_noise(self.Xsph, y)
-
         # polynomial regression
         if self.reg_meth == 'poly':
             # Compute design matrix
@@ -436,9 +414,6 @@ class Emu(object):
             if noise_var is None:
                 noise_var = np.array([2]*self.N_samples*self.N_modes)           # all training set samples w/ equal weight
                 noise_var = noise_var.reshape(self.N_samples,self.N_modes)
-
-            if calc_noise == True:
-                noise_var = self.KM_std**2
 
             if norm_noise == True:
                 noise_var /= y**2
@@ -483,9 +458,6 @@ class Emu(object):
                 else:
                     gp_kwargs = gp_kwargs_arr[j].copy()
 
-                if calc_noise == True:
-                    gp_kwargs['alpha'] = self.KM_std.T[j]
-
                 if norm_noise == True:
                     if 'alpha' not in gp_kwargs: gp_kwargs['alpha'] = 1e-1
                     gp_kwargs['alpha'] = (gp_kwargs['alpha']/y.T[self.modegroups[j][0]])**2
@@ -511,9 +483,10 @@ class Emu(object):
         names = ['xhat','stand_err','GP']
         self.update(ezcreate(names,locals()))
 
-    def hype_regress_1D(self, grid_od, data_od, n_restarts=4, alpha=1e-3):
+
+    def hypersolve_1D(self, grid_od, data_od, kernel=None, n_restarts=4, alpha=1e-3):
         """
-        Regress for hyperparameters across each dimension individually
+        Solve for hyperparameters across each dimension individually
         Make sure norotate = True
 
         Input:
@@ -528,7 +501,9 @@ class Emu(object):
         ydata_od = self.w_tr
 
         # Iterate over independent dimensions
-        kernel = gaussian_process.kernels.RBF(length_scale=1.0)
+        if kernel is None:
+            kernel = gaussian_process.kernels.RBF(length_scale=1.0)
+
         optima = []
         for p in range(self.N_params):
             xdata = grid_od[p].T[p][:,np.newaxis]
@@ -538,19 +513,6 @@ class Emu(object):
 
         optima = np.array(optima).T
         return optima
-
-    def GPhyperParam_NN(self,k=10,kwargs_tr={}):
-        self.E.GPhyperParams = []
-        for i in range(len(self.E.grid_tr)):
-            parsph = np.dot(self.E.invL,self.E.grid_tr[i])
-            grid_NN = self.E.tree.query(parsph,k=k)[1][0]
-            self.E.N_samples = len(grid_NN)
-            self.emu_train(self.E.data_tr[grid_NN],self.E.grid_tr[grid_NN],fid_params=self.E.fid_params,fid_data=self.E.fid_data,kwargs_tr=kwargs_tr)
-            if solve_simul == True:
-                W.E.GPhyperParams.append(self.E.GP.theta_)
-            else:
-                W.E.GPhyperParams.append(map(lambda x: x.theta_,self.E.GP))
-        self.E.GPhyperParams = np.array(self.E.GPhyperParams)
 
     def group_eigenmodes(self,emode_variance_div=10.0):
         '''
@@ -705,10 +667,6 @@ class Emu(object):
             self.weights = weights
             self.weights_err = weights_err
             self.recon_err_cov = recon_err_cov
-
-    # Check if regression of a certain eigenmode is really working via cross validation
-    def check_cross_valid(self):
-        pass
 
 
 
