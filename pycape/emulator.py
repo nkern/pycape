@@ -210,7 +210,6 @@ class Emu(object):
         ''' compute KL transform and calculate eigenvector weights for each sample in training set (TS)
             data        : [N_samples, N_data] 2D matrix, containing data of TS
             fid_data    : [N_data] row vector, containing fiducial data
-            param_samples   : [N_samples, N_params] 2D matrix, containing parameter values for each sample in TS
 
             Necessary parameters when initializing klfuncs:
             N_modes     : scalar, number of eigenmodes to keep after truncation
@@ -373,7 +372,7 @@ class Emu(object):
             self.weights_cv = self.weights
             self.weights_err_cv = self.weights_err
 
-    def train(self,data,param_samples,
+    def train(self,data,grid,
             fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
             use_pca=True,compute_klt=True,norm_noise=False,verbose=False,
             group_modes=False,save_chol=False,invL=None,fast=False,pool=None,norotate=False):
@@ -389,10 +388,10 @@ class Emu(object):
             gp_kwargs variables
         '''
         # Check parameters are correct
-        self.param_check(data,param_samples)
+        self.param_check(data,grid)
 
         # Sphere parameter space vector
-        self.sphere(param_samples,save_chol=save_chol,invL=invL,fid_params=fid_params,norotate=norotate)
+        self.sphere(grid,save_chol=save_chol,invL=invL,fid_params=fid_params,norotate=norotate)
 
         # Compute y vector
         if compute_klt == True and use_pca == True:
@@ -406,7 +405,7 @@ class Emu(object):
         elif use_pca == False:
             y = data
 
-        if 'N_modegroups' not in self.__dict__:
+        if hasattr(self,'N_modegroups') == False:
                 self.group_eigenmodes(emode_variance_div=emode_variance_div)
 
         # polynomial regression

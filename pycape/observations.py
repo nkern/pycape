@@ -107,18 +107,18 @@ class Obs(object):
 
         return np.array(model_interp)
 
-    def mat2row(self,datavec,mat2row=False):
+    def row2mat(self,datavec,row2mat=True):
         """
-        A conversion of an x or y data vector from matrix to row form or vice versa
+        A conversion of an x or y data vector from row to matrix form or vice versa
 
         datavec : ndarray (dtype=object, shape=[z_num,x_num])
             a data vector of x data (ex. k-modes and/or redshifts) or y data (ex. PS bandpowers)
 
-        mat2row : boolean (default=False)
-            if True: convert from mat2row
-            elif False: convert from row2mat
+        row2mat : boolean (default=True)
+            if True: convert from row2mat
+            elif False: convert from mat to row
         """
-        if mat2row == True:
+        if row2mat == False:
             try:
                 datavec = np.concatenate(datavec.tolist())
             except ValueError:
@@ -158,9 +158,9 @@ class Obs(object):
         
         # get categories
         track = reduce(operator.add,map(lambda x: self.ydata_cat==x,catnames))
-        track = self.mat2row(track,mat2row=False)
+        track = self.row2mat(track,row2mat=True)
         track = np.array(map(lambda x: x[0][x[1]] if len(x[0]) > 0 else np.array([]), zip(arr,track)))
-        track_bool = self.mat2row(np.array(map(lambda x: x in catnames, self.ydata_cat)),mat2row=False)
+        track_bool = self.row2mat(np.array(map(lambda x: x in catnames, self.ydata_cat)),row2mat=True)
 
         if mat == True:
             if return_bool == True:
@@ -169,9 +169,9 @@ class Obs(object):
                 return track
         else:
             if return_bool == True:
-                return self.mat2row(track,mat2row=True), self.mat2row(track_bool,mat2row=True)
+                return self.row2mat(track,row2mat=False), self.row2mat(track_bool,row2mat=False)
             else:
-                return self.mat2row(track,mat2row=True)
+                return self.row2mat(track,row2mat=False)
 
 	def drive_21cmSense(self,calib_file,ps_filenames,
                         data_filename=None,obs_direc=None,write_direc=None,write_data=True,

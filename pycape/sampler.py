@@ -364,7 +364,7 @@ class Samp(object):
         # Run burn-in
         if burn_num > 0:
             end_pos, end_prob, end_state = self.sampler.run_mcmc(pos0,burn_num)
-            self.sampler.reset()
+            #self.sampler.reset()
         else:
             end_pos = pos0
 
