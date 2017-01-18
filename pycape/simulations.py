@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 try:
     import camb
-except ImportError:
+except:
     warnings.warn('\nCould not import camb')
 
 __all__ = ['Drive_Camb','Drive_21cmFAST']
