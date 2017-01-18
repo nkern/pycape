@@ -6,6 +6,7 @@ Samp class for MCMC sampling of posterior
 import numpy as np
 import emcee
 import scipy.linalg as la
+import scipy.stats as stats
 
 __all__ = ['Samp']
 
