@@ -283,7 +283,7 @@ class Emu(object):
 
 
     def kfold_cv(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},
-                       kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1, pool=None):
+                   rando=None, kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1, pool=None):
         """
         Cross validate emulator
 
@@ -316,15 +316,13 @@ class Emu(object):
         recon_grid
         """
         # Assign random cv sets
-        rd = np.random.RandomState(RandomState)
-        size = kfold_Nclus*kfold_Nsamp
-        rando = rd.choice(np.arange(len(data_cv)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
-        rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_cv))) for i in range(kfold_Nclus)])
-
-        # Define operation
+        if rando is None:
+            rd = np.random.RandomState(RandomState)
+            size = kfold_Nclus*kfold_Nsamp
+            rando = rd.choice(np.arange(len(data_cv)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
+            rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_cv))) for i in range(kfold_Nclus)])
 
         # Iterate over sets
-
         recon_grid = []
         recon_data = []
         recon_cv = []
