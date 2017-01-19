@@ -360,7 +360,8 @@ class Emu(object):
             if self.scale_by_obs_errs == True:
                 D /= self.yerrs
 
-            self.weights_true_cv = np.dot(D,self.eig_vecs.T)    
+            self.klt_project(data_cv)
+            self.weights_true_cv = self.w_tr
 
         # Predict
         if output == True:
