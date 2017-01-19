@@ -326,6 +326,7 @@ class Emu(object):
         # Iterate over sets
 
         recon_grid = []
+        recon_data = []
         recon_cv = []
         recon_err_cv = []
         for i in range(kfold_Nclus):
@@ -339,11 +340,13 @@ class Emu(object):
             recon_cv.extend(self.recon_cv)
             recon_err_cv.extend(self.recon_err_cv)
             recon_grid.extend(grid_cv[rando[i]])
+            recon_data.extend(data_cv[rando[i]])
 
         recon_cv = np.array(recon_cv)
         recon_err_cv = np.array(recon_err_cv)
         recon_grid = np.array(recon_grid)
-        return recon_cv, recon_err_cv, recon_grid
+        recon_data = np.array(recon_data)
+        return recon_cv, recon_err_cv, recon_grid, recon_data, rando
 
     def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False):
         # Sphere data
