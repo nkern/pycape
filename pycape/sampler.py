@@ -56,9 +56,7 @@ class Samp(object):
             self.hasObs = True
 
         # Create lnlike
-        if lnlike is None:
-            self.lnlike = self.gauss_lnlike
-        else:
+        if lnlike is not None:
             self.lnlike = lnlike
 
         # Create lnprior funcs
@@ -98,7 +96,7 @@ class Samp(object):
     def update(self,dic):
         self.__dict__.update(dic)
 
-    def emcee_init(self, nwalkers, ndim, lnprob, lnprob_kwargs={}, sampler_kwargs={}):
+    def emcee_init(self, nwalkers, ndim, lnprob, ntemps=None, lnprob_kwargs={}, sampler_kwargs={}, PT=False):
         """
         Initialize an ensemble sampler
 
@@ -120,7 +118,10 @@ class Samp(object):
         self.nwalkers = nwalkers
         self.ndim = ndim
         self.lnprob = lnprob
-        self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, self.lnprob,
+        if PT == True:
+            self.sampler = emcee.PTSampler(ntemps, nwalkers, ndim, self.lnlike, self.lnprior)
+        else:
+            self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, self.lnprob,
                                                 kwargs=lnprob_kwargs, **sampler_kwargs)
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
@@ -309,6 +310,20 @@ class Samp(object):
                 lnprior.append(lnp)
             return np.array(lnprior)
 
+    def lnlike(self, theta, **lnlike_kwargs):
+        """
+        Evaluate log-likelihood
+        theta : ndarray (dtype=float, shape=[N_params,])
+            row vector of walker position
+        """
+        # Create model prediction
+        self.construct_model(theta, **lnlike_kwargs)
+
+        # Evaluate lnlike
+        lnlike = self.gauss_lnlike(self.O.ydata, self.model_ydata, self.data_invcov)
+
+        return lnlike
+
     def lnprob(self, theta, output='lnprob', **lnlike_kwargs):
         """
         Evaluate log-like and log-prior to get log-posterior (numerator of Bayes Thm.)
@@ -320,11 +335,8 @@ class Samp(object):
             elif 'lnprior': return log-prior
             else: return log-posterior
         """
-        # Create Model Prediction
-        self.construct_model(theta,**lnlike_kwargs)
-
-        # Evaluate lnlike
-        lnlike = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov) 
+        # Evaluate Likelihood
+        lnlike = self.lnlike(theta,**lnlike_kwargs)
 
         # Evaluate lnprior
         lnprior = self.lnprior(theta, **lnlike_kwargs['predict_kwargs'])
