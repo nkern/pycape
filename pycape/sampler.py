@@ -118,11 +118,13 @@ class Samp(object):
         self.nwalkers = nwalkers
         self.ndim = ndim
         self.lnprob = lnprob
+        self.ntemps = ntemps
+        self.PT = PT
+
         if PT == True:
-            self.sampler = emcee.PTSampler(ntemps, nwalkers, ndim, self.lnlike, self.lnprior)
+            self.sampler = emcee.PTSampler(ntemps, nwalkers, ndim, self.lnlike, self.lnprior, loglkwargs=lnprob_kwargs, **sampler_kwargs)
         else:
-            self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, self.lnprob,
-                                                kwargs=lnprob_kwargs, **sampler_kwargs)
+            self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, self.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
                         add_overall_modeling_error=False, modeling_error=0.20,
@@ -374,6 +376,14 @@ class Samp(object):
         fname : str (default='chainhist_step')
             filename prefix (without .pkl) for chain history
         """
+        # Alter sampler run function
+        if self.PT == True:
+            def run_mcmc(pos0, step_num):
+                p, logl, logp = self.sampler.sample(pos0,iterations=step_num)
+                end_pos = self.sampler.chain[:,:,-1,:]
+                return end_pos, 0, 0
+            self.sampler.run_mcmc = run_mcmc
+
         # Run burn-in
         if burn_num > 0:
             end_pos, end_prob, end_state = self.sampler.run_mcmc(pos0,burn_num)
