@@ -423,16 +423,8 @@ class Samp(object):
         """
         # Iterate over CV samples
         self.construct_model(grid_cv, **lnlike_kwargs)
-        emu_lnlike = self.lnlike(self.O.ydata,self.model_ydata,self.data_invcov)
-        tru_lnlike = self.lnlike(self.O.ydata,data_cv,self.data_invcov)
+        emu_lnlike = self.gauss_lnlike(self.O.ydata,self.model_ydata,self.data_invcov)
+        tru_lnlike = self.gauss_lnlike(self.O.ydata,data_cv,self.data_invcov)
 
         return emu_lnlike, tru_lnlike
-
-
-
-
-
-
-
-
 
