@@ -93,7 +93,7 @@ class TestObs(unittest.TestCase):
 
         # test track
         _ = O.track(['ps'])
-        _ = O.track(['ps'], arr=O.mat2row(O.x_ext) )
+        _ = O.track(['ps'], arr=O.row2mat(O.x_ext, row2mat=False) )
 
 if __name__ == '__main__':
     unittest.main()
