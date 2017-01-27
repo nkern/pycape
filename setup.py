@@ -11,7 +11,8 @@ setup(
     description     = 'emulator for 21cm studies',
     author          = 'Nick Kern',
     url             = "http://github.com/nkern/pycape",
-    packages        = ['pycape','pycape.scripts'],
+    packages        = ['pycape','pycape.tests','pycape.scripts'],
+    package_data    = {'pycape':['tests/*.pkl']},
     setup_requires  = ['pytest-runner'],
     tests_require   = ['pytest']
     )
