@@ -29,7 +29,7 @@ class TestObs(unittest.TestCase):
 
     def test_pspec_handling(self):
         # Load mock obs file
-        file = open(pycape.__packagepath__+'/tests/mockObs_hera331_allz.pkl','rb')
+        file = open(pycape.__packagepath__+'/data/mockObs_hera331_allz.pkl','rb')
         mock_data = pkl.Unpickler(file).load()
         file.close()
 
