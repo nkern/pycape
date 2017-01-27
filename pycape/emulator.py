@@ -206,7 +206,7 @@ class Emu(object):
             sq_err = np.abs(np.dot(resid.T,resid)/(Ashape[0]-Ashape[1]))
             return xhat, np.sqrt(sq_err)
 
-    def klt(self,data_tr,fid_data=None,norm=True,w_norm=None):
+    def klt(self,data_tr,fid_data=None,norm=False,w_norm=None):
         ''' compute KL transform and calculate eigenvector weights for each sample in training set (TS)
             data        : [N_samples, N_data] 2D matrix, containing data of TS
             fid_data    : [N_data] row vector, containing fiducial data
