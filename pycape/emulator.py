@@ -42,7 +42,7 @@ class Emu(object):
         self.__dict__.update(dic)
         self._trained = False
         if hasattr(self, 'cov_est') == False:
-            self.cov_est = lambda x: covariance.MinCovDet().fit(x.T).covariance_
+            self.cov_est = lambda x: covariance.MinCovDet(store_precision=False).fit(x.T).covariance_
 
     @property
     def print_pars(self):
@@ -224,7 +224,10 @@ class Emu(object):
             fid_data = np.array(map(np.median,data_tr.T))
 
         # Find self-variance of mean-subtracted data
-        D = (data_tr - fid_data)
+        if self.lognorm == True:
+            D = np.log(data_tr / fid_data)
+        else:
+            D = (data_tr - fid_data)
         Dstd = np.array(map(astats.biweight_midvariance,D.T))
 
         if self.scale_by_std == True:
@@ -275,7 +278,10 @@ class Emu(object):
         Having already run klt() to get eigenvectors and eigenvalues, project vector 'data' onto eigenmodes
         '''
         # Subtract fiducial data from data
-        D = data - self.fid_data
+        if self.lognorm == True:
+            D = np.log(data / self.fid_data)
+        else:
+            D = data - self.fid_data
         if self.scale_by_std == True:
             D /= self.Dstd
 
@@ -657,7 +663,11 @@ class Emu(object):
             if self.scale_by_obs_errs == True:
                 recon  *= self.yerrs
 
-            recon += self.fid_data
+            if self.lognorm == True:
+                recon = np.exp(recon)
+                recon *= self.fid_data
+            else:
+                recon += self.fid_data
 
         # Calculate Error
         if use_pca == True:
@@ -669,6 +679,11 @@ class Emu(object):
         else:
             recon_err = weights_err
             recon_err_cov = np.array([np.eye(len(recon.T[i]),len(recon.T[i])) * recon_err.T[i] for i in range(len(recon.T))]).T
+
+        # ReNormalize
+        if self.lognorm == True:
+            recon_err = np.array([recon_err[i]/recon[i] for i in range(len(recon))])
+            recon_err_cov = np.array([recon_err_cov[i] / np.outer(recon_err[i],recon_err[i]) for i in range(len(recon))])
 
         # Normalize Error
         recon_err *= self.recon_err_norm
