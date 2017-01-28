@@ -19,6 +19,7 @@ import operator
 import functools
 from sklearn import gaussian_process
 from sklearn import neighbors
+from sklearn import covariance
 import astropy.stats as astats
 import emcee
 
@@ -40,6 +41,8 @@ class Emu(object):
         self.__name__ = 'Emu'
         self.__dict__.update(dic)
         self._trained = False
+        if hasattr(self, 'cov_est') == False:
+            self.cov_est = lambda x: covariance.MinCovDet().fit(x.T).covariance_
 
     @property
     def print_pars(self):
@@ -101,7 +104,7 @@ class Emu(object):
         # Find cholesky
         if invL is None:
             # Find Covariance
-            Xcov = np.cov(X.T, ddof=1) #np.inner(X.T,X.T)/self.N_samples
+            Xcov = self.cov_est(X.T)# np.cov(X.T, ddof=1) #np.inner(X.T,X.T)/self.N_samples
             if Xcov.ndim < 2:
                 Xcov = np.array([[Xcov]])
             L = la.cholesky(Xcov).T
@@ -233,7 +236,7 @@ class Emu(object):
             D /= self.yerrs
 
         # Find Covariance
-        Dcov = np.cov(D.T, ddof=1) #np.inner(D.T,D.T)/self.N_samples
+        Dcov = self.cov_est(D.T) #np.cov(D.T, ddof=1) #np.inner(D.T,D.T)/self.N_samples
 
         # Solve for eigenvectors and values using SVD
         u,eig_vals,eig_vecs = la.svd(Dcov)
@@ -684,7 +687,6 @@ class Emu(object):
                 self.weights = weights
                 self.weights_err = weights_err
                 self.recon_err_cov = recon_err_cov
-
 
 
 
