@@ -209,7 +209,7 @@ class Emu(object):
             sq_err = np.abs(np.dot(resid.T,resid)/(Ashape[0]-Ashape[1]))
             return xhat, np.sqrt(sq_err)
 
-    def klt(self,data_tr,fid_data=None,norm=False,w_norm=None):
+    def klt(self,data_tr,fid_data=None,normalize=False,w_norms=None):
         ''' compute KL transform and calculate eigenvector weights for each sample in training set (TS)
             data        : [N_samples, N_data] 2D matrix, containing data of TS
             fid_data    : [N_data] row vector, containing fiducial data
@@ -260,11 +260,11 @@ class Emu(object):
         rec_var         = sum(eig_vals)
         frac_var        = rec_var/tot_var
 
-        if norm == True and w_norm is None:
+        if normalize == True and w_norm is None:
             w_norm = np.array(map(lambda x: np.abs(x).max()/2,w_tr.T)).T
-        elif norm == True and w_norm is not None:
+        elif normalize == True and w_norm is not None:
             w_norm = w_norm
-        elif norm == False:
+        elif normalize == False:
             w_norm = np.ones(self.N_modes)
 
         w_tr /= w_norm
