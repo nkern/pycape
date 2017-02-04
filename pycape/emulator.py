@@ -42,7 +42,7 @@ class Emu(object):
         self.__dict__.update(dic)
         self._trained = False
         if hasattr(self, 'cov_est') == False:
-            self.cov_est = lambda x: covariance.MinCovDet(store_precision=False).fit(x.T).covariance_
+            self.cov_est = lambda x: np.cov(x, ddof=1) #covariance.MinCovDet(store_precision=False).fit(x.T).covariance_
 
     @property
     def print_pars(self):

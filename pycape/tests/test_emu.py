@@ -36,7 +36,7 @@ class TestEmu(unittest.TestCase):
         # Instantiate
         N_modes = N_data
         variables = {'reg_meth':'gaussian','gp_kwargs':{},'N_modes':N_modes,'N_samples':N_samples,
-                'scale_by_std':False,'scale_by_obs_errs':False}
+                'scale_by_std':False,'scale_by_obs_errs':False,'lognorm':False}
         E = pycape.Emu(variables)
 
         E.sphere(grid_tr, save_chol=True)
