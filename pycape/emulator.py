@@ -209,6 +209,8 @@ class Emu(object):
             sq_err = np.abs(np.dot(resid.T,resid)/(Ashape[0]-Ashape[1]))
             return xhat, np.sqrt(sq_err)
 
+    def transform_data(self, data_tr
+
     def klt(self,data_tr,fid_data=None,normalize=False,w_norm=None):
         ''' compute KL transform and calculate eigenvector weights for each sample in training set (TS)
             data        : [N_samples, N_data] 2D matrix, containing data of TS
@@ -432,9 +434,6 @@ class Emu(object):
                 noise_var = np.array([2]*self.N_samples*self.N_modes)           # all training set samples w/ equal weight
                 noise_var = noise_var.reshape(self.N_samples,self.N_modes)
 
-            if norm_noise == True:
-                noise_var /= y**2
-
             # Fill weight matrix
             W = np.zeros((self.N_modes,self.N_samples,self.N_samples))
             for i in range(self.N_modes):
@@ -474,10 +473,6 @@ class Emu(object):
                     gp_kwargs = self.gp_kwargs.copy()
                 else:
                     gp_kwargs = gp_kwargs_arr[j].copy()
-
-                if norm_noise == True:
-                    if 'alpha' not in gp_kwargs: gp_kwargs['alpha'] = 1e-1
-                    gp_kwargs['alpha'] = (gp_kwargs['alpha']/y.T[self.modegroups[j][0]])**2
 
                 # Create GP
                 gp = gaussian_process.GaussianProcessRegressor(**gp_kwargs)
@@ -682,8 +677,8 @@ class Emu(object):
 
         # ReNormalize
         if self.lognorm == True:
-            recon_err = np.array([recon_err[i]/recon[i] for i in range(len(recon))])
-            recon_err_cov = np.array([recon_err_cov[i] / np.outer(recon_err[i],recon_err[i]) for i in range(len(recon))])
+            recon_err = np.array([recon_err[i]*np.exp(recon[i]) for i in range(len(recon))])
+            recon_err_cov = np.array([recon_err_cov[i]*np.exp(np.outer(recon_err[i],recon_err[i])) for i in range(len(recon))])
 
         # Normalize Error
         recon_err *= self.recon_err_norm
