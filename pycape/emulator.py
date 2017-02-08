@@ -294,7 +294,6 @@ class Emu(object):
         self.w_tr = np.dot(D,self.eig_vecs.T)
         self.w_tr /= self.w_norm
 
-
     def kfold_cv(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},
                    rando=None, kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1, pool=None):
         """
@@ -374,7 +373,7 @@ class Emu(object):
                 D /= self.yerrs
 
             self.klt_project(data_cv)
-            self.weights_true_cv = self.w_tr
+            self.weights_true_cv = self.w_tr * self.w_norm
 
         # Predict
         if output == True:
