@@ -181,7 +181,6 @@ class Samp(object):
 
         # Add other covariances in quadrature
         if add_lnlike_cov is not None:
-            print 'hello...'
             self.data_cov += add_lnlike_cov
 
         self.data_invcov = np.array([la.inv(self.data_cov[i]) for i in range(self.model_shape[0])])
