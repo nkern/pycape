@@ -261,9 +261,11 @@ class Emu(object):
         frac_var        = rec_var/tot_var
 
         if normalize == True and w_norm is None:
-            w_norm = np.array(map(lambda x: np.abs(x).max()/2,w_tr.T)).T
+            w_norm = np.array(map(lambda x: astats.biweight_midvariance(x)*5, w_tr.T)).T
+
         elif normalize == True and w_norm is not None:
             w_norm = w_norm
+
         elif normalize == False:
             w_norm = np.ones(self.N_modes)
 
@@ -292,16 +294,17 @@ class Emu(object):
         self.w_tr = np.dot(D,self.eig_vecs.T)
         self.w_tr /= self.w_norm
 
-    def kfold_cv(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},
-                   rando=None, kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={}, RandomState=1, pool=None):
+    def kfold_cv(self,grid_tr,data_tr,use_pca=True,predict_kwargs={},
+                   rando=None, kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={},
+                   RandomState=1, pool=None):
         """
         Cross validate emulator
 
         Input:
         ------
-        grid_cv : ndarray
+        grid_tr : ndarray
 
-        data_cv : ndarray
+        data_tr : ndarray
 
         use_pca : bool (default=True)
 
@@ -329,8 +332,8 @@ class Emu(object):
         if rando is None:
             rd = np.random.RandomState(RandomState)
             size = kfold_Nclus*kfold_Nsamp
-            rando = rd.choice(np.arange(len(data_cv)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
-            rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_cv))) for i in range(kfold_Nclus)])
+            rando = rd.choice(np.arange(len(data_tr)), replace=False, size=size).reshape(kfold_Nclus,kfold_Nsamp)
+            rando = np.array([map(lambda x: x in rando[i], np.arange(len(data_tr))) for i in range(kfold_Nclus)])
 
         # Iterate over sets
         recon_grid = []
@@ -339,21 +342,22 @@ class Emu(object):
         recon_err_cv = []
         for i in range(kfold_Nclus):
             print "...working on kfold clus "+str(i+1)+":\n"+"-"*26
-            data_tr = data_cv[~rando[i]]
-            grid_tr = grid_cv[~rando[i]]
+            data_tr_temp = data_tr[~rando[i]]
+            grid_tr_temp = grid_tr[~rando[i]]
             # Train     
-            self.train(data_tr,grid_tr,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
+            self.train(data_tr_temp,grid_tr_temp,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
             # Cross Valid
-            self.cross_validate(grid_cv[rando[i]], data_cv[rando[i]], use_pca=use_pca, predict_kwargs=predict_kwargs)
+            self.cross_validate(grid_tr[rando[i]], data_tr[rando[i]], use_pca=use_pca, predict_kwargs=predict_kwargs)
             recon_cv.extend(self.recon_cv)
             recon_err_cv.extend(self.recon_err_cv)
-            recon_grid.extend(grid_cv[rando[i]])
-            recon_data.extend(data_cv[rando[i]])
+            recon_grid.extend(np.copy(grid_tr[rando[i]]))
+            recon_data.extend(np.copy(data_tr[rando[i]]))
 
         recon_cv = np.array(recon_cv)
         recon_err_cv = np.array(recon_err_cv)
         recon_grid = np.array(recon_grid)
         recon_data = np.array(recon_data)
+
         return recon_cv, recon_err_cv, recon_grid, recon_data, rando
 
     def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False):

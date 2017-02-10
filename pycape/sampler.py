@@ -404,6 +404,65 @@ class Samp(object):
 
         self.end_pos = end_pos
 
+    def kfold_cross_validate(self,grid_tr,data_tr,use_pca=True,predict_kwargs={},
+                            rando=None, kfold_Nclus=None, kfold_Nsamp=None, kwargs_tr={},
+                            lnlike_kwargs={}, RandomState=1, pool=None):
+        """
+        Cross validate sampler
+
+        Input:
+        ------
+        grid_tr : ndarray
+
+        data_tr : ndarray
+
+        use_pca : bool (default=True)
+
+        predict_kwargs : dict (default={})
+
+        rando : ndarray
+
+        kfold_Nclus : int (default=None)
+
+        kfold_Nsamp : int (default=None)
+
+        kwargs_tr : dict (default={})
+
+        RandomState : int (default=1)
+
+        Output:
+        -------
+        """
+        # Assign random cv sets
+        if rando is None:
+            rando = np.array([[False]*len(data_tr) for i in range(Nclus)])
+            rand_samp = np.random.choice(np.arange(len(data_tr)), replace=False, size=Nclus*Nsamp).reshape(Nclus,Nsamp)
+            for i in range(Nclus): rando[i][rand_samp[i]] = True
+
+        # Iterate over sets
+        recon_grid = []
+        recon_data = []
+        lnlike_data = []
+        lnlike_cv = []
+        for i in range(kfold_Nclus):
+            print "...working on kfold clus "+str(i+1)+":\n"+"-"*26
+            data_tr_temp = data_tr[~rando[i]]
+            grid_tr_temp = grid_tr[~rando[i]]
+            # Train     
+            self.train(data_tr_temp,grid_tr_temp,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
+            # Cross Valid
+            emu_lnlike, tru_lnlike = self.cross_validate(grid_tr[rando[i]], data_tr[rando[i]], lnlike_kwargs=lnlike_kwargs)
+            recon_grid.append(grid_tr[rando[i]])
+            recon_data.append(data_tr[rando[i]])
+            lnlike_data.append(tru_lnlike)
+            lnlike_cv.append(emu_lnlike)
+
+        recon_grid = np.array(recon_grid)
+        recon_data = np.array(recon_data)
+        lnlike_data = np.array(lnlike_data)
+        lnlike_cv = np.array(lnlike_cv)
+
+        return lnlike_cv, lnlike_data, recon_data, recon_grid, rando
 
     def cross_validate(self,grid_cv,data_cv,lnlike_kwargs={}):
         """
