@@ -674,8 +674,8 @@ class Emu(object):
 
         # ReNormalize
         if self.lognorm == True:
-            recon_err = np.array([recon_err[i]*np.exp(recon[i]) for i in range(len(recon))])
-            recon_err_cov = np.array([recon_err_cov[i]*np.exp(np.outer(recon_err[i],recon_err[i])) for i in range(len(recon))])
+            recon_err = np.array([recon_err[i]*recon[i] for i in range(len(recon))])
+            recon_err_cov = np.array([recon_err_cov[i]*np.outer(recon_err[i],recon_err[i]) for i in range(len(recon))])
 
         # Normalize Error
         recon_err *= self.recon_err_norm
@@ -694,6 +694,5 @@ class Emu(object):
                 self.weights = weights
                 self.weights_err = weights_err
                 self.recon_err_cov = recon_err_cov
-
 
 
