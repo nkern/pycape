@@ -561,7 +561,7 @@ class Emu(object):
             self.modegroups = modegroups
 
     def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
-        use_pca=True,sphere=True,output=False,LAYG=False,kwargs_tr={}):
+        use_pca=True,sphere=True,output=False,LAYG=False,k=10,kwargs_tr={}):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
 
