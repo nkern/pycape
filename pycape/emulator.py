@@ -561,7 +561,7 @@ class Emu(object):
             self.modegroups = modegroups
 
     def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
-        use_pca=True,group_modes=False,sphere=True,output=False):
+        use_pca=True,sphere=True,output=False,LAYG=False,kwargs_tr={}):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
 
@@ -575,6 +575,10 @@ class Emu(object):
         # Chi Square Multiplier, 95% prob
         self.csm = np.sqrt([3.841,5.991,7.815,9.488,11.070,12.592,14.067,15.507,16.919])
 
+        # Checkf or LAYG
+        if LAYG == True:
+            self.E.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
+
         # Transform to whitened parameter space
         Xpred_shape = Xpred.shape
         if sphere == True:
@@ -584,6 +588,13 @@ class Emu(object):
 
         if use_Nmodes is None:
             use_Nmodes = self.N_modes
+
+        # Check for LAYG
+        if LAYG == True:
+            grid_D, grid_NN = self.nearest(Xpred_sph, k=k, use_tree=False)
+            self.klt_project(self.data_tr[grid_NN])
+            self.E.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
+                            fid_params=self.fid_params,**kwargs_tr)
 
         # Polynomial Interpolation
         if self.reg_meth == 'poly':
