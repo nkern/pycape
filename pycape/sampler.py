@@ -452,10 +452,10 @@ class Samp(object):
             self.E.train(data_tr_temp,grid_tr_temp,fid_data=self.E.fid_data,fid_params=self.E.fid_params,**kwargs_tr)
             # Cross Valid
             emu_lnlike, tru_lnlike = self.cross_validate(grid_tr[rando[i]], data_tr[rando[i]], lnlike_kwargs=lnlike_kwargs)
-            recon_grid.append(grid_tr[rando[i]])
-            recon_data.append(data_tr[rando[i]])
-            lnlike_data.append(tru_lnlike)
-            lnlike_cv.append(emu_lnlike)
+            recon_grid.extend(grid_tr[rando[i]])
+            recon_data.extend(data_tr[rando[i]])
+            lnlike_data.extend(tru_lnlike)
+            lnlike_cv.extend(emu_lnlike)
 
         recon_grid = np.array(recon_grid)
         recon_data = np.array(recon_data)
