@@ -449,7 +449,7 @@ class Samp(object):
             data_tr_temp = data_tr[~rando[i]]
             grid_tr_temp = grid_tr[~rando[i]]
             # Train     
-            self.E.train(data_tr_temp,grid_tr_temp,fid_data=self.fid_data,fid_params=self.fid_params,**kwargs_tr)
+            self.E.train(data_tr_temp,grid_tr_temp,fid_data=self.E.fid_data,fid_params=self.E.fid_params,**kwargs_tr)
             # Cross Valid
             emu_lnlike, tru_lnlike = self.cross_validate(grid_tr[rando[i]], data_tr[rando[i]], lnlike_kwargs=lnlike_kwargs)
             recon_grid.append(grid_tr[rando[i]])
