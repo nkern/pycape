@@ -577,7 +577,7 @@ class Emu(object):
 
         # Checkf or LAYG
         if LAYG == True:
-            self.E.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
+            self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
 
         # Transform to whitened parameter space
         Xpred_shape = Xpred.shape
@@ -593,7 +593,7 @@ class Emu(object):
         if LAYG == True:
             grid_D, grid_NN = self.nearest(Xpred_sph, k=k, use_tree=False)
             self.klt_project(self.data_tr[grid_NN])
-            self.E.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
+            self.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
                             fid_params=self.fid_params,**kwargs_tr)
 
         # Polynomial Interpolation
