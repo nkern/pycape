@@ -161,7 +161,7 @@ class Samp(object):
             else:
                 M = pool.map
             if theta.ndim == 1: theta = theta[np.newaxis,:]
-            model_ydata,model_ydata_err,model_ydata_err_cov,weights,weights_err = np.array(map(lambda x: self.predict(x, output=True, **predict_kwargs), theta))
+            model_ydata,model_ydata_err,model_ydata_err_cov,weights,weights_err = np.array(map(lambda x: self.E.predict(x, output=True, **predict_kwargs), theta))
             model_shape = model_ydata.shape
         else:
             self.E.predict(theta, **predict_kwargs)
