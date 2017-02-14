@@ -392,15 +392,21 @@ class Emu(object):
                 weights_err.append(output[i][4][0])
             recon,recon_err,recon_err_cov = np.array(recon), np.array(recon_err), np.array(recon_err_cov)
             weights, weights_err = np.array(weights), np.array(weights_err)
+            self.recon_cv = recon
+            self.recon_err_cv = recon_err
+            self.recon_err_cov_cv = recon_err_cov
+            self.weights_cv = weights
+            self.weights_err_cv = weights_err
         else:
             self.predict(grid_cv,output=False,**predict_kwargs)
             self.recon_cv = self.recon
             self.recon_err_cv = self.recon_err
+            self.recon_err_cov_cv = self.recon_err_cov
             self.weights_cv = self.weights
             self.weights_err_cv = self.weights_err
 
         if output == True:
-            return self.recon_cv, self.recon_err_cv, recon_err_cov, self.weights, self.weights_err
+            return self.recon_cv, self.recon_err_cv, self.recon_err_cov, self.weights_cv, self.weights_err_cv
 
     def train(self,data,grid,
             fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
@@ -707,17 +713,17 @@ class Emu(object):
         recon_err_cov *= self.recon_err_norm**2
 
         # Construct data product and error on data product
+        if fast == False:
+            names = ['recon','weights','MSE','weights_err','Xpred_sph','recon_err','recon_err_cov']
+            self.update(ezcreate(names,locals()))
+        else:
+            self.recon = recon
+            self.recon_err = recon_err
+            self.weights = weights
+            self.weights_err = weights_err
+            self.recon_err_cov = recon_err_cov
+
         if output == True:
             return recon, recon_err, recon_err_cov, weights, weights_err
-        else:
-            if fast == False:
-                names = ['recon','weights','MSE','weights_err','Xpred_sph','recon_err','recon_err_cov']
-                self.update(ezcreate(names,locals()))
-            else:
-                self.recon = recon
-                self.recon_err = recon_err
-                self.weights = weights
-                self.weights_err = weights_err
-                self.recon_err_cov = recon_err_cov
 
 
