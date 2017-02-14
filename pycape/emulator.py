@@ -382,7 +382,16 @@ class Emu(object):
             else:
                 M = pool.map
             if grid_cv.ndim == 1: grid_cv = grid_cv[np.newaxis,:]
-            recon,recon_err,recon_err_cov,weights,weights_err = np.array(map(lambda x: self.predict(x, output=True, **predict_kwargs), grid_cv))
+            recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
+            output = map(lambda x: self.predict(x, output=True, **predict_kwargs), grid_cv)
+            for i in range(len(output)):
+                recon.append(output[i][0][0])
+                recon_err.append(output[i][1][0])
+                recon_err_cov.append(output[i][2][0])
+                weights.append(output[i][3][0])
+                weights_err.append(output[i][4][0])
+            recon,recon_err,recon_err_cov = np.array(recon), np.array(recon_err), np.array(recon_err_cov)
+            weights, weights_err = np.array(weights), np.array(weights_err)
         else:
             self.predict(grid_cv,output=False,**predict_kwargs)
             self.recon_cv = self.recon
