@@ -360,10 +360,7 @@ class Emu(object):
 
         return recon_cv, recon_err_cv, recon_grid, recon_data, rando
 
-    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False):
-        # Sphere data
-        X = grid_cv - self.fid_params
-        Xsph = np.dot(self.invL,X.T).T
+    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False,LAYG=False,pool=None):
 
         # Solve for eigenmode weight constants
         if use_pca == True:
@@ -378,15 +375,22 @@ class Emu(object):
             self.weights_true_cv = self.w_tr * self.w_norm
 
         # Predict
-        if output == True:
-            recon, recon_err, recon_err_cov, weights, weights_err = self.predict(grid_cv,output=output,**predict_kwargs)
-            return recon, recon_err, recon_err_cov, weights, weights_err
+        if LAYG == True:
+            if pool is None:
+                M = map
+            else:
+                M = pool.map
+            if grid_cv.ndim == 1: grid_cv = grid_cv[np.newaxis,:]
+            recon,recon_err,recon_err_cov,weights,weights_err = np.array(map(lambda x: self.predict(x, output=True, **predict_kwargs), grid_cv))
         else:
-            self.predict(grid_cv,output=output,**predict_kwargs)
+            self.predict(grid_cv,output=False,**predict_kwargs)
             self.recon_cv = self.recon
             self.recon_err_cv = self.recon_err
             self.weights_cv = self.weights
             self.weights_err_cv = self.weights_err
+
+        if output == True:
+            return self.recon_cv, self.recon_err_cv, recon_err_cov, self.weights, self.weights_err
 
     def train(self,data,grid,
             fid_data=None,fid_params=None,noise_var=None,gp_kwargs_arr=None,emode_variance_div=1.0,
@@ -561,7 +565,7 @@ class Emu(object):
             self.modegroups = modegroups
 
     def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
-        use_pca=True,sphere=True,output=False,LAYG=False,k=10,kwargs_tr={}):
+        use_pca=True,sphere=True,output=False,kwargs_tr={},LAYG=False,k=50,use_tree=True):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
 
@@ -575,10 +579,6 @@ class Emu(object):
         # Chi Square Multiplier, 95% prob
         self.csm = np.sqrt([3.841,5.991,7.815,9.488,11.070,12.592,14.067,15.507,16.919])
 
-        # Checkf or LAYG
-        if LAYG == True:
-            self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
-
         # Transform to whitened parameter space
         Xpred_shape = Xpred.shape
         if sphere == True:
@@ -591,8 +591,9 @@ class Emu(object):
 
         # Check for LAYG
         if LAYG == True:
-            grid_D, grid_NN = self.nearest(Xpred_sph, k=k, use_tree=False)
-            self.klt_project(self.data_tr[grid_NN])
+            self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
+            grid_NN = self.nearest(Xpred_sph, k=k, use_tree=use_tree)[1]
+            self.klt_project(self.E.data_tr[grid_NN])
             self.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
                             fid_params=self.fid_params,**kwargs_tr)
 

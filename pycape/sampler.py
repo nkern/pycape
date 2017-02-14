@@ -128,7 +128,7 @@ class Samp(object):
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
                         add_overall_modeling_error=False, modeling_error=0.20,
-                        add_model_cov=False):
+                        add_model_cov=False, LAYG=False, k=50, pool=None):
         """
         Generate model prediction at walker position theta, create lnlike covariance matrix
 
@@ -154,12 +154,22 @@ class Samp(object):
         elif self.hasObs == False:
             raise Exception("This Samp class has no Obs attached to it...")
 
-        # Emulate
-        self.E.predict(theta, **predict_kwargs)
-        self.model_shape            = self.E.recon.shape
-        self.model_ydata            = self.E.recon
-        self.model_ydata_err        = self.E.recon_err
-        self.model_ydata_err_cov    = self.E.recon_err_cov
+        # Chck for LAYG
+        if LAYG == True:
+            if pool is None:
+                M = map
+            else:
+                M = pool.map
+            if theta.ndim == 1: theta = theta[np.newaxis,:]
+            model_ydata,model_ydata_err,model_ydata_err_cov,weights,weights_err = np.array(map(lambda x: self.predict(x, output=True, **predict_kwargs), theta))
+            model_shape = model_ydata.shape
+        else:
+            self.E.predict(theta, **predict_kwargs)
+            self.model_shape            = self.E.recon.shape
+            self.model_ydata            = self.E.recon
+            self.model_ydata_err        = self.E.recon_err
+            self.model_ydata_err_cov    = self.E.recon_err_cov
+
         self.data_cov               = np.array([np.copy(self.O.cov) for i in range(self.model_shape[0])])
 
         # Add emulator error cov output at theta
