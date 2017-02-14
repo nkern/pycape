@@ -593,7 +593,7 @@ class Emu(object):
         if LAYG == True:
             self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
             grid_NN = self.nearest(Xpred_sph, k=k, use_tree=use_tree)[1]
-            self.klt_project(self.E.data_tr[grid_NN])
+            self.klt_project(self.data_tr[grid_NN])
             self.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
                             fid_params=self.fid_params,**kwargs_tr)
 
