@@ -140,6 +140,7 @@ class Emu(object):
                 self.sphere(self.grid_tr)
                 self.create_tree(self.Xsph)
             grid_D, grid_NN = self.tree.query(theta, k=k)
+            grid_D, grid_NN = grid_D[0], grid_NN[0]
         else:
             R = np.array(map(la.norm, self.Xsph-theta))
             near = np.argsort(R)
@@ -593,7 +594,6 @@ class Emu(object):
         if LAYG == True:
             self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
             grid_NN = self.nearest(Xpred_sph, k=k, use_tree=use_tree)[1]
-            self.klt_project(self.data_tr[grid_NN])
             self.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
                             fid_params=self.fid_params,**kwargs_tr)
 
