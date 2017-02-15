@@ -128,7 +128,7 @@ class Samp(object):
 
     def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
                         add_overall_modeling_error=False, modeling_error=0.20,
-                        add_model_cov=False, LAYG=False, k=50, pool=None):
+                        add_model_cov=False, LAYG=False, k=50, use_tree=True, pool=None):
         """
         Generate model prediction at walker position theta, create lnlike covariance matrix
 
@@ -161,7 +161,19 @@ class Samp(object):
             else:
                 M = pool.map
             if theta.ndim == 1: theta = theta[np.newaxis,:]
-            model_ydata,model_ydata_err,model_ydata_err_cov,weights,weights_err = np.array(map(lambda x: self.E.predict(x, output=True, **predict_kwargs), theta))
+            recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
+            output = np.array(map(lambda x: self.E.predict(x, output=True, use_tree=use_tree, **predict_kwargs), theta))
+            for i in range(len(output)):
+                recon.append(output[i][0][0])
+                recon_err.append(output[i][1][0])
+                recon_err_cov.append(output[i][2][0])
+                weights.append(output[i][3][0])
+                weights_err.append(output[i][4][0])
+            recon,recon_err,recon_err_cov = np.array(recon), np.array(recon_err), np.array(recon_err_cov)
+            weights, weights_err = np.array(weights), np.array(weights_err)
+            self.model_ydata = recon
+            self.model_ydata_err = recon_err
+            self.model_ydata_err_cov = recon_err_cov
             model_shape = model_ydata.shape
         else:
             self.E.predict(theta, **predict_kwargs)
