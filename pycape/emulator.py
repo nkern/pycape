@@ -361,7 +361,7 @@ class Emu(object):
 
         return recon_cv, recon_err_cv, recon_grid, recon_data, rando
 
-    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False,LAYG=False,pool=None):
+    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False,LAYG=False,use_tree=False,pool=None):
 
         # Solve for eigenmode weight constants
         if use_pca == True:
@@ -383,7 +383,7 @@ class Emu(object):
                 M = pool.map
             if grid_cv.ndim == 1: grid_cv = grid_cv[np.newaxis,:]
             recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
-            output = map(lambda x: self.predict(x, output=True, **predict_kwargs), grid_cv)
+            output = map(lambda x: self.predict(x, output=True, use_tree=use_tree, **predict_kwargs), grid_cv)
             for i in range(len(output)):
                 recon.append(output[i][0][0])
                 recon_err.append(output[i][1][0])
