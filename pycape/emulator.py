@@ -143,9 +143,14 @@ class Emu(object):
             if theta.ndim == 1:
                 grid_D, grid_NN = grid_D[0], grid_NN[0]
         else:
-            R = np.array(map(la.norm, self.Xsph-theta))
-            near = np.argsort(R)
-            grid_D, grid_NN = self.Xsph[near][:k+1], near[:k+1]
+            if theta.ndim > 1:
+                near = np.array(map(lambda x: np.argsort(map(la.norm, self.Xsph-x)), theta))
+                grid_D = np.array([map(lambda x: la.norm, self.Xsph[near[i][:k+1]]-theta[i]) for i in range(len(near))])
+                grid_NN = np.array(map(lambda x: x[:k+1], near))
+            else:
+                near = np.argsort(np.array(map(la.norm, self.Xsph-theta)))
+                grid_D = np.array(map(la.norm, self.Xsph[near][:k+1]-theta))
+                grid_NN = near[:k+1]
 
         if grid_D[0] == 0:
             grid_D = grid_D[1:]
