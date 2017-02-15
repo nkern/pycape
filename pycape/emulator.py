@@ -131,7 +131,7 @@ class Emu(object):
         elif tree_type == 'kd':
             self.tree = neighbors.KDTree(data,leaf_size=leaf_size,metric=metric)
 
-    def nearest(self, theta, k=10, use_tree=False):
+    def nearest(self, theta, k=10, use_tree=False, reject_self=True):
         """
         Get Nearest Neighbors from sphered theta
         """
@@ -139,12 +139,20 @@ class Emu(object):
             if 'tree' not in self.__dict__:
                 self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
                 self.create_tree(self.Xsph)
-            grid_D, grid_NN = self.tree.query(theta, k=k)
-            grid_D, grid_NN = grid_D[0], grid_NN[0]
+            grid_D, grid_NN = self.tree.query(theta, k=k+1)
+            if theta.ndim == 1:
+                grid_D, grid_NN = grid_D[0], grid_NN[0]
         else:
             R = np.array(map(la.norm, self.Xsph-theta))
             near = np.argsort(R)
-            grid_D, grid_NN = self.Xsph[near][:k], near[:k]
+            grid_D, grid_NN = self.Xsph[near][:k+1], near[:k+1]
+
+        if grid_D[0] == 0:
+            grid_D = grid_D[1:]
+            grid_NN = grid_NN[1:]
+        else:
+            grid_D = grid_D[:-1]
+            grid_NN = grid_NN[:-1]
 
         return grid_D, grid_NN
 
@@ -365,13 +373,6 @@ class Emu(object):
 
         # Solve for eigenmode weight constants
         if use_pca == True:
-            D = data_cv - self.fid_data
-            if self.scale_by_std == True:
-                D /= self.Dstd
-
-            if self.scale_by_obs_errs == True:
-                D /= self.yerrs
-
             self.klt_project(data_cv)
             self.weights_true_cv = self.w_tr * self.w_norm
 
