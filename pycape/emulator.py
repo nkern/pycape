@@ -137,7 +137,7 @@ class Emu(object):
         """
         if use_tree == True:
             if 'tree' not in self.__dict__:
-                self.sphere(self.grid_tr, invL=self.invL)
+                self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
                 self.create_tree(self.Xsph)
             grid_D, grid_NN = self.tree.query(theta, k=k)
             grid_D, grid_NN = grid_D[0], grid_NN[0]
