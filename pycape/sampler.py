@@ -162,7 +162,7 @@ class Samp(object):
                 M = pool.map
             if theta.ndim == 1: theta = theta[np.newaxis,:]
             recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
-            output = np.array(map(lambda x: self.E.predict(x, output=True, use_tree=use_tree, **predict_kwargs), theta))
+            output = map(lambda x: self.E.predict(x, output=True, use_tree=use_tree, **predict_kwargs), theta)
             for i in range(len(output)):
                 recon.append(output[i][0][0])
                 recon_err.append(output[i][1][0])
