@@ -433,7 +433,11 @@ class Emu(object):
         self.param_check(data,grid)
 
         # Sphere parameter space vector
-        self.sphere(grid,save_chol=save_chol,invL=invL,fid_params=fid_params,norotate=norotate)
+        if invL is None:
+            self.sphere(grid,fid_params=fid_params,norotate=norotate)
+            Xsph = self.Xsph
+        else:
+            Xsph = np.dot(self.invL, (grid-fid_params).T).T
 
         # Compute y vector
         if compute_klt == True and use_pca == True:
@@ -453,7 +457,7 @@ class Emu(object):
         # polynomial regression
         if self.reg_meth == 'poly':
             # Compute design matrix
-            param_samp_ravel = map(list,self.Xsph.T)
+            param_samp_ravel = map(list,Xsph.T)
             A = self.poly_design_mat(param_samp_ravel,dim=self.N_params,degree=self.poly_deg)
 
             # Use LLS over training set to solve for weight function polynomials
@@ -512,7 +516,7 @@ class Emu(object):
             else:
                 M = pool.map
 
-            M(lambda x: x[0].fit(self.Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
+            M(lambda x: x[0].fit(Xsph,y.T[self.modegroups[x[1]]].T), zip(GP,np.arange(len(GP))))
             GP = np.array(GP)
             if pool is not None:
                 pool.close()
