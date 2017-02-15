@@ -174,7 +174,7 @@ class Samp(object):
             self.model_ydata = recon
             self.model_ydata_err = recon_err
             self.model_ydata_err_cov = recon_err_cov
-            model_shape = model_ydata.shape
+            self.model_shape = self.model_ydata.shape
         else:
             self.E.predict(theta, **predict_kwargs)
             self.model_shape            = self.E.recon.shape
