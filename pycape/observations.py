@@ -53,7 +53,7 @@ class Obs(object):
     ex: ['ps','Tb','xe']
     """
 
-    def __init__(self,model_xdata,xdata,ydata,yerrs,ydata_cat,cat_types):
+    def __init__(self,model_xdata,xdata,ydata,yerrs,ydata_cat,cat_types,p_true):
         self.__name__       = 'Obs'
         self.model_xdata    = model_xdata
         self.xdata          = xdata
@@ -61,6 +61,7 @@ class Obs(object):
         self.yerrs          = yerrs
         self.ydata_cat      = ydata_cat
         self.cat_types      = cat_types
+        self.p_true         = p_true
 
         try:
             self.x_ext          = np.concatenate(list(self.xdata))
