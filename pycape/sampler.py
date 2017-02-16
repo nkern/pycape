@@ -337,6 +337,9 @@ class Samp(object):
         # Evaluate lnlike
         lnlike = self.gauss_lnlike(self.O.ydata, self.model_ydata, self.data_invcov)
 
+        # Get rid of nan
+        lnlike[np.where(np.isnan(lnlike)==True)] = -np.inf
+
         return lnlike
 
     def lnprob(self, theta, output='lnprob', **lnlike_kwargs):
