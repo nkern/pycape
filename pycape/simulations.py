@@ -22,6 +22,7 @@ class Drive_Camb(object):
     def __init__(self,dic):
         self.__dict__.update(dic)
         self.pars = camb.CAMBparams()
+        self.reion_pars = camb.ReionizationParams()
 
     def set_params(self,H0=67.5,ombh2=0.022,omch2=0.122,mnu=0.06,omk=0,tau=None,ns=0.965,As=2e-9,theta_mc=None):
         """
