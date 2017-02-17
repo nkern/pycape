@@ -200,7 +200,7 @@ class Samp(object):
         for i in range(self.model_shape[0]):
             try:
                 self.data_invcov.append( la.inv(self.data_cov[i]) )
-            except LinAlgError:
+            except la.LinAlgError:
                 self.data_invcov.append( la.inv(self.O.cov) )
 
         self.data_invcov = np.array(self.data_invcov)
