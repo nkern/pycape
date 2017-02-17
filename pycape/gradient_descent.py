@@ -14,7 +14,7 @@ import numpy as np
 import scipy.linalg as la
 import traceback
 
-__all__ = ['FiniteDiff']
+__all__ = ['FiniteDiff','Conj_Grad']
 
 class FiniteDiff(object):
 
@@ -334,11 +334,15 @@ class FiniteDiff(object):
 
 
 
-class conj_grad(object):
+class Conj_Grad(object):
 
     def __init__(self):
         pass
 
+    def line_search(self, p, alpha=1.0):
+        """
+        Perform an inexact line search following the Wolfe Conditions
+        """
 
 
 

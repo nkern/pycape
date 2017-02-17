@@ -38,6 +38,7 @@ from .emulator import *
 from .sampler import *
 from .observations import *
 from .simulations import *
+from .gradient_descent import *
 import os
 
 __packagepath__ = os.path.dirname(os.path.realpath(__file__))

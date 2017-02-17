@@ -196,6 +196,7 @@ class Samp(object):
         if add_lnlike_cov is not None:
             self.data_cov += add_lnlike_cov
 
+        self.data_cov[np.where((self.data_cov==np.inf)|(self.data_cov==-np.inf)|(np.isnan(self.data_cov)==True))] = 1e20
         self.data_invcov = np.array([la.inv(self.data_cov[i]) for i in range(self.model_shape[0])])
 
     def gauss_lnlike(self, ydata, model, invcov):
