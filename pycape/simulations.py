@@ -61,7 +61,7 @@ class Drive_Camb(object):
 
     @property
     def tau(self):
-        return self.results.Reion.optical_depth
+        return self.pars.Reion.optical_depth
 
     @property
     def get_pars(self):
