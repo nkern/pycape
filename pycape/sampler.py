@@ -196,11 +196,14 @@ class Samp(object):
         if add_lnlike_cov is not None:
             self.data_cov += add_lnlike_cov
 
-        n = self.data_cov.shape[0]
-        self.data_cov[range(n),range(n)][np.where((self.data_cov[range(n),range(n)]==np.inf)|\
-                (self.data_cov[range(n),range(n)]==-np.in)|(np.isnan(self.data_cov[range(n),range(n)])==True))] = 1e40
-        self.data_cov[np.where((self.data_cov==np.inf)|(self.data_cov==-np.inf)|(np.isnan(self.data_cov)==True))] = 1e20
-        self.data_invcov = np.array([la.inv(self.data_cov[i]) for i in range(self.model_shape[0])])
+        self.data_invcov = []
+        for i in range(self.model_shape[0]):
+            try:
+                self.data_invcov.append( la.inv(self.data_cov[i]) )
+            except LinAlgError:
+                self.data_invcov.append( la.inv(self.O.cov) )
+
+        self.data_invcov = np.array(self.data_invcov)
 
     def gauss_lnlike(self, ydata, model, invcov):
         """
