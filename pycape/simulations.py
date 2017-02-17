@@ -65,8 +65,8 @@ class Drive_Camb(object):
 
     @property
     def get_pars(self):
-        return OrderedDict(zip(['sigma8','theta_mc','hlittle','As','ombh2','omch2','ns'],\
-                    [self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns]))
+        return OrderedDict(zip(['sigma8','theta_mc','hlittle','As','ombh2','omch2','ns','tau'],\
+                    [self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns,self.tau]))
 
 
 
