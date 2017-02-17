@@ -19,8 +19,7 @@ class Drive_Camb(object):
     - Drive CAMB to get sigma8 <=> A_s and/or H0 <=> Theta_MC mappings given base CMB parameters
     """
 
-    def __init__(self,dic):
-        self.__dict__.update(dic)
+    def __init__(self):
         self.pars = camb.CAMBparams()
         self.reion_pars = camb.ReionizationParams()
 
