@@ -374,7 +374,7 @@ class Emu(object):
 
         return recon_cv, recon_err_cv, recon_grid, recon_data, rando
 
-    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False,LAYG=False,use_tree=False,pool=None):
+    def cross_validate(self,grid_cv,data_cv,use_pca=True,predict_kwargs={},output=False,LAYG=False,use_tree=False,pool=None,reject_self=True):
 
         # Solve for eigenmode weight constants
         if use_pca == True:
@@ -389,7 +389,7 @@ class Emu(object):
                 M = pool.map
             if grid_cv.ndim == 1: grid_cv = grid_cv[np.newaxis,:]
             recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
-            output = map(lambda x: self.predict(x, output=True, use_tree=use_tree, **predict_kwargs), grid_cv)
+            output = map(lambda x: self.predict(x, output=True, use_tree=use_tree, reject_self=reject_self, **predict_kwargs), grid_cv)
             for i in range(len(output)):
                 recon.append(output[i][0][0])
                 recon_err.append(output[i][1][0])
@@ -591,7 +591,7 @@ class Emu(object):
             self.modegroups = modegroups
 
     def predict(self,Xpred,use_Nmodes=None,GPs=None,fast=False,\
-        use_pca=True,sphere=True,output=False,kwargs_tr={},LAYG=False,k=50,use_tree=True):
+        use_pca=True,sphere=True,output=False,kwargs_tr={},LAYG=False,k=50,use_tree=True,reject_self=False):
         '''
         - param_vals is ndarray with shape [N_params,N_samples]
 
@@ -618,7 +618,7 @@ class Emu(object):
         # Check for LAYG
         if LAYG == True:
             self.sphere(self.grid_tr, fid_params=self.fid_params, invL=self.invL)
-            grid_NN = self.nearest(Xpred_sph, k=k, use_tree=use_tree)[1]
+            grid_NN = self.nearest(Xpred_sph, k=k, use_tree=use_tree, reject_self=reject_self)[1]
             self.train(self.data_tr[grid_NN],self.grid_tr[grid_NN],fid_data=self.fid_data,
                             fid_params=self.fid_params,**kwargs_tr)
 

@@ -12,6 +12,7 @@ Nicholas Kern
 """
 import numpy as np
 import scipy.linalg as la
+import sklearn.gaussian_process as gp
 import traceback
 
 __all__ = ['FiniteDiff','Conj_Grad']
@@ -334,14 +335,26 @@ class FiniteDiff(object):
 
 
 
-class Conj_Grad(object):
+class NonLin_CG(object):
 
-    def __init__(self):
+    def __init__(self, base_direc, pbounds):
+        """
+        Perform nonlinear conjugate gradient with gaussian processes
+        """
+        self.base_direc = base_direc
+        self.pbounds = pbounds
+
+    def send_job(self):
         pass
 
-    def line_search(self, p, alpha=1.0):
+    def wait_job(self):
+        pass
+
+
+
+    def line_search(self, p):
         """
-        Perform an inexact line search following the Wolfe Conditions
+        Perform an inexact line search using gaussian processes
         """
 
 
