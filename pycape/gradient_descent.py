@@ -26,6 +26,9 @@ class FiniteDiff(object):
         """
         Central finite difference for first order partial derivative of f
 
+        Input:
+        ------
+
         f_neg : scalar
                 f(x-dx,y,z,..)
 
@@ -34,6 +37,10 @@ class FiniteDiff(object):
 
         dx    : scalar
                 dx
+
+        Output:
+        -------
+        first_central : scalar
         """
         return (f_pos - f_neg)/(2*dx)
 
@@ -41,6 +48,8 @@ class FiniteDiff(object):
         """
         Forward finite difference for first order partial derivative of f
 
+        Input:
+        ------
         f     : scalar
                 f(x,y,z,..)
 
@@ -49,12 +58,19 @@ class FiniteDiff(object):
 
         dx    : scalar
                 dx
+
+        Output:
+        -------
+        first_forward : scalar
         """
         return (f_pos-f)/dx
 
     def second_central_cross(self, f, f_neg1, f_pos1, f_neg2, f_pos2, f_neg1_neg2, f_pos1_pos2, dx1, dx2):
         """
         Central finite difference approximation for second order partial derivative of f
+
+        Input:
+        ------
 
         f           : scalar
                     f(x,y,z,..)
@@ -82,12 +98,20 @@ class FiniteDiff(object):
 
         dx2         : scalar
                     dx2
+
+        Output:
+        -------
+        second_central_cross : scalar
         """
         return (f_pos1_pos2 - f_pos1 - f_pos2 + 2*f - f_neg1 - f_neg2 + f_neg1_neg2) / (2*dx1*dx2)
 
     def second_central_auto(self, f, f_pos, f_neg, dx):
         """
         Calculate second derivative f_xx
+
+        Input:
+        ------
+
         f           : scalar
 
         f_pos       : scalar
@@ -95,40 +119,66 @@ class FiniteDiff(object):
         f_neg       : scalar
 
         dx          : scalar
+
+        Output:
+        -------
+        second_central_auto : scalar
         """
         return (f_pos - 2*f + f_neg)/(dx**2)
 
-    def calc_jacobian(self, f, pos_vec, diff_vec, neg_vec=None, attach=True):
+    def calc_jacobian(self, f, theta, diff_vec, attach=True, grad_type='forward'):
         """
         Calculate the approximate Jacobian Matrix
-        f           : scalar
-                    f(x,y,z,..)
+        theta = [x, y, z, ...]
+        diff_vec = [dx, dy, dz, ...]
 
-        pos_vec     : ndarray [dtype=float, shape=(ndim,)]
-                    vector containing func positive offsets
+        Input:
+        ------
+
+        f           : function object
+                    The underlying function
+
+        theta       : ndarray
+                    Position in parameter space
 
         diff_vec    : ndarray [dtype=float, shape=(ndim,)]
-                    vector containing dx offsets        
+                    vector containing dx offsets  for gradient calculation       
 
-        neg_vec     : ndarray [dtype=float, shape=(ndim,), default=None]
-                    vector containing func negative offsets
+        attach      : bool [default=True]
+                    if True attach result to class
+                    else return result
+
+        grad_type   : string [default='forward']
+                    Type of gradient, ['forward', 'central']
+
+        Output:
+        -------
+        J : Jacobian matrix ndarray
         """
         ndim = len(diff_vec)
+
+        # Calc Partials
+        f0 = f(theta)
+        pos_vec, neg_vec = self.calc_partials(f, theta, diff_vec, second_order=False)
+
         J = np.empty((1,ndim))
         for i in range(ndim):
-            if neg_vec is None:
-                J[0,i] = self.first_forward(f, pos_vec[i], diff_vec[i])
-            else:
+            if grad_type == 'forward':
+                J[0,i] = self.first_forward(f0, pos_vec[i], diff_vec[i])
+            elif grad_type == 'central':
                 J[0,i] = self.first_central(neg_vec[i], pos_vec[i], diff_vec[i])
 
         if attach == True:
             self.J = J
-
-        return J
+        else:
+            return J
 
     def calc_hessian(self, f, pos_mat, neg_mat, diff_vec, out_jacobian=True, attach=True):
         """
         Calculate the approximate Hessian Matrix
+
+        Input:
+        ------
 
         f           : scalar
             evaluation of "f" at fiducial point
@@ -150,6 +200,15 @@ class FiniteDiff(object):
 
         out_jacobian    : bool [default=True]
             If True: output jacobian matrix as well as hessian matrix
+
+        attach : bool [default=True]
+            if True attach result to class
+            else return result
+
+        Output:
+        -------
+        H : Approximate Hessian Matrix, ndarray
+        J : Approximate Jacobian matrix if out_jacobian is True
         """
         ndim = len(diff_vec)
 
@@ -171,15 +230,40 @@ class FiniteDiff(object):
         if out_jacobian == True:
             if attach == True:
                 self.H, self.J = H, J
-            return H, J
+            else:
+                return H, J
         else:
             if attach == True:
                 self.H = H
-            return H
+            else:
+                return H
 
     def calc_partials(self, f, theta, diff_vec, second_order=True):
         """
-        Use finite difference to calculate pos_mat and neg_mat
+        Use finite difference to calculate pos_mat and neg_mat,
+        which are matrices of the function, f, evaluated at f(x+dx)
+        or f(y+dy) or f(x+dx, y+dy) or f(x+dx, y) etc.
+        theta = [x, y, ...]
+        diff_vec = [dx, dy, ...]
+
+        Input:
+        ------
+
+        f           : function object
+
+        theta       : ndarray
+                    Position in spacev
+
+        diff_vec    : ndarray
+                    Difference offsets for gradient calculation
+
+        second_order    : bool [default=True]
+                    Calculate off diagonal terms of f for Hessian matrix
+
+        Output:
+        -------
+        pos_mat, neg_mat : ndarray, ndarray
+                        matrices containing f evaluated at theta +/- diff_vec
         """
         ndim = len(diff_vec)
 
