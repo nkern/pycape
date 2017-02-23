@@ -419,7 +419,7 @@ class FiniteDiff(object):
 
 
 
-class NonLin_CG(object):
+class Conj_Grad(object):
 
     def __init__(self, base_direc, pbounds):
         """
