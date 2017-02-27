@@ -4,6 +4,7 @@ import pycape
 import scipy.stats as stats
 import warnings
 import os
+from emupy import Emu
 
 class TestSamp(unittest.TestCase):
 
@@ -36,7 +37,7 @@ class TestSamp(unittest.TestCase):
         N_modes = N_data
         variables = {'reg_meth':'gaussian','gp_kwargs':{},'N_modes':N_modes,'N_samples':N_samples,
                 'scale_by_std':False,'scale_by_obs_errs':False,'lognorm':False}
-        E = pycape.Emu(variables)
+        E = Emu(variables)
 
         E.sphere(grid_tr, save_chol=True)
 

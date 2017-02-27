@@ -34,7 +34,6 @@ See the GPL License for details on usage
 ##### Authors:
 Nicholas Kern
 """
-from .emulator import *
 from .sampler import *
 from .observations import *
 from .simulations import *
