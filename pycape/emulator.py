@@ -713,14 +713,17 @@ class Emu(object):
             recon_err = weights_err
             recon_err_cov = np.array([np.eye(len(recon.T[i]),len(recon.T[i])) * recon_err.T[i] for i in range(len(recon.T))]).T
 
-        # ReNormalize
+        # ReNormalize Error
         if self.lognorm == True:
             recon_err = np.array([recon_err[i]*recon[i] for i in range(len(recon))])
             recon_err_cov = np.array([recon_err_cov[i]*np.outer(recon_err[i],recon_err[i]) for i in range(len(recon))])
 
-        # Normalize Error
-        recon_err *= self.recon_err_norm
-        recon_err_cov *= self.recon_err_norm**2
+        # Calibrate recon
+        recon *= self.recon_calib
+
+        # Calibrate Error
+        recon_err *= self.recon_err_calib
+        recon_err_cov *= self.recon_err_calib**2
 
         # Construct data product and error on data product
         if fast == False:
