@@ -178,6 +178,7 @@ class Samp(object):
             self.model_ydata_err_cov = recon_err_cov
             self.model_shape = self.model_ydata.shape
         else:
+            if theta.ndim == 1: theta = theta[np.newaxis,:]
             if (vectorize == True and pool is not None) or vectorize == False:
                 output = M(lambda x: self.E.predict(x, output=True, **predict_kwargs), theta)
                 recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
