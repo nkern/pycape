@@ -1,14 +1,7 @@
 """
 observations.py
 
-Obs class for handling observational data, including
-a driver for the 21cmSense code
-
-For more on 21cmSense, see:
-Parsons et al. 2012ApJ...753...81P
-Pober et al. 2013AJ....145...65P
-Pober et al. 2014ApJ...782...66P
-Code Repo: https://github.com/jpober/21cmSense
+Obs class for handling observational data
 """
 import os
 import numpy as np
@@ -173,102 +166,4 @@ class Obs(object):
                 return self.row2mat(track,row2mat=False), self.row2mat(track_bool,row2mat=False)
             else:
                 return self.row2mat(track,row2mat=False)
-
-	def drive_21cmSense(self,calib_file,ps_filenames,
-                        data_filename=None,obs_direc=None,write_direc=None,write_data=True,
-			            foreground_model='mod',buff=[0.1],freq=[0.135],ndays=180,n_per_day=6,
-                        bwidth=[0.008],nchan=[82],lowk_cut=0.15):
-		"""
-		Calculate telescope sensitivity to a 21cm power spectrum
-		Calib_file should be the calibration file without '.py' ex: hera331.py => hera331
-		Note that the ps_file should have 1st column as k bins and 2nd column as power spectrum delta^2(k)
-		Keyword Arguments : 
-		data_filename=None,obs_direc=None,write_direc=None,write_data=True
-		foreground_model='mod',buff=[0.1],freq=[0.135],ndays=180
-		n_per_day=6,bwidth=[0.008],nchan=[82],lowk_cut=0.15
-		"""
-		# Set parameters
-		if obs_direc == None:
-			obs_direc = self.dir_pycape+'/ObsData'
-
-		if write_direc == None:
-			write_direc = '.'
-
-		if data_filename == None:
-			data_filename = 'mock_21cmObs.pkl'
-
-        # Instantiate Calc_Sense
-        CS = Calc_Sense(**kwargs)
-
-		# Use calibration file to create *.npz file
-        os.system('python %s/mk_array_file.py -C %s' % (self.dir_21cmSense,calib_file))
-
-		# Move *.npz file to proper directory
-        os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
-
-		# Configure data arrays
-        kbins = []
-        PSdata = []
-        sense_kbins = []
-        sense_PSdata = []
-        sense_PSerrs = []	
-
-        valid = []
-        # Use *.npz file to get sensitivity measurements
-        len_files = len(ps_filenames)
-        for i in range(len_files):
-            print ''
-            print 'working on file: '+ps_filenames[i]
-            print '-'*30
-            os.system('python %s/calc_sense.py -m %s -b %s -f %s --eor %s --ndays %s --n_per_day %s --bwidth %s \
-                --nchan %s %s/%s.drift_blmin*.npz' % (self.dir_21cmSense,foreground_model,buff[i],freq[i],ps_filenames[i],
-                ndays,n_per_day,bwidth[i],nchan[i],obs_direc,calib_file))
-
-            # Move *.npz file to proper directory
-            os.system('mv %s*.npz %s/' % (calib_file,obs_direc))
-
-            # Load 21cm PS
-            model = np.loadtxt(ps_filenames[i])
-            kb = model[:,0]
-            PSdat = model[:,1]
-
-            # Load 21cmSense errors
-            sense = np.load(obs_direc+'/'+calib_file+'.drift_mod_%0.3f.npz'%freq[i])
-            sense_kb = sense['ks']
-            sense_PSerr = sense['errs']
-
-            valid.append( (sense_PSerr!=np.inf)&(np.isnan(sense_PSerr)!=True)&(sense_kb>lowk_cut) )
-
-            # Interpolate between ps_file to get ps at sense_kbins
-            sense_PSdat = np.interp(sense_kb,kb,PSdat)
-
-            # Append to arrays
-            kbins.append(kb)
-            PSdata.append(PSdat)
-            sense_kbins.append(sense_kb)
-            sense_PSdata.append(sense_PSdat)
-            sense_PSerrs.append(sense_PSerr)	
-
-        kbins		= np.array(kbins)
-        PSdata		= np.array(PSdata)
-        sense_kbins	= np.array(sense_kbins)
-        sense_PSdata	= np.array(sense_PSdata)
-        sense_PSerrs	= np.array(sense_PSerrs)
-        valid		= np.array(valid)
-
-        # Append to namespace
-        self.kbins = kbins
-        self.PSdata = PSdata
-        self.sense_kbins = sense_kbins
-        self.sense_PSdata = sense_PSdata
-        self.sense_PSerrs = sense_PSerrs
-        self.valid = valid
-        self.freq = freq
-
-        # Write to file
-        if write_data == True:
-            file = open(write_direc+'/'+data_filename,'wb')
-            output = pkl.Pickler(file)
-            output.dump(data_dic)
-            file.close()
 
