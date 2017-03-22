@@ -127,7 +127,6 @@ class Samp(object):
             self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, self.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
     def construct_model(self, theta, predict_kwargs={},
-                        add_overall_modeling_error=False, modeling_error=0.20,
                         add_model_cov=False, LAYG=False, k=50, use_tree=True, pool=None, vectorize=True):
         """
         Generate model prediction at walker position theta, create lnlike covariance matrix
@@ -138,12 +137,6 @@ class Samp(object):
         predict_kwargs : dict (default={})
             keyword arguments for Emu.predict function
 
-        add_overall_modeling_error : bool (default=False)
-            if True: add to existing covariance matrix predicted model_ydata times modeling_error
-            if False: do nothing
-
-        modeling_error : float (default=0.20)
-            if add_overall_modeling_err is True: add model_ydata times modeling_error to cov
         """
         # Check for Emu and Obs classes
         if self.hasEmu == False:
@@ -197,17 +190,10 @@ class Samp(object):
             self.model_ydata_err        = recon_err
             self.model_ydata_err_cov    = recon_err_cov
 
-        self.data_cov = np.array([self.O.cov for i in range(self.model_shape[0])])
         new_cov = False
-
         # Add emulator error cov output at theta
         if add_model_cov == True:
-            self.data_cov += self.model_ydata_err_cov
-            new_cov = True
-
-        # Add overall modeling error (21cmFAST ~ 15%)
-        if add_overall_modeling_error == True:
-            self.data_cov += np.array([np.eye(len(self.model_ydata[i])) * self.model_ydata[i] * modeling_error for i in range(self.model_shape[0])])
+            self.data_cov = np.array([self.O.cov for i in range(self.model_shape[0])]) + self.model_ydata_err_cov
             new_cov = True
 
         self.data_invcov = []
