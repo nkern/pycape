@@ -126,7 +126,7 @@ class Samp(object):
         else:
             self.sampler = emcee.EnsembleSampler(self.nwalkers, self.ndim, self.lnprob, kwargs=lnprob_kwargs, **sampler_kwargs)
 
-    def construct_model(self, theta, predict_kwargs={}, add_lnlike_cov=None,
+    def construct_model(self, theta, predict_kwargs={},
                         add_overall_modeling_error=False, modeling_error=0.20,
                         add_model_cov=False, LAYG=False, k=50, use_tree=True, pool=None, vectorize=True):
         """
@@ -137,9 +137,6 @@ class Samp(object):
 
         predict_kwargs : dict (default={})
             keyword arguments for Emu.predict function
-
-        add_lnlike_cov : ndarray (dtype=float, shape=[N_data,N_data], default=None)
-            Extra covariance matrix to add to existing covariance matrix
 
         add_overall_modeling_error : bool (default=False)
             if True: add to existing covariance matrix predicted model_ydata times modeling_error
@@ -179,7 +176,7 @@ class Samp(object):
             self.model_shape = self.model_ydata.shape
         else:
             if theta.ndim == 1: theta = theta[np.newaxis,:]
-            if (vectorize == True and pool is not None) or vectorize == False:
+            if pool is not None or vectorize == False:
                 output = M(lambda x: self.E.predict(x, output=True, **predict_kwargs), theta)
                 recon,recon_err,recon_err_cov,weights,weights_err = [],[],[],[],[]
                 for i in range(len(output)):
@@ -200,26 +197,28 @@ class Samp(object):
             self.model_ydata_err        = recon_err
             self.model_ydata_err_cov    = recon_err_cov
 
-        self.data_cov               = np.array([np.copy(self.O.cov) for i in range(self.model_shape[0])])
+        self.data_cov = np.array([self.O.cov for i in range(self.model_shape[0])])
+        new_cov = False
 
         # Add emulator error cov output at theta
         if add_model_cov == True:
             self.data_cov += self.model_ydata_err_cov
+            new_cov = True
 
         # Add overall modeling error (21cmFAST ~ 15%)
         if add_overall_modeling_error == True:
             self.data_cov += np.array([np.eye(len(self.model_ydata[i])) * self.model_ydata[i] * modeling_error for i in range(self.model_shape[0])])
-
-        # Add other covariances in quadrature
-        if add_lnlike_cov is not None:
-            self.data_cov += add_lnlike_cov
+            new_cov = True
 
         self.data_invcov = []
         for i in range(self.model_shape[0]):
-            try:
-                self.data_invcov.append( la.inv(self.data_cov[i]) )
-            except:
-                self.data_invcov.append( la.inv(self.O.cov) )
+            if new_cov == True:
+                try:
+                    self.data_invcov.append( la.inv(self.data_cov[i]) )
+                except:
+                    self.data_invcov.append( self.O.invcov )
+            else:
+                self.data_invcov.append( self.O.invcov )
 
         self.data_invcov = np.array(self.data_invcov)
 
