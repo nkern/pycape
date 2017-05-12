@@ -1,4 +1,4 @@
-## pycape : Python toolbox for Cosmic Dawn Parameter Estimation
+## pycape : Python Toolbox for Cosmic Dawn Parameter Estimation
 [![Build Status](https://travis-ci.com/nkern/pycape.svg?token=5USCxbBe7R1gkSvyQwzK&branch=master)](https://travis-ci.com/nkern/pycape)
 
 ### Version: 0.1
@@ -16,10 +16,8 @@ pycape is dependent on a number of public codes.
 - sklearn >= 0.18
 - emcee : http://dan.iel.fm/emcee/current
 - astropy >= 1.2.1
-- aipy : https://github.com/AaronParsons/aipy
 
-The packages above can be pip installed.
-
+The packages above can be pip installed. pycape is 
 - 21cmSense : https://github.com/nkern/21cmSense
 
 You can install 21cmSense by cloning the above repo and then adding the 21cmSense directory to your PYTHONPATH
