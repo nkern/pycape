@@ -1,4 +1,4 @@
-## pycape : PYthon toolbox for Cosmic dAwn Parameter Estimation
+## pycape : Python toolbox for Cosmic Dawn Parameter Estimation
 [![Build Status](https://travis-ci.com/nkern/pycape.svg?token=5USCxbBe7R1gkSvyQwzK&branch=master)](https://travis-ci.com/nkern/pycape)
 
 ### Version: 0.1
