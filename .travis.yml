@@ -28,9 +28,12 @@ install:
     # Install source builds
     - bash source_builds.sh
     - export PYTHONPATH=$HOME/21cmSense:$PYTHONPATH
+    - pwd
     - cd $HOME/emupy
     - python setup.py install
+    - pwd
     - cd $HOME
+    - pwd
 
 # Test
 script: py.test
