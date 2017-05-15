@@ -73,7 +73,3 @@ cmb_priors3 = {
 'tau_err'               , 0.012}
 
 
-
-
-
-

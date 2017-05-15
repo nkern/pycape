@@ -1,29 +1,34 @@
 ## pycape : Python Toolbox for Cosmic Dawn Parameter Estimation
-[![Build Status](https://travis-ci.com/nkern/pycape.svg?token=5USCxbBe7R1gkSvyQwzK&branch=master)](https://travis-ci.com/nkern/pycape)
 
 ### Version: 0.1
 Code Repo : https://github.com/nkern/pycape
 
 ### About: 
-**pycape** is a Python toolbox for emulating the 21cm power spectrum given a training set, calculating the 21cm likelihood given an observation (likewise forecasting performance given a mock observation), and performing Monte Carlo sampling routines within a Bayesian framework to produce realistic 21cm constraints on the parameters of Cosmic Dawn.
-pycape is specially designed to work in the regime when evaluating the simulated 21cm power spectrum with a single set of parameters is time intensive (on the order of minutes - hours+). 
+**pycape** is a Python toolbox for producing 21cm parameter constraints with emulators. It contains methods for calculating a 21cm likelihood and is attached to a Markov Chain Monte Carlo sampler. The emulator code can be found in [[emupy]](https://github.com/nkern/emupy)
 
 ### Dependencies:
-pycape is dependent on a number of public codes, which can be pip installed
+pycape is dependent on a few public codes:
 - numpy >= 1.10.4
 - scipy >= 0.18.0
 - emcee : http://dan.iel.fm/emcee/current
+- emupy : https://github.com/nkern/emupy
+
+Please check emupy for further software dependencies. 
 
 ### Installation:
-To install, clone this repo, cd into it and run the setupy.py script as
+To install, clone this repo and run the setupy.py script as
 ```bash
 python setup.py install
 ```
+
 ### Running:
-pycape is not an end-to-end analysis package
+See examples for demonstrations on how to run the code
 
 ### License:
 See the General Public License for details on usage
+
+### Citation:
+Please use Kern et al. 2017 for citation
 
 ### Authors:
 Nicholas Kern<br>
