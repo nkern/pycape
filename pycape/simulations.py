@@ -69,37 +69,3 @@ class Drive_Camb(object):
                     [self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns,self.tau]))
 
 
-
-class Drive_21cmFAST(object):
-    """
-    Drive the seminumerical simulation 21cmFAST
-    Can be used on a personal machine or can be attached to a dynamic job scheduler
-    """
-
-    def __init__(self,dic):
-        self.__dict__.update(dic)
-
-    def init_machine(self):
-        """
-        - initialize how simulation will be run: on a single processor, on a cluster, etc.
-        """
-        pass
-
-    def init_files(self):
-        """
-        - build necessary directories and files for jobs to be run
-        """
-        pass
-
-    def send_jobs(self):
-        """
-        - run simulation
-        """
-        pass
-
-    def collect_results(self):
-        """
-        - load results from various runs and print to file
-        """
-        pass
-
