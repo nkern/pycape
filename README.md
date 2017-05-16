@@ -28,7 +28,7 @@ See examples for demonstrations on how to run the code
 See the General Public License for details on usage
 
 ### Citation:
-Please use Kern et al. 2017 for citation
+Please use [Kern et al. 2017](https://arxiv.org/abs/1705.04688) for citation.
 
 ### Authors:
 Nicholas Kern<br>
