@@ -4,7 +4,7 @@
 Code Repo : https://github.com/nkern/pycape
 
 ### About: 
-**pycape** is a Python toolbox for producing 21cm parameter constraints with emulators. It contains methods for calculating a 21cm likelihood and is attached to a Markov Chain Monte Carlo sampler. The emulator code can be found in [[emupy]](https://github.com/nkern/emupy)
+**pycape** is a Python toolbox for producing 21cm parameter constraints with emulators. It contains methods for calculating a 21cm likelihood and is attached to a Markov Chain Monte Carlo sampler. The emulator code can be found in the [emupy](https://github.com/nkern/emupy) package.
 
 ### Dependencies:
 pycape is dependent on a few public codes:
