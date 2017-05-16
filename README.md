@@ -16,13 +16,13 @@ pycape is dependent on a few public codes:
 Please check emupy for further software dependencies. 
 
 ### Installation:
-To install, clone this repo and run the setupy.py script as
+To install, clone this repo and run the setup.py script as
 ```bash
 python setup.py install
 ```
 
 ### Running:
-See examples for demonstrations on how to run the code
+See examples for demonstrations on how to run the code (pending...)
 
 ### License:
 See the General Public License for details on usage
