@@ -12,7 +12,7 @@ try:
 except:
     warnings.warn('\nCould not import camb')
 
-__all__ = ['Drive_Camb','Drive_21cmFAST']
+__all__ = ['Drive_Camb']
 
 class Drive_Camb(object):
     """
