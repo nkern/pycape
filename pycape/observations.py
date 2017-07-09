@@ -22,7 +22,7 @@ class Obs(object):
     Observation class
     Define:
     z_num = number of redshifts
-    x_num(x) = number of xdata at each redshift (ex. k-modes, dTb, x_e etc.)
+    x_num(z) = number of xdata at each redshift (ex. k-modes, dTb, x_e etc.)
     which need not be the same at each z
 
     model_xdata : ndarray (dtype=float object, shape=[z_num, x_num(z)])
