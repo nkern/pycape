@@ -22,7 +22,7 @@ python setup.py install
 ```
 
 ### Running:
-See examples for demonstrations on how to run the code (pending...)
+See examples for demonstrations on how to run the code.
 
 ### License:
 See the General Public License for details on usage
