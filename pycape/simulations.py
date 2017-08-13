@@ -23,8 +23,8 @@ class Drive_Camb(object):
         self.pars = camb.CAMBparams()
         self.reion_pars = camb.ReionizationParams()
 
-    def set_params(self,H0=67.27,ombh2=0.02225,omch2=0.1184,mnu=0.06,omk=0,tau=0.079,ns=0.945,As=2.2065e-9,theta_mc=None,
-                        omb=None, omc=None):
+    def set_params(self,H0=67.27,ombh2=0.02225,omch2=0.1198,omk=0,ns=0.9645,As=2.2065e-9,theta_mc=None,
+                        omb=None, omc=None, tau=0.079):
         """
         Set cosmological parameters
         Default values consistent with Planck 2016 Parameter Constraints with TT, TE, EE + lowP
