@@ -23,13 +23,45 @@ class Drive_Camb(object):
         self.pars = camb.CAMBparams()
         self.reion_pars = camb.ReionizationParams()
 
-    def set_params(self,H0=67.27,ombh2=0.02225,omch2=0.1198,omk=0,ns=0.9645,As=2.2065e-9,theta_mc=None,
-                        omb=None, omc=None, tau=0.079):
+    def set_params(self,H0=67.27,ombh2=0.02225,omch2=0.1198,omk=0,ns=0.9645,As=2.2065e-9,theta_mc=None,tau=0.079,
+                        omb=None, omc=None):
         """
         Set cosmological parameters
         Default values consistent with Planck 2016 Parameter Constraints with TT, TE, EE + lowP
-        Note: ombh2 and omb, omch2 and omc cannot simultaneously be set. If both are assigned, will default
-        to omb and omc values.
+
+        Input:
+        ------
+
+        H0 : float, default=67.27
+            Hubble Constant, km/sec/Mpc
+
+        ombh2 : float, default = 0.02225
+            Omega baryon * (H0/100)**2
+            Fractional energy density of baryons w.r.t. critical density at z=0
+
+        omch2 : float, default = 0.1198
+            Omega cold dark matter * (H0/100)**2
+            Fractional energy density of CDM w.r.t. critical density at z=0
+
+        omk : float, default = 0.0
+            Omega curvature
+
+        ns : float, default = 0.9645
+            Spectral tilt of primordial curvature fluctuation power spectrum
+
+        As : float, default = 2.2065e-9
+            Amplitude of primordial scalar perturbation fluctuations
+
+        theta_mc : float, default = None
+            Sound horizon at recombination, as approximated by CosmoMC
+
+        tau : float, default = 0.079
+            Electron scattering optical depth to the surface of last scattering
+
+        Notes:
+        ------
+        ombh2 and omb, omch2 and omc cannot simultaneously be set. If both are assigned, will default
+        to omb and omc values multiplied by (H0/100.0)**2
         """
         if ombh2 is not None and omb is not None:
             ombh2 = omb * (H0/100.0)**2
@@ -79,7 +111,7 @@ class Drive_Camb(object):
                     [self.sigma8,self.theta_mc,self.hlittle,self.As,self.ombh2,self.omch2,self.ns,self.tau]))
 
     def get_cl(self):
-        self.total = self.results.get_cmb_power_spectra(params=self.pars, spectra=['total'],CMB_unit='muK')['total']
+        self.D_ell = self.results.get_cmb_power_spectra(params=self.pars, spectra=['total'],CMB_unit='muK')['total']
 
 
 
