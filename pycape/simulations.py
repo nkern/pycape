@@ -6,6 +6,7 @@ Drivers for relevant simulations
 import os
 import warnings
 from collections import OrderedDict
+import numpy as np
 
 try:
     import camb
