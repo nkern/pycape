@@ -28,16 +28,16 @@ class Obs(object):
     model_xdata : ndarray (dtype=float object, shape=[z_num, x_num(z)])
     x-data values for the simulation model
 
-    xdata : ndarray (dtype=float object, shape=[z_num,x_num(z)])
+    xdata : ndarray (dtype=float object, shape=[z_num, x_num(z)])
     x-data values for the observations
 
-    ydata : ndarray (dtype=float object, shape=[z_num,x_num(z)])
+    ydata : ndarray (dtype=float object, shape=[z_num*x_num(z)])
     y-data values for the observations
 
-    yerrs : ndarray (dtype=float object, shape=[z_num,x_num(z)])
+    yerrs : ndarray (dtype=float object, shape=[z_num*x_num(z)])
     y-data errors for the observations
 
-    ydata_cat : ndarray (dtype=string object, shape=[z_num,x_num(z)])
+    ydata_cat : ndarray (dtype=string object, shape=[z_num*x_num(z)])
     non-rectangular ndarray of **strings** specifying the data categories
     ex: ['ps','ps','ps','Tb','xe']
 

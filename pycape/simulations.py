@@ -24,7 +24,7 @@ class Drive_Camb(object):
         self.reion_pars = camb.ReionizationParams()
 
     def set_params(self,H0=67.27,ombh2=0.02225,omch2=0.1198,omk=0,ns=0.9645,As=2.2065e-9,theta_mc=None,tau=0.079,
-                        omb=None, omc=None):
+                        omb=None, omc=None, ln10As=None):
         """
         Set cosmological parameters
         Default values consistent with Planck 2016 Parameter Constraints with TT, TE, EE + lowP
@@ -58,15 +58,21 @@ class Drive_Camb(object):
         tau : float, default = 0.079
             Electron scattering optical depth to the surface of last scattering
 
+        ln10As : float, default = None
+            Value for log_e(1e10 * As), if defined will override value of As
+
         Notes:
         ------
-        ombh2 and omb, omch2 and omc cannot simultaneously be set. If both are assigned, will default
-        to omb and omc values multiplied by (H0/100.0)**2
+        ombh2 and omb, omch2 and omc cannot simultaneously be set.
+        If omb or omc are defined, will default to using
+        omb and omc values multiplied by (H0/100.0)**2
         """
-        if ombh2 is not None and omb is not None:
+        if omb is not None:
             ombh2 = omb * (H0/100.0)**2
-        if omch2 is not None and omc is not None:
+        if omc is not None:
             omch2 = omc * (H0/100.0)**2
+        if ln10As is not None:
+            As = np.exp(ln10As) / 1e10
 
         # Set camb parameters
         self.ns = ns
@@ -94,6 +100,10 @@ class Drive_Camb(object):
         return self.pars.primordial_power(0.05,0)
 
     @property
+    def ln10As(self):
+        return np.log(1e10*self.pars.primordial_power(0.05,0))
+
+    @property
     def ombh2(self):
         return self.pars.omegab * (self.hlittle)**2
 
@@ -112,9 +122,6 @@ class Drive_Camb(object):
 
     def get_cl(self):
         self.D_ell = self.results.get_cmb_power_spectra(params=self.pars, spectra=['total'],CMB_unit='muK')['total']
-
-
-
 
 
 
